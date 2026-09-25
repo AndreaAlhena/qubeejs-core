@@ -44,4 +44,5 @@ replaced by a 40-line internal serialiser, verified case-by-case against `qs` it
 
 `URLSearchParams` cannot substitute for either: it percent-encodes with no opt-out, so
 `filters[status][$eq]` becomes `filters%5Bstatus%5D%5B%24eq%5D`, and it flattens nested objects to
-`[object Object]`.
+`[object Object]`. The library encodes values — the part that carries user input — and leaves keys
+literal; `URLSearchParams` cannot make that distinction.

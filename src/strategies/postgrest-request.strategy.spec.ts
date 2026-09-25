@@ -149,7 +149,7 @@ describe('PostgrestRequestStrategy', () => {
       };
       const uri = strategy.buildUri(state, options);
 
-      expect(uri).toContain('name=ilike.%john%');
+      expect(uri).toContain('name=ilike.%25john%25');
     });
 
     it('should emit IN as col=in.(v1,v2,v3)', () => {
@@ -273,7 +273,7 @@ describe('PostgrestRequestStrategy', () => {
       };
       const uri = strategy.buildUri(state, options);
 
-      expect(uri).toContain('name=ilike.%john%');
+      expect(uri).toContain('name=ilike.*john*');
     });
 
     it('should emit FTS / PLFTS / PHFTS / WFTS for full-text search', () => {
@@ -288,10 +288,10 @@ describe('PostgrestRequestStrategy', () => {
       };
       const uri = strategy.buildUri(state, options);
 
-      expect(uri).toContain('d=fts.fat&rat');
-      expect(uri).toContain('e=plfts.fat rat');
-      expect(uri).toContain('f=phfts.fat rat');
-      expect(uri).toContain('g=wfts.fat -rat');
+      expect(uri).toContain('d=fts.fat%26rat');
+      expect(uri).toContain('e=plfts.fat%20rat');
+      expect(uri).toContain('f=phfts.fat%20rat');
+      expect(uri).toContain('g=wfts.fat%20-rat');
     });
 
     it('should emit multiple operator filters together', () => {

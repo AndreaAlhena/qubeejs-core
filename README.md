@@ -5,7 +5,8 @@ standards.
 
 > Extracted from [ng-qubee](https://github.com/AndreaAlhena/ng-qubee), which remains fully
 > supported and unaffected. Every URI is verified byte-for-byte against `ng-qubee@3.8.0` across all
-> eighteen drivers — see `npm run test:parity`.
+> eighteen drivers, apart from the bugs fixed here and still present there, each listed with its
+> issue — see `npm run test:parity`.
 
 [![CI](https://github.com/AndreaAlhena/qubeejs-core/actions/workflows/ci.yml/badge.svg)](https://github.com/AndreaAlhena/qubeejs-core/actions/workflows/ci.yml)
 [![license](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)

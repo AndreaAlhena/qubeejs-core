@@ -84,7 +84,7 @@ describe('PocketbaseRequestStrategy', () => {
       };
       const uri = strategy.buildUri(state, options);
 
-      expect(uri).toContain("filter=(category='tech' && status='active')");
+      expect(uri).toContain("filter=(category='tech' %26%26 status='active')");
     });
 
     it('should skip filters with empty value arrays', () => {
@@ -144,7 +144,7 @@ describe('PocketbaseRequestStrategy', () => {
       };
       const uri = strategy.buildUri(state, options);
 
-      expect(uri).toContain("title~'Intro%'");
+      expect(uri).toContain("title~'Intro%25'");
     });
 
     it('should emit IN as an OR group', () => {
@@ -164,7 +164,7 @@ describe('PocketbaseRequestStrategy', () => {
       };
       const uri = strategy.buildUri(state, options);
 
-      expect(uri).toContain('(price>=10 && price<=100)');
+      expect(uri).toContain('(price>=10 %26%26 price<=100)');
     });
 
     it('should throw if BTW does not receive exactly two values', () => {
@@ -195,7 +195,7 @@ describe('PocketbaseRequestStrategy', () => {
       };
       const uri = strategy.buildUri(state, options);
 
-      expect(uri).toContain("(status!='draft' && status!='archived')");
+      expect(uri).toContain("(status!='draft' %26%26 status!='archived')");
     });
 
     it('should emit NULL with boolean dispatch', () => {
@@ -229,7 +229,7 @@ describe('PocketbaseRequestStrategy', () => {
       };
       const uri = strategy.buildUri(state, options);
 
-      expect(uri).toContain("filter=(status='active' && views>100)");
+      expect(uri).toContain("filter=(status='active' %26%26 views>100)");
     });
 
     it('should throw UnsupportedFilterOperatorError for the FTS family', () => {

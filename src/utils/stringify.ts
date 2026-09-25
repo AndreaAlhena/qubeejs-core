@@ -21,10 +21,12 @@ type QueryValue =
  * { a: [] } / { a: {} }                 -> ''          (nothing to emit)
  * ```
  *
- * Values are **not** percent-encoded. Backends receiving these query strings
+ * Nothing is percent-encoded here. Backends receiving these query strings
  * expect literal brackets and operators (`filters[status][$eq]`), and
  * `URLSearchParams` offers no way to opt out of encoding — which is why it
- * cannot serve as a substitute here.
+ * cannot serve as a substitute here. Values that carry user input arrive
+ * already encoded: `AbstractRequestStrategy.buildUri()` runs the state
+ * through `encodeValues()` before any strategy calls this.
  *
  * @param payload - The object to serialise
  * @returns Query-string segments joined with `&`, or an empty string

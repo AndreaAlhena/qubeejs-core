@@ -278,7 +278,7 @@ export class PostgrestRequestStrategy extends AbstractRequestStrategy {
       case FilterOperatorEnum.SW:
         return `like.${first}*`;
       case FilterOperatorEnum.CONTAINS:
-        return `ilike.%${first}%`;
+        return `ilike.*${first}*`;
       case FilterOperatorEnum.FTS:
         return `fts.${first}`;
       case FilterOperatorEnum.PLFTS:

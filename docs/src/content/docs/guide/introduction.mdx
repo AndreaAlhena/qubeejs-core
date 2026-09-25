@@ -57,4 +57,6 @@ that had grown a framework-agnostic core inside it. `ng-qubee` remains supported
 the same engine with the Angular removed, so React and vanilla consumers can use it too.
 
 The extraction is verified, not asserted: every driver builds a byte-identical URI to
-`ng-qubee@3.8.0` for the same query, checked by `npm run test:parity` before each release.
+`ng-qubee@3.8.0` for the same query, checked by `npm run test:parity` before each release. The only
+exceptions are bugs fixed here that `ng-qubee` still has — such as PocketBase sending a raw `&&`
+that cut its filter short — and the harness lists each one with its issue.
