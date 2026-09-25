@@ -20,6 +20,13 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   name. All repository links — the CI badge, the docs edit and GitHub links, and the changelog
   comparison links — now point at the new URL; GitHub redirects the old one
 
+### Fixed
+
+- `PaginatedObject` is `object` rather than `Record<string, unknown>`, so `paginate<User>()` and
+  `PaginatedCollection<User>` accept an `interface` or a class row again, as `ng-qubee` 3.x did.
+  TypeScript grants an implicit index signature to a `type` alias but never to an interface, and
+  the old constraint depended on it (#20)
+
 ## [1.0.0] - 2026-09-08
 
 First release. `@qubeejs/core` is the framework-agnostic engine extracted from
