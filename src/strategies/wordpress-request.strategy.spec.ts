@@ -139,7 +139,7 @@ describe('WordpressRequestStrategy', () => {
       const state = { ...baseState, search: 'hello world' };
       const uri = strategy.buildUri(state, options);
 
-      expect(uri).toContain('search=hello world');
+      expect(uri).toContain('search=hello%20world');
     });
 
     it('should omit the search param when no term is set', () => {
