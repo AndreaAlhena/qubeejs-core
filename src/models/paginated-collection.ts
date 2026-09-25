@@ -42,7 +42,9 @@ export class PaginatedCollection<T extends PaginatedObject> {
       }
 
       const source = key !== undefined && key in item ? key : 'id';
-      const value = Object.hasOwn(item, source) ? item[source] : undefined;
+      const value = Object.hasOwn(item, source)
+        ? (item as Record<string, unknown>)[source]
+        : undefined;
 
       if (typeof value !== 'number' && typeof value !== 'string') {
         throw new KeyNotFoundError(key ?? 'id');

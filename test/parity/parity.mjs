@@ -76,7 +76,22 @@ const NG_STRATEGY = {
   wordpress: 'WordpressRequestStrategy',
 };
 
+/**
+ * Deliberate departures from ng-qubee, each a bug fixed here and still present
+ * there. The expected URI is derived from ng-qubee's own output by the stated
+ * rewrite, so the comparison stays byte for byte — against a documented rule
+ * rather than a hand-copied string.
+ */
+const DIVERGENCES = {
+  pocketbase: {
+    issue: '#21',
+    reason: 'the && conjunction is sent as %26%26 — a raw & ends the filter parameter',
+    rewrite: (uri) => uri.replaceAll(' && ', ' %26%26 '),
+  },
+};
+
 let pass = 0,
+  diverged = 0,
   fail = 0;
 const failures = [];
 
@@ -106,9 +121,14 @@ for (const id of DRIVERS) {
     b = `THREW: ${e.message}`;
   }
 
-  if (a === b) {
+  const divergence = DIVERGENCES[id];
+
+  if (!divergence && a === b) {
     pass += 1;
     console.log(`  ok ${id.padEnd(14)} ${b.slice(0, 78)}`);
+  } else if (divergence && divergence.rewrite(a) === b && a !== b) {
+    diverged += 1;
+    console.log(`  ~~ ${id.padEnd(14)} ${divergence.issue}: ${divergence.reason}`);
   } else {
     fail += 1;
     failures.push({ id, ng: a, core: b });
@@ -116,7 +136,7 @@ for (const id of DRIVERS) {
   }
 }
 
-console.log(`\n  ${pass} identical, ${fail} mismatched`);
+console.log(`\n  ${pass} identical, ${diverged} diverged as documented, ${fail} mismatched`);
 for (const f of failures) {
   console.log(`\n  --- ${f.id} ---\n    ng-qubee : ${f.ng}\n    qubee    : ${f.core}`);
 }

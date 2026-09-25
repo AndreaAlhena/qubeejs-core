@@ -4,6 +4,7 @@ import type { QueryBuilderState } from '../types/query-builder-state.type';
 import type { StrategyCapabilities } from '../types/strategy-capabilities.type';
 
 import { InvalidLimitError } from '../errors/invalid-limit.error';
+import { encodeValues } from '../utils/encode-values';
 
 /**
  * Base class for request strategies
@@ -88,6 +89,11 @@ export abstract class AbstractRequestStrategy implements IRequestStrategy {
    * delegates the per-driver query-string segments to `parts(...)`, and
    * joins them with the conventional `?`/`&` separators.
    *
+   * `parts(...)` receives the state with filter values, operator-filter
+   * values and the search term already percent-encoded (see
+   * `encodeValues`), so no concrete strategy encodes on its own and none
+   * can forget to.
+   *
    * @param state - The current query builder state
    * @param options - The query parameter key name configuration
    * @returns The composed URI string
@@ -96,7 +102,7 @@ export abstract class AbstractRequestStrategy implements IRequestStrategy {
   public buildUri(state: QueryBuilderState, options: QueryBuilderOptions): string {
     this.assertResource(state);
 
-    const segments = this.parts(state, options);
+    const segments = this.parts(encodeValues(state), options);
 
     return this.join(this.baseUri(state), segments);
   }

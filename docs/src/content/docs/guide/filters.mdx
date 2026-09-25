@@ -24,6 +24,28 @@ OData       $filter=status eq 'published'
 Spatie      filter[status]=published
 ```
 
+## Values are encoded for you
+
+Filter values, operator values and the search term are percent-encoded before they reach the URI,
+so pass them exactly as the user typed them:
+
+```ts
+qb.addFilter('name', '%foo & bar%');
+// JSON:API   filter[name]=%25foo%20%26%20bar%25
+```
+
+Everything around the values stays literal — bracketed keys, operator syntax such as `eq.` or
+`$eq:`, and the `,` that joins several values. A comma *inside* a value is encoded as `%2C`, so it
+cannot be mistaken for a separator.
+
+Strings are the only values encoded; numbers and booleans are emitted as they are. Field names,
+includes, sorts and the resource are yours rather than your users', and are not encoded.
+
+:::caution[Bee aware]
+Don't call `encodeURIComponent()` on a value yourself — it will be encoded twice. If you did that
+to work around unencoded values before 1.1.0, remove it when you upgrade.
+:::
+
 ## Explicit operators
 
 `addFilterOperator()` takes a `FilterOperatorEnum`.
@@ -78,3 +100,8 @@ qb.addFilterOperator('price', FilterOperatorEnum.GTE, 10);
 ```
 
 Check the [capability matrix](/drivers/capabilities/) before reaching for one.
+
+The JSON:API driver is one of them by design. The specification reserves the `filter` parameter but
+deliberately leaves what goes inside it to each server, so a convention such as
+`filter[name][ilike]=…` belongs to your backend rather than to JSON:API. To target one, extend
+`JsonApiRequestStrategy` in your own driver — see [Writing a driver](/extending/writing-a-driver/).

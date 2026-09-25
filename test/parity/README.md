@@ -14,8 +14,19 @@ compiler has to be loaded first even though the request strategies themselves ar
 
 Everything here is gitignored except this file and `parity.mjs`.
 
-## Result as of the 1.0 audit
+## Deliberate divergences
+
+A bug fixed here but still present in `ng-qubee` is listed in `DIVERGENCES` in `parity.mjs`, with
+its issue and a rewrite that turns `ng-qubee`'s URI into the expected one. The comparison stays
+byte for byte, against a stated rule; any other difference still fails.
+
+| Driver     | Issue | Rewrite                     |
+| ---------- | ----- | --------------------------- |
+| pocketbase | #21   | `&&` → `%26%26` in `filter` |
+
+## Results
 
 ```
-18 identical, 0 mismatched
+1.0 audit   18 identical, 0 mismatched
+1.1.0       17 identical, 1 diverged as documented, 0 mismatched
 ```

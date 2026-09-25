@@ -1,7 +1,7 @@
 import starlight from '@astrojs/starlight';
 import { defineConfig } from 'astro/config';
 
-const REPO = 'https://github.com/AndreaAlhena/qubee-core';
+const REPO = 'https://github.com/AndreaAlhena/qubeejs-core';
 
 export default defineConfig({
   integrations: [

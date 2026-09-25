@@ -24,6 +24,21 @@ page.to;       // 50
 `Paginator` also writes that metadata back into the store, which is what lets the builder answer
 questions about where you are.
 
+### Typing the rows
+
+`paginate<T>()` types `page.data` as `T[]`. `T` can be an interface, a class or a type alias —
+anything that is an object:
+
+```ts
+interface Article {
+  id: number;
+  title: string;
+}
+
+const page = paginator.paginate<Article>(body);
+page.data[0].title; // string
+```
+
 ## Header-based pagination
 
 Some backends page over headers rather than the body — PostgREST's `Content-Range`, WordPress's

@@ -5,9 +5,10 @@ standards.
 
 > Extracted from [ng-qubee](https://github.com/AndreaAlhena/ng-qubee), which remains fully
 > supported and unaffected. Every URI is verified byte-for-byte against `ng-qubee@3.8.0` across all
-> eighteen drivers — see `npm run test:parity`.
+> eighteen drivers, apart from the bugs fixed here and still present there, each listed with its
+> issue — see `npm run test:parity`.
 
-[![CI](https://github.com/AndreaAlhena/qubee-core/actions/workflows/ci.yml/badge.svg)](https://github.com/AndreaAlhena/qubee-core/actions/workflows/ci.yml)
+[![CI](https://github.com/AndreaAlhena/qubeejs-core/actions/workflows/ci.yml/badge.svg)](https://github.com/AndreaAlhena/qubeejs-core/actions/workflows/ci.yml)
 [![license](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 
 **[Documentation](https://qubeejs.andreatantimonaco.me)**
@@ -54,8 +55,8 @@ Zero runtime dependencies, and importing one driver leaves the other seventeen o
 
 | import                       | minified | gzipped    |
 | ---------------------------- | -------- | ---------- |
-| `STRAPI_DRIVER` (one driver) | 6.5 kB   | **2.5 kB** |
-| `DRIVERS` (all eighteen)     | 49 kB    | 9.5 kB     |
+| `STRAPI_DRIVER` (one driver) | 6.7 kB   | **2.6 kB** |
+| `DRIVERS` (all eighteen)     | 50 kB    | 9.6 kB     |
 
 Reach for `DRIVERS` only when the backend is chosen at runtime.
 

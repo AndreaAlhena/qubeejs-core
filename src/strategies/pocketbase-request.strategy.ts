@@ -16,7 +16,8 @@ import { AbstractRequestStrategy } from './abstract-request.strategy';
  * - Filters: a single `filter=(...)` expression-language parameter —
  *   simple single-value filters fold to `field='value'`, multi-value
  *   filters fold to an OR group (`(field='v1' || field='v2')`), and all
- *   clauses join with ` && `
+ *   clauses join with ` && ` — sent as ` %26%26 `, since a raw `&` would
+ *   end the parameter
  * - Operator filters: expression terms (`field>=10`, `field~'val'`) —
  *   see the mapping on `_formatOperatorClause`
  * - Sorts: `sort=-created,title` (CSV, `-` prefix = DESC)
@@ -40,6 +41,15 @@ import { AbstractRequestStrategy } from './abstract-request.strategy';
  * @see https://pocketbase.io/docs/api-records/
  */
 export class PocketbaseRequestStrategy extends AbstractRequestStrategy {
+  /**
+   * The ` && ` conjunction, percent-encoded for the wire
+   *
+   * A raw `&` inside the `filter=` value would end the parameter, so
+   * PocketBase would receive only the first clause. The server decodes
+   * `%26%26` back to `&&` before parsing the expression.
+   */
+  private static readonly _and = ' %26%26 ';
+
   /**
    * PocketBase-native names of the six hardcoded query keys
    *
@@ -137,7 +147,9 @@ export class PocketbaseRequestStrategy extends AbstractRequestStrategy {
       return;
     }
 
-    out.push(`${PocketbaseRequestStrategy._filterKey}=(${clauses.join(' && ')})`);
+    out.push(
+      `${PocketbaseRequestStrategy._filterKey}=(${clauses.join(PocketbaseRequestStrategy._and)})`
+    );
   }
 
   /**
@@ -188,7 +200,7 @@ export class PocketbaseRequestStrategy extends AbstractRequestStrategy {
    * - `CONTAINS`/`ILIKE` → `field~'v'` (PocketBase's `~` is a
    *   case-insensitive LIKE that auto-wraps the operand in `%...%`)
    * - `SW` → `field~'v%'` (explicit trailing wildcard disables the
-   *   auto-wrap)
+   *   auto-wrap; sent as `%25`, since a bare `%` is an invalid escape)
    * - `IN` → OR group `(field='v1' || field='v2')`
    * - `BTW` → AND group `(field>=min && field<=max)` (arity-checked)
    * - `NOT` → `field!='v'` (single) / AND group of `!=` terms (multi)
@@ -226,7 +238,7 @@ export class PocketbaseRequestStrategy extends AbstractRequestStrategy {
       case FilterOperatorEnum.ILIKE:
         return `${field}~${this._formatValue(first)}`;
       case FilterOperatorEnum.SW:
-        return `${field}~'${this._escape(String(first))}%'`;
+        return `${field}~'${this._escape(String(first))}%25'`;
       case FilterOperatorEnum.IN:
         return `(${values.map((value) => `${field}=${this._formatValue(value)}`).join(' || ')})`;
 
@@ -238,13 +250,13 @@ export class PocketbaseRequestStrategy extends AbstractRequestStrategy {
           );
         }
 
-        return `(${field}>=${this._formatValue(values[0])} && ${field}<=${this._formatValue(values[1])})`;
+        return `(${field}>=${this._formatValue(values[0])}${PocketbaseRequestStrategy._and}${field}<=${this._formatValue(values[1])})`;
       }
 
       case FilterOperatorEnum.NOT:
         return values.length === 1
           ? `${field}!=${this._formatValue(first)}`
-          : `(${values.map((value) => `${field}!=${this._formatValue(value)}`).join(' && ')})`;
+          : `(${values.map((value) => `${field}!=${this._formatValue(value)}`).join(PocketbaseRequestStrategy._and)})`;
 
       case FilterOperatorEnum.NULL: {
         if (values.length !== 1 || typeof first !== 'boolean') {

@@ -7,15 +7,46 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-09-25
+
 ### Changed
 
 - Documentation site now matches the provided design: a custom 404, a changelog page generated
   from `CHANGELOG.md`, top-level section navigation with a version chip, and the bee mark inside
   "Bee aware" callouts (#19)
 - Landing page rebuilt against the design markup: two-column hero with the bee mark, radial glow,
-  pill badge, hexagon feature icons, framed code sample and the driver grid (#20)
+  pill badge, hexagon feature icons, framed code sample and the driver grid
 - Doc-page chrome matched to the design — sidebar rails, table of contents, previous/next cards,
-  heading scale, honey-tinted inline code, and a breadcrumb above each title (#21)
+  heading scale, honey-tinted inline code, and a breadcrumb above each title
+- Repository renamed from `qubee-core` to `qubeejs-core`, matching the `@qubeejs/core` package
+  name. All repository links — the CI badge, the docs edit and GitHub links, and the changelog
+  comparison links — now point at the new URL; GitHub redirects the old one
+- A single-driver import is 2.6 kB gzipped, up from 2.5 kB: every driver now carries the value
+  encoder (#21)
+
+### Fixed
+
+- `PaginatedObject` is `object` rather than `Record<string, unknown>`, so `paginate<User>()` and
+  `PaginatedCollection<User>` accept an `interface` or a class row again, as `ng-qubee` 3.x did.
+  TypeScript grants an implicit index signature to a `type` alias but never to an interface, and
+  the old constraint depended on it (#20)
+- **Filter values and search terms are percent-encoded.** No driver encoded them, so a `&` split
+  the value into a new parameter, a `#` cut off everything after it — pagination included — and
+  a `%` became an invalid escape; user input could inject parameters of its own. Values are now
+  encoded once, in `AbstractRequestStrategy.buildUri()`, while keys, operator syntax and the `,`
+  joining several values stay literal. **If you called `encodeURIComponent()` on values yourself,
+  remove it** — it will now double-encode. Custom strategies extending the base receive encoded
+  values and must not encode them again (#21)
+- PocketBase joined filter clauses with a raw `&&`, so any filter with more than one condition
+  reached the server cut off at the first `&`. It is now sent as `%26%26` (#21)
+- PostgREST `CONTAINS` and PocketBase `SW` wrote a bare `%` wildcard into the URI — an invalid
+  escape. PostgREST now uses its documented `*` wildcard; PocketBase sends `%25` (#21)
+
+### Internal
+
+- The parity harness records deliberate divergences from `ng-qubee@3.8.0`, each with its issue
+  and a rewrite of `ng-qubee`'s URI into the expected one, so the comparison stays byte for byte.
+  PocketBase is the first: 17 drivers identical, 1 diverged as documented (#21)
 
 ## [1.0.0] - 2026-09-08
 
@@ -50,7 +81,7 @@ eighteen drivers before release — see `test/parity/` and `npm run test:parity`
   `StrategyCapabilities` and the registry, so third parties can author a driver (#11)
 - One file per driver under `src/drivers/`, which is what makes a single-driver import
   tree-shakeable (#15)
-- A [documentation site](https://andreaalhena.github.io/qubee-core/): 145 pages, with the API
+- A [documentation site](https://qubeejs.andreatantimonaco.me): 145 pages, with the API
   reference, all 18 driver pages and the capability matrix generated from source (#17)
 
 ### Fixed
@@ -94,5 +125,6 @@ Carried over from `ng-qubee`, where these are still present:
 - CI verifies both entry points resolve, that there are no runtime dependencies, and that a
   single-driver import still tree-shakes (#12)
 
-[unreleased]: https://github.com/AndreaAlhena/qubee-core/compare/v1.0.0...HEAD
-[1.0.0]: https://github.com/AndreaAlhena/qubee-core/releases/tag/v1.0.0
+[unreleased]: https://github.com/AndreaAlhena/qubeejs-core/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/AndreaAlhena/qubeejs-core/compare/v1.0.0...v1.1.0
+[1.0.0]: https://github.com/AndreaAlhena/qubeejs-core/releases/tag/v1.0.0
