@@ -26,6 +26,17 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   `PaginatedCollection<User>` accept an `interface` or a class row again, as `ng-qubee` 3.x did.
   TypeScript grants an implicit index signature to a `type` alias but never to an interface, and
   the old constraint depended on it (#20)
+- **Filter values and search terms are percent-encoded.** No driver encoded them, so a `&` split
+  the value into a new parameter, a `#` cut off everything after it — pagination included — and
+  a `%` became an invalid escape; user input could inject parameters of its own. Values are now
+  encoded once, in `AbstractRequestStrategy.buildUri()`, while keys, operator syntax and the `,`
+  joining several values stay literal. **If you called `encodeURIComponent()` on values yourself,
+  remove it** — it will now double-encode. Custom strategies extending the base receive encoded
+  values and must not encode them again (#21)
+- PocketBase joined filter clauses with a raw `&&`, so any filter with more than one condition
+  reached the server cut off at the first `&`. It is now sent as `%26%26` (#21)
+- PostgREST `CONTAINS` and PocketBase `SW` wrote a bare `%` wildcard into the URI — an invalid
+  escape. PostgREST now uses its documented `*` wildcard; PocketBase sends `%25` (#21)
 
 ## [1.0.0] - 2026-09-08
 

@@ -95,3 +95,15 @@ import { stringify } from '@qubeejs/core';
 stringify({ filters: { status: { $eq: 'published' } } });
 // filters[status][$eq]=published
 ```
+
+`stringify()` does not encode, and does not need to: `AbstractRequestStrategy.buildUri()` hands
+`parts()` a state whose filter values, operator values and search term are already
+percent-encoded. Emit them as they arrive. Encoding them again produces `%2520` where a space
+should be, and anything your strategy adds around a value — operators, brackets, a joining `,` —
+must stay literal.
+
+:::caution[Bee aware]
+Anything *you* write into a value must be URI-safe on its own. A raw `&` ends the parameter, and a
+bare `%` is an invalid escape: PocketBase's `&&` conjunction is emitted as `%26%26`, and its `SW`
+wildcard as `%25`.
+:::
