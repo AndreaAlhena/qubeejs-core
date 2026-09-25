@@ -37,7 +37,9 @@
     },
     "./package.json": "./package.json"
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "keywords": [
     "api-platform",
     "builder",
@@ -69,6 +71,10 @@
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "name": "@qubeejs/core",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AndreaAlhena/qubeejs-core.git"
+  },
   "scripts": {
     "build": "tsup",
     "format": "prettier --write .",

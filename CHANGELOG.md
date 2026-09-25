@@ -23,6 +23,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   comparison links — now point at the new URL; GitHub redirects the old one
 - A single-driver import is 2.6 kB gzipped, up from 2.5 kB: every driver now carries the value
   encoder (#21)
+- `package.json` declares its `repository`. npm trusted publishing requires `repository.url` to
+  match the publishing GitHub repository, and the npm page now links back to it
 
 ### Fixed
 
