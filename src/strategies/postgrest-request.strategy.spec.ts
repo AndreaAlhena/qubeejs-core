@@ -273,7 +273,7 @@ describe('PostgrestRequestStrategy', () => {
       };
       const uri = strategy.buildUri(state, options);
 
-      expect(uri).toContain('name=ilike.%john%');
+      expect(uri).toContain('name=ilike.*john*');
     });
 
     it('should emit FTS / PLFTS / PHFTS / WFTS for full-text search', () => {
