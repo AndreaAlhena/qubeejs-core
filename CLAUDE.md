@@ -52,9 +52,9 @@ exporting one `<ID>_DRIVER` const plus a line in `DRIVERS`. The `Record<DriverEn
 deliberately closed, so the compiler tells you what's missing. Copy any existing `*.driver.ts` as
 the template.
 
-**Bundle note:** `DRIVERS` reaches every driver by construction (~49 kB minified). A consumer that
+**Bundle note:** `DRIVERS` reaches every driver by construction (~50 kB minified). A consumer that
 knows its backend at build time should `import { STRAPI_DRIVER } from '@qubeejs/core'` instead
-(~6.5 kB minified / 2.5 kB gzipped).
+(~6.7 kB minified / 2.6 kB gzipped).
 
 **Reactivity:** `QubeeStore` exposes `getSnapshot()` + `subscribe()` — deliberately the
 `useSyncExternalStore` contract. The core has no Signals and no RxJS; adapters supply their own.

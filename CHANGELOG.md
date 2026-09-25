@@ -7,6 +7,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-09-25
+
 ### Changed
 
 - Documentation site now matches the provided design: a custom 404, a changelog page generated
@@ -19,6 +21,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Repository renamed from `qubee-core` to `qubeejs-core`, matching the `@qubeejs/core` package
   name. All repository links — the CI badge, the docs edit and GitHub links, and the changelog
   comparison links — now point at the new URL; GitHub redirects the old one
+- A single-driver import is 2.6 kB gzipped, up from 2.5 kB: every driver now carries the value
+  encoder (#21)
 
 ### Fixed
 
@@ -37,6 +41,12 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   reached the server cut off at the first `&`. It is now sent as `%26%26` (#21)
 - PostgREST `CONTAINS` and PocketBase `SW` wrote a bare `%` wildcard into the URI — an invalid
   escape. PostgREST now uses its documented `*` wildcard; PocketBase sends `%25` (#21)
+
+### Internal
+
+- The parity harness records deliberate divergences from `ng-qubee@3.8.0`, each with its issue
+  and a rewrite of `ng-qubee`'s URI into the expected one, so the comparison stays byte for byte.
+  PocketBase is the first: 17 drivers identical, 1 diverged as documented (#21)
 
 ## [1.0.0] - 2026-09-08
 
@@ -115,5 +125,6 @@ Carried over from `ng-qubee`, where these are still present:
 - CI verifies both entry points resolve, that there are no runtime dependencies, and that a
   single-driver import still tree-shakes (#12)
 
-[unreleased]: https://github.com/AndreaAlhena/qubeejs-core/compare/v1.0.0...HEAD
+[unreleased]: https://github.com/AndreaAlhena/qubeejs-core/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/AndreaAlhena/qubeejs-core/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/AndreaAlhena/qubeejs-core/releases/tag/v1.0.0
