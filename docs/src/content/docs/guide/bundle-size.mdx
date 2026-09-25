@@ -10,8 +10,8 @@ import a driver or the registry.
 
 | Import | Minified | Gzipped |
 | --- | --- | --- |
-| `STRAPI_DRIVER` (one driver) | 6.5 kB | **2.5 kB** |
-| `DRIVERS` (all eighteen) | 49 kB | 9.5 kB |
+| `STRAPI_DRIVER` (one driver) | 6.7 kB | **2.6 kB** |
+| `DRIVERS` (all eighteen) | 50 kB | 9.6 kB |
 
 Measured with esbuild, minified, ES2022, and asserted in CI so it cannot regress.
 
@@ -40,7 +40,7 @@ const driver = DRIVERS[config.driver]; // pulls in all eighteen
 
 The only one there ever was is `qs`, used solely to serialise nested bracket notation. It was
 replaced by a 40-line internal serialiser, verified case-by-case against `qs` itself — worth about
-13 kB gzipped, which is why a single-driver import fell from 15.7 kB to 2.5 kB.
+13 kB gzipped, which is why a single-driver import fell from 15.7 kB to 2.5 kB in 1.0.0.
 
 `URLSearchParams` cannot substitute for either: it percent-encodes with no opt-out, so
 `filters[status][$eq]` becomes `filters%5Bstatus%5D%5B%24eq%5D`, and it flattens nested objects to
