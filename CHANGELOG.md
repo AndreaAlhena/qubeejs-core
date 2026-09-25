@@ -13,9 +13,9 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   from `CHANGELOG.md`, top-level section navigation with a version chip, and the bee mark inside
   "Bee aware" callouts (#19)
 - Landing page rebuilt against the design markup: two-column hero with the bee mark, radial glow,
-  pill badge, hexagon feature icons, framed code sample and the driver grid (#20)
+  pill badge, hexagon feature icons, framed code sample and the driver grid
 - Doc-page chrome matched to the design — sidebar rails, table of contents, previous/next cards,
-  heading scale, honey-tinted inline code, and a breadcrumb above each title (#21)
+  heading scale, honey-tinted inline code, and a breadcrumb above each title
 - Repository renamed from `qubee-core` to `qubeejs-core`, matching the `@qubeejs/core` package
   name. All repository links — the CI badge, the docs edit and GitHub links, and the changelog
   comparison links — now point at the new URL; GitHub redirects the old one
