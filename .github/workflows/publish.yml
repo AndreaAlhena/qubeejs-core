@@ -17,14 +17,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # No `registry-url`: it makes setup-node write `_authToken=${NODE_AUTH_TOKEN}`
-      # into .npmrc with a placeholder token, and npm presents that instead of
-      # the OIDC credential — "403 OIDC permission denied". The public registry
-      # is npm's default anyway.
       - uses: actions/setup-node@v4
         with:
           cache: npm
           node-version: '24'
+          registry-url: https://registry.npmjs.org
 
       - name: Upgrade npm for trusted-publisher OIDC support
         run: npm install -g npm@latest

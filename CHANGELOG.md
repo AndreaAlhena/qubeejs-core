@@ -49,9 +49,6 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - The parity harness records deliberate divergences from `ng-qubee@3.8.0`, each with its issue
   and a rewrite of `ng-qubee`'s URI into the expected one, so the comparison stays byte for byte.
   PocketBase is the first: 17 drivers identical, 1 diverged as documented (#21)
-- The publish workflow no longer sets `registry-url` on `setup-node`. It wrote a placeholder
-  `_authToken` into `.npmrc` that npm presented instead of the OIDC credential, so trusted
-  publishing failed with "403 OIDC permission denied"
 
 ## [1.0.0] - 2026-09-08
 
