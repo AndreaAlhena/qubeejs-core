@@ -27,6 +27,7 @@ export type { HeaderBag } from './types/header-bag.type';
 export type { Normalized } from './types/normalized.type';
 export type { OperatorFilter } from './types/operator-filter.type';
 export type { PaginatedObject } from './types/paginated-object.type';
+export type { PaginatedResult } from './types/paginated-result.type';
 export type { PaginationConfig } from './types/pagination-config.type';
 export type { PaginationMode } from './types/pagination-mode.type';
 export type { QueryBuilderConfig } from './types/query-builder-config.type';
