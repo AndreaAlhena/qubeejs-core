@@ -24,6 +24,17 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   key is the other followed by `[` (`page` against JSON:API's `page[number]`). The check reads
   the URI the driver actually produced, so it covers custom strategies and leaves a key free
   until the driver needs it (#22)
+- `DriverId`, `Driver | (string & {})`: any string, while editors keep suggesting the eighteen
+  built-in ids (#22)
+
+### Changed
+
+- **Custom drivers can name themselves.** `DriverDefinition.id`, `QueryBuilder`'s `driver`
+  argument and `UnsupportedCapabilityError.driver` (with its eight subclasses) are typed
+  `DriverId` rather than `Driver`. A driver defined outside the package no longer has to borrow a
+  built-in id, so its capability errors name it. `DRIVERS` stays keyed by `DriverEnum` and
+  `Config.driver` stays `Driver`, since both resolve through the registry. Code that passes a
+  definition's `id` somewhere typed `Driver` now needs a check first (#22)
 
 ## [1.1.0] - 2026-09-25
 

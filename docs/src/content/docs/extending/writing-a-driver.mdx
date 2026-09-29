@@ -74,6 +74,7 @@ If it is nested, extend `AbstractDotPathResponseStrategy`, which resolves dotted
 
 ```ts title="src/drivers/my-backend.driver.ts"
 export const MY_BACKEND_DRIVER: DriverDefinition = {
+  id: 'my-backend',
   createRequestStrategy: () => new MyBackendRequestStrategy(),
   createResponseStrategy: () => new MyBackendResponseStrategy(),
   createResponseOptions: (config) => new ResponseOptions(config),
@@ -86,6 +87,41 @@ Then one line in `DRIVERS`, and a named export from `src/index.ts`.
 `test/drivers.spec.ts` fails if a `*.driver.ts` file exists that nothing imports — the one hazard
 the per-file layout introduces. Both strategies need specs; every existing driver has them.
 :::
+
+## Keeping a driver in your own code
+
+The four steps above add a driver to this repository. A driver can equally live in your own
+application: export a `DriverDefinition` and pass it to `createQubee()`. Give it an `id` of its own
+so capability errors name it, rather than the built-in driver it started from:
+
+```ts title="src/api/studio-api.driver.ts"
+import {
+  createQubee,
+  JsonApiRequestStrategy,
+  JsonApiResponseOptions,
+  JsonApiResponseStrategy,
+  type DriverDefinition,
+} from '@qubeejs/core';
+
+class StudioApiRequestStrategy extends JsonApiRequestStrategy {
+  // override what this backend does differently
+}
+
+export const STUDIO_API_DRIVER: DriverDefinition = {
+  id: 'studio-api',
+  createRequestStrategy: () => new StudioApiRequestStrategy(),
+  createResponseStrategy: () => new JsonApiResponseStrategy(),
+  createResponseOptions: (config) => new JsonApiResponseOptions(config),
+};
+
+const { builder } = createQubee({ driver: STUDIO_API_DRIVER });
+
+builder.setSearch('jazz');
+// UnsupportedSearchError: The 'studio-api' driver does not support full-text search.
+```
+
+`id` is a `DriverId`: any string, while editors still suggest the eighteen built-in ids. Only those
+resolve through `DRIVERS`, so a driver of your own is always passed as its definition.
 
 ## Serialising nested structures
 

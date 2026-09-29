@@ -58,6 +58,10 @@ page.lastPage; // 6
   builder.setParam('status', 'failed'); // → …&status=failed
   ```
 
+- **A backend no driver covers** gets a `DriverDefinition` of your own, with an `id` of its own
+  that errors will name. See
+  [Writing a driver](https://qubeejs.andreatantimonaco.me/extending/writing-a-driver/).
+
 ## Why it is small
 
 Zero runtime dependencies, and importing one driver leaves the other seventeen out of your bundle:
