@@ -33,6 +33,7 @@ Branch on `code`. Messages are for humans and may be reworded.
 | `INVALID_RESOURCE_NAME` | The resource is empty, blank or not a string |
 | `INVALID_FILTER_OPERATOR_VALUE` | An operator got the wrong number or type of values |
 | `PAGINATION_NOT_SYNCED` | Page metadata was read before any response was parsed |
+| `PARAM_COLLISION` | A param set with `setParam()` would shadow one the driver emits |
 | `UNSELECTABLE_MODEL` | `addFields()` named a model that is not the resource or an include |
 | `KEY_NOT_FOUND` | `normalize()` could not find an identifier on a row |
 
@@ -66,6 +67,8 @@ Errors expose what went wrong as data rather than requiring you to parse prose:
 new InvalidLimitError(0).limit;        // 0
 new InvalidPageNumberError(-3).page;   // -3
 new KeyNotFoundError('slug').key;      // 'slug'
+
+new ParamCollisionError('page', 'page[number]', 'json-api').driverKey; // 'page[number]'
 ```
 
 :::caution[Bee aware]

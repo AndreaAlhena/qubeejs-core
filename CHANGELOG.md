@@ -7,6 +7,24 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- **Parameters no driver models.** `QueryBuilder.setParam(key, ...values)` and
+  `deleteParams(...keys)` emit what a backend accepts beyond the driver's own parameters — a
+  top-level `status`, an `include` on a driver without includes. `generateUri()` appends them
+  after the request strategy returns, so all eighteen drivers emit them, and so does a custom
+  strategy that implements `IRequestStrategy` directly. No capability gates them. Keys are
+  literal; each value is percent-encoded like a filter value, then the values are joined with a
+  literal `,` (`setParam('ids', 'a,b', 'c')` → `ids=a%2Cb,c`). Both methods reset the page to 1,
+  and `reset()` clears them. They live in the new `QueryBuilderState.params` (`Params`), which
+  is optional in the type so state literals written against 1.1 still compile; the store always
+  sets it (#22)
+- `ParamCollisionError` (`PARAM_COLLISION`), thrown by `generateUri()` when a param would
+  duplicate or override one the driver emits: its key equals one in the generated URI, or one
+  key is the other followed by `[` (`page` against JSON:API's `page[number]`). The check reads
+  the URI the driver actually produced, so it covers custom strategies and leaves a key free
+  until the driver needs it (#22)
+
 ## [1.1.0] - 2026-09-25
 
 ### Changed

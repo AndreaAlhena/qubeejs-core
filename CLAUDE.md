@@ -37,13 +37,13 @@ no transport layer; consumers fetch however they like and hand the response body
 src/
 ├─ drivers/      one <driver>.driver.ts per backend + driver-registry.ts composing them
 ├─ enums/        DriverEnum, FilterOperatorEnum, PaginationModeEnum, SortEnum
-├─ errors/       QubeeError base + 15 concrete errors
+├─ errors/       QubeeError base + 16 concrete errors
 ├─ interfaces/   IRequestStrategy, IResponseStrategy — the only two class contracts
 ├─ models/       PaginatedCollection, QueryBuilderOptions, ResponseOptions
 ├─ services/     QueryBuilder, QubeeStore, Paginator
 ├─ strategies/   18 request + 18 response strategies, over 3 abstract bases
 ├─ types/        data shapes and derived unions
-└─ utils/        read-header, stringify
+└─ utils/        append-params, encode-values, read-header, read-path, stringify
 ```
 
 **Adding a driver:** four steps — a `DriverEnum` member, a request strategy extending
@@ -51,6 +51,9 @@ src/
 exporting one `<ID>_DRIVER` const plus a line in `DRIVERS`. The `Record<DriverEnum, …>` registry is
 deliberately closed, so the compiler tells you what's missing. Copy any existing `*.driver.ts` as
 the template.
+
+**Extra params:** `setParam()` values are appended by `QueryBuilder.generateUri()` after the
+request strategy returns (`utils/append-params.ts`), so strategies never emit `state.params`.
 
 **Bundle note:** `DRIVERS` reaches every driver by construction (~50 kB minified). A consumer that
 knows its backend at build time should `import { STRAPI_DRIVER } from '@qubeejs/core'` instead

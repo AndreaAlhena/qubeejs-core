@@ -77,6 +77,50 @@ qb.addEmbedded('author', 'name', 'email');  // capabilities.embedded — PostgRE
 qb.setSearch('typescript');  // capabilities.search
 ```
 
+## Parameters no driver models
+
+Backends accept more than any driver models — a top-level `status`, an `include` on an endpoint
+whose driver has no includes. `setParam()` adds one and `deleteParams()` removes it:
+
+```ts
+qb.setResource('jobs').setParam('status', 'failed');
+// NestJS → /jobs?limit=15&page=1&status=failed
+
+qb.setParam('include', 'queue', 'user'); // → include=queue,user
+qb.deleteParams('include');
+```
+
+`generateUri()` appends them after the driver's own parameters, in the order their keys were first
+set. That happens once the request strategy has returned, so every driver emits them — a custom
+strategy that implements `IRequestStrategy` directly included — and no capability gates them.
+
+| | Behaviour |
+| --- | --- |
+| Key | Emitted verbatim, so `page[cursor]` works |
+| Values | Each percent-encoded like a filter value, then joined with a literal `,`: `setParam('ids', 'a,b', 'c')` gives `ids=a%2Cb,c` |
+| Setting a key again | Replaces its values |
+| No values | `setParam('status')` does nothing; remove a key with `deleteParams()` |
+| Repeated keys | Not supported — a key is emitted once |
+| Page | Both methods reset it to 1, as filters do |
+| `reset()` | Clears them |
+
+### Collisions
+
+A param must not shadow one the driver emits. When its key equals a key in the generated URI — or
+one is the other followed by `[`, as `page` and JSON:API's `page[number]` are — `generateUri()`
+throws rather than send a duplicate the backend would resolve however it likes:
+
+```ts
+jsonApi.setResource('jobs').setParam('page', 2).generateUri();
+// ParamCollisionError: The param 'page' collides with 'page[number]', which the
+// 'json-api' driver already emits. Use the builder method that controls it, or
+// remove the param with deleteParams('page').
+```
+
+The check reads the URI the driver actually produced, so a key is free until the driver needs it:
+on JSON:API, `setParam('sort', …)` works until `addSort()` makes the driver emit `sort` itself.
+Siblings are fine — `page[cursor]` beside `page[number]` does not collide.
+
 ## Chaining and resetting
 
 ```ts
@@ -91,8 +135,8 @@ qb.reset(); // back to a pristine state
 ```
 
 :::caution[Bee aware]
-Adding or removing a filter resets the page to 1. Changing what you are filtering by invalidates
-your position in the result set, so paging on would be meaningless.
+Adding or removing a filter — or a param — resets the page to 1. Changing what you are filtering
+by invalidates your position in the result set, so paging on would be meaningless.
 :::
 
 ## Capability checks happen immediately

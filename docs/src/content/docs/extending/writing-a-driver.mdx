@@ -55,6 +55,9 @@ export class MyBackendRequestStrategy extends AbstractRequestStrategy {
 Declare `capabilities` honestly. It is what makes the builder throw a useful error instead of
 emitting something the server ignores.
 
+Leave `state.params` alone. `QueryBuilder.generateUri()` appends those after `buildUri()` returns,
+for every strategy, and throws `ParamCollisionError` if one names a key your strategy emitted.
+
 ## 3. Write the response strategy
 
 If the envelope is flat, extend `AbstractFlatResponseStrategy` and you are done — the base reads

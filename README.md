@@ -49,6 +49,15 @@ page.total; // 57
 page.lastPage; // 6
 ```
 
+## When the driver is not enough
+
+- **A parameter no driver models** — a top-level `status`, say — goes through `setParam()`. It
+  works on every driver, and throws rather than shadow a parameter the driver emits:
+
+  ```ts
+  builder.setParam('status', 'failed'); // → …&status=failed
+  ```
+
 ## Why it is small
 
 Zero runtime dependencies, and importing one driver leaves the other seventeen out of your bundle:
