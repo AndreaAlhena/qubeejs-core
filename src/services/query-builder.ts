@@ -4,7 +4,7 @@ import type { SortEnum } from '../enums/sort.enum';
 // Contracts
 import type { IRequestStrategy } from '../interfaces/request-strategy.interface';
 // Types
-import type { Driver } from '../types/driver.type';
+import type { DriverId } from '../types/driver-id.type';
 import type { Fields } from '../types/fields.type';
 import type { StrategyCapabilities } from '../types/strategy-capabilities.type';
 // Services
@@ -37,7 +37,7 @@ export class QueryBuilder {
   /**
    * The active driver, recorded solely so capability errors can name it.
    */
-  private readonly _driver?: Driver;
+  private readonly _driver?: DriverId;
 
   /**
    * Resolved query parameter key name options
@@ -58,13 +58,14 @@ export class QueryBuilder {
    * @param store - State container holding the query being built
    * @param requestStrategy - Driver strategy that turns state into a URI
    * @param options - Query parameter key names for the active driver
-   * @param driver - Active driver id, used to name it in capability errors
+   * @param driver - Active driver id, used to name it in capability errors;
+   * any string, so a custom driver can pass its own
    */
   constructor(
     store: QubeeStore,
     requestStrategy: IRequestStrategy,
     options: QueryBuilderOptions = new QueryBuilderOptions({}),
-    driver?: Driver
+    driver?: DriverId
   ) {
     this._driver = driver;
     this._options = options;

@@ -339,6 +339,24 @@ describe('QueryBuilder driver validation (Spatie)', () => {
   });
 });
 
+describe('QueryBuilder driver id', () => {
+  it('names a driver id this package does not ship in capability errors', () => {
+    const builder = new QueryBuilder(
+      new QubeeStore(),
+      new LaravelRequestStrategy(),
+      undefined,
+      'studio-api'
+    );
+
+    expect(() => builder.addFilter('status', 'published')).toThrowError(
+      expect.objectContaining({
+        driver: 'studio-api',
+        message: "The 'studio-api' driver does not support filters.",
+      })
+    );
+  });
+});
+
 describe('QueryBuilder driver validation (Laravel)', () => {
   let builder: QueryBuilder;
   let store: QubeeStore;

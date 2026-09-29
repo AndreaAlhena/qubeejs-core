@@ -17,6 +17,7 @@ export type { Qubee } from './types/qubee.type';
 export type { QubeeConfig } from './types/qubee-config.type';
 export type { Config } from './types/config.type';
 export type { DriverDefinition } from './types/driver-definition.type';
+export type { DriverId } from './types/driver-id.type';
 export type { Driver } from './types/driver.type';
 export type { Embedded } from './types/embedded.type';
 export type { Fields } from './types/fields.type';
