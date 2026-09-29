@@ -39,6 +39,18 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   built-in id, so its capability errors name it. `DRIVERS` stays keyed by `DriverEnum` and
   `Config.driver` stays `Driver`, since both resolve through the registry. Code that passes a
   definition's `id` somewhere typed `Driver` now needs a check first (#22)
+- JSDoc names `QueryBuilder`, `Paginator` and `QubeeStore` where it still named ng-qubee's
+  `NgQubeeService`, `PaginationService`, `NestService`, `nest()` and `provideNgQubee` — on
+  `PaginationModeEnum`, `StrategyCapabilities`, `IRequestStrategy`, `QubeeStore`, `QueryBuilder`
+  and several strategies. `QueryBuilder` and `PaginatedCollection` gain the class comments they
+  lacked (#22)
+- The generated API reference renders `{}`, index signatures, `keyof` and rest parameters as
+  declared, so `DriverId`, `Params` and `setParam()` read as they are written (#22)
+
+### Fixed
+
+- `PaginationNotSyncedError` told core consumers to call `PaginationService.paginate()`, which
+  exists only in ng-qubee. It now names `Paginator.paginate()`; the code is unchanged (#22)
 
 ## [1.1.0] - 2026-09-25
 
