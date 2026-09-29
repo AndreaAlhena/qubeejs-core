@@ -60,8 +60,8 @@ export class PostgrestRequestStrategy extends AbstractRequestStrategy {
 
   /**
    * @param paginationMode - Wire-level pagination mechanism. Defaults to
-   * `PaginationModeEnum.QUERY`; `provideNgQubee` wires this from
-   * `Config.pagination`.
+   * `PaginationModeEnum.QUERY`; `createQubee()` passes its `pagination`
+   * option through `DriverDefinition.createRequestStrategy()`.
    */
   constructor(paginationMode: PaginationModeEnum = PaginationModeEnum.QUERY) {
     super();
@@ -339,7 +339,7 @@ export class PostgrestRequestStrategy extends AbstractRequestStrategy {
   /**
    * Compute `Range-Unit` / `Range` HTTP headers for RANGE pagination mode
    *
-   * In QUERY mode this returns `null` so `NgQubeeService.paginationHeaders()`
+   * In QUERY mode this returns `null` so `QueryBuilder.paginationHeaders()`
    * conveys "no headers needed" to the consumer. In RANGE mode the method
    * converts the 1-indexed `state.page` + `state.limit` into PostgREST's
    * 0-indexed inclusive range (`from = (page - 1) * limit`,

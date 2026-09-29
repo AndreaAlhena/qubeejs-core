@@ -24,6 +24,15 @@ import { UnsupportedSortError } from '../errors/unsupported-sort.error';
 // Models
 import { QueryBuilderOptions } from '../models/query-builder-options';
 
+/**
+ * Fluent, capability-checked builder for one driver's query URIs.
+ *
+ * Every mutator writes to the {@link QubeeStore} it was given and returns
+ * `this`, so a whole query is one chain; `generateUri()` turns the current
+ * state into a URI through the driver's request strategy. A method the
+ * driver cannot express throws at the call site instead of emitting a
+ * parameter the backend would ignore.
+ */
 export class QueryBuilder {
   /**
    * The active driver, recorded solely so capability errors can name it.
@@ -278,7 +287,7 @@ export class QueryBuilder {
    * Delete selected fields for the given models in the current query builder state (JSON:API and Spatie only)
    *
    * ```
-   * ngQubeeService.deleteFields({
+   * builder.deleteFields({
    *   users: ['email', 'password'],
    *   address: ['zipcode']
    * });
@@ -299,7 +308,7 @@ export class QueryBuilder {
    * Delete selected fields for the given model in the current query builder state (JSON:API and Spatie only)
    *
    * ```
-   * ngQubeeService.deleteFieldsByModel('users', 'email', 'password');
+   * builder.deleteFieldsByModel('users', 'email', 'password');
    * ```
    *
    * @param model - Model that holds the fields
@@ -525,7 +534,7 @@ export class QueryBuilder {
   /**
    * Navigate to the last page known from the most recent paginated response
    *
-   * @remarks Requires at least one `PaginationService.paginate()` call to have synced `state.lastPage`. Before that, the bound is unknown and this method throws.
+   * @remarks Requires at least one `Paginator.paginate()` call to have synced `state.lastPage`. Before that, the bound is unknown and this method throws.
    * @returns {this}
    * @throws {PaginationNotSyncedError} If `state.isLastPageKnown` is false (no paginated response has been synced yet)
    */
@@ -685,7 +694,7 @@ export class QueryBuilder {
   /**
    * Get the total number of pages reported by the most recent paginated response
    *
-   * @remarks Throws when called before any `paginate()` has synced a value. For a non-throwing read in a template, read `nest().isLastPageKnown` first as a guard.
+   * @remarks Throws when called before any `paginate()` has synced a value. For a non-throwing read in a template, read `store.getSnapshot().isLastPageKnown` first as a guard.
    * @returns The last page number
    * @throws {PaginationNotSyncedError} If `state.isLastPageKnown` is false (no paginated response has been synced yet)
    */

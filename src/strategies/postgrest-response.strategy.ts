@@ -32,7 +32,7 @@ type ContentRangeParts = {
  * This strategy expects the consumer to pass the array body as `response`
  * (or a plain object with `readPath(response, options.data)` pointing at the array)
  * and the response headers via the optional `headers` bag. See
- * `PaginationService.paginate()` for the call-site shape.
+ * `Paginator.paginate()` for the call-site shape.
  *
  * @see https://postgrest.org/en/stable/references/api/pagination_count.html
  */
@@ -95,7 +95,7 @@ export class PostgrestResponseStrategy implements IResponseStrategy {
     // Per-page can only be derived from the from/to range; fall back to undefined
     const perPage = from !== undefined && to !== undefined ? to - from + 1 : undefined;
 
-    // Page is 1-based in ng-qubee state; PostgREST reports 0-based indices
+    // Page is 1-based in the store; PostgREST reports 0-based indices
     const page = perPage && from !== undefined ? Math.floor(from / perPage) + 1 : 1;
     const lastPage = total !== undefined && perPage ? Math.ceil(total / perPage) : undefined;
 

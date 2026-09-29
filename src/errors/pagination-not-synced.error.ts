@@ -2,9 +2,9 @@ import { QubeeError } from './qubee.error';
 
 /**
  * Thrown when a pagination helper that needs `state.lastPage` is called
- * before `PaginationService.paginate()` has ever synced a value.
+ * before `Paginator.paginate()` has ever synced a value.
  *
- * Examples: `NgQubeeService.lastPage()`, `NgQubeeService.totalPages()`.
+ * Examples: `QueryBuilder.lastPage()`, `QueryBuilder.totalPages()`.
  *
  * Safe-for-templates predicates (`isLastPage`, `hasNextPage`, etc.) do not
  * throw and return conservative defaults instead.

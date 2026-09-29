@@ -24,7 +24,7 @@ export abstract class AbstractRequestStrategy implements IRequestStrategy {
    * Capability declaration for this driver
    *
    * Concrete strategies must provide a static, immutable capability map
-   * so `NgQubeeService._assertCapability(...)` can read it.
+   * so `QueryBuilder` can gate its feature methods on it.
    */
   public abstract readonly capabilities: StrategyCapabilities;
 
