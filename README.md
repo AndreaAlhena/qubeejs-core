@@ -61,6 +61,8 @@ page.lastPage; // 6
 - **A backend no driver covers** gets a `DriverDefinition` of your own, with an `id` of its own
   that errors will name. See
   [Writing a driver](https://qubeejs.andreatantimonaco.me/extending/writing-a-driver/).
+- **A server-rendered page** can pass `page.toPlain()` — a plain, JSON-safe copy — to a React
+  Client Component, which refuses class instances.
 
 ## Why it is small
 

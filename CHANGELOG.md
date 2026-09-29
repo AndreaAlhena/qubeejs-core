@@ -26,6 +26,10 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   until the driver needs it (#22)
 - `DriverId`, `Driver | (string & {})`: any string, while editors keep suggesting the eighteen
   built-in ids (#22)
+- `PaginatedCollection.toPlain()`, returning a `PaginatedResult<T>`: an object literal with a new
+  `data` array and every pagination field, `null` where the backend reported nothing so
+  `JSON.stringify` keeps every key. React Server Components refuse to pass class instances to
+  Client Components; this is the shape to hand them. The collection itself is unchanged (#22)
 
 ### Changed
 
