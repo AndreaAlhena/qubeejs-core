@@ -592,7 +592,8 @@ export class QubeeStore {
    * Set an extra query parameter, replacing any values it already had
    *
    * Extra parameters are ones no driver models. A key that is set again
-   * keeps its original position in the query string.
+   * keeps its original position in the query string; integer-like keys
+   * come first, as in any JavaScript object.
    *
    * @param {string} key - The parameter name, emitted verbatim
    * @param {(string | number | boolean)[]} values - The values, percent-encoded and comma-joined on output

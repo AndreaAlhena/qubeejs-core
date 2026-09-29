@@ -703,14 +703,16 @@ export class QueryBuilder {
    *
    * For what a backend accepts beyond the driver's own parameters — a
    * top-level `status`, an `include` on a driver without includes. It is
-   * appended by `generateUri()` after the driver's parameters, in the order
-   * keys were first set, so it works with every driver, custom ones
-   * included, and is not gated by capabilities.
+   * appended by `generateUri()` after the driver's parameters, so it works
+   * with every driver, custom ones included, and is not gated by
+   * capabilities. Params come out in the order their keys were first set,
+   * except that integer-like keys such as `'2024'` come first, as they do in
+   * any JavaScript object.
    *
-   * The key is emitted verbatim, so bracketed names such as `page[cursor]`
-   * work. Each value is percent-encoded the way filter values are, then the
-   * values are joined with a literal `,` — so a comma inside a value arrives
-   * as `%2C`:
+   * The key is emitted verbatim, so bracketed names such as `meta[tag]` work
+   * — and so a key must never be built from end-user input. Each value is
+   * percent-encoded the way filter values are, then the values are joined
+   * with a literal `,` — so a comma inside a value arrives as `%2C`:
    *
    * ```
    * qb.setParam('status', 'failed');  // → status=failed

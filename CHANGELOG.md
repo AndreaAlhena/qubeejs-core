@@ -23,7 +23,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   duplicate or override one the driver emits: its key equals one in the generated URI, or one
   key is the other followed by `[` (`page` against JSON:API's `page[number]`). The check reads
   the URI the driver actually produced, so it covers custom strategies and leaves a key free
-  until the driver needs it (#22)
+  until the driver needs it — except pagination keys: the next page's URI is checked too, so
+  PostgREST's `offset` and OData's `$skip` collide on page 1, where they are not yet emitted (#22)
 - `DriverId`, `Driver | (string & {})`: any string, while editors keep suggesting the eighteen
   built-in ids (#22)
 - `PaginatedCollection.toPlain()`, returning a `PaginatedResult<T>`: an object literal with a new

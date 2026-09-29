@@ -91,12 +91,12 @@ qb.deleteParams('include');
 ```
 
 `generateUri()` appends them after the driver's own parameters, in the order their keys were first
-set. That happens once the request strategy has returned, so every driver emits them — a custom
+set — except that integer-like keys such as `'2024'` come first, as in any JavaScript object. That happens once the request strategy has returned, so every driver emits them — a custom
 strategy that implements `IRequestStrategy` directly included — and no capability gates them.
 
 | | Behaviour |
 | --- | --- |
-| Key | Emitted verbatim, so `page[cursor]` works |
+| Key | Emitted verbatim, so `meta[tag]` works — never build one from end-user input |
 | Values | Each percent-encoded like a filter value, then joined with a literal `,`: `setParam('ids', 'a,b', 'c')` gives `ids=a%2Cb,c` |
 | Setting a key again | Replaces its values |
 | No values | `setParam('status')` does nothing; remove a key with `deleteParams()` |
@@ -113,13 +113,18 @@ throws rather than send a duplicate the backend would resolve however it likes:
 ```ts
 jsonApi.setResource('jobs').setParam('page', 2).generateUri();
 // ParamCollisionError: The param 'page' collides with 'page[number]', which the
-// 'json-api' driver already emits. Use the builder method that controls it, or
+// 'json-api' driver emits. Use the builder method that controls it, or
 // remove the param with deleteParams('page').
 ```
 
 The check reads the URI the driver actually produced, so a key is free until the driver needs it:
 on JSON:API, `setParam('sort', …)` works until `addSort()` makes the driver emit `sort` itself.
-Siblings are fine — `page[cursor]` beside `page[number]` does not collide.
+Siblings are fine — `page[cursor]` beside JSON:API's `page[number]` does not collide, though beside
+a bare `page` it would.
+
+Pagination keys are the exception: the next page's URI is checked too. PostgREST and OData leave
+`offset` and `$skip` out of page 1, and a param named after one still collides there, rather than
+only once the user navigates.
 
 ## Chaining and resetting
 

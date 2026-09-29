@@ -28,6 +28,11 @@ describe('appendParams', () => {
       );
     });
 
+    it('lists integer-like keys first, as every JavaScript object does', () => {
+      // Documented rather than worked around: params live in a plain record (#22).
+      expect(appendParams('/jobs', { b: ['x'], '1': ['y'] })).toBe('/jobs?1=y&b=x');
+    });
+
     it('skips a key with no values', () => {
       expect(appendParams('/jobs?page=1', { empty: [], status: ['failed'] })).toBe(
         '/jobs?page=1&status=failed'
