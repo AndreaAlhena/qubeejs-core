@@ -7,6 +7,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-09-30
+
 ### Added
 
 - **Parameters no driver models.** `QueryBuilder.setParam(key, ...values)` and
@@ -47,6 +49,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   lacked (#22)
 - The generated API reference renders `{}`, index signatures, `keyof` and rest parameters as
   declared, so `DriverId`, `Params` and `setParam()` read as they are written (#22)
+- A single-driver import is 2.7 kB gzipped, up from 2.6 kB: every response strategy now carries
+  `toPlain()`. All eighteen drivers stay at 9.6 kB (#22)
 
 ### Fixed
 
@@ -173,6 +177,7 @@ Carried over from `ng-qubee`, where these are still present:
 - CI verifies both entry points resolve, that there are no runtime dependencies, and that a
   single-driver import still tree-shakes (#12)
 
-[unreleased]: https://github.com/AndreaAlhena/qubeejs-core/compare/v1.1.0...HEAD
+[unreleased]: https://github.com/AndreaAlhena/qubeejs-core/compare/v1.2.0...HEAD
+[1.2.0]: https://github.com/AndreaAlhena/qubeejs-core/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/AndreaAlhena/qubeejs-core/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/AndreaAlhena/qubeejs-core/releases/tag/v1.0.0

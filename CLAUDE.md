@@ -57,7 +57,7 @@ request strategy returns (`utils/append-params.ts`), so strategies never emit `s
 
 **Bundle note:** `DRIVERS` reaches every driver by construction (~50 kB minified). A consumer that
 knows its backend at build time should `import { STRAPI_DRIVER } from '@qubeejs/core'` instead
-(~6.7 kB minified / 2.6 kB gzipped).
+(~7.1 kB minified / 2.7 kB gzipped).
 
 **Reactivity:** `QubeeStore` exposes `getSnapshot()` + `subscribe()` — deliberately the
 `useSyncExternalStore` contract. The core has no Signals and no RxJS; adapters supply their own.
