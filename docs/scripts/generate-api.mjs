@@ -52,13 +52,27 @@ function typeName(t) {
       return /[|&]/.test(inner) ? `(${inner})[]` : `${inner}[]`;
     }
     case 'union':
-      return t.types.map(typeName).join(' | ');
+      // `&` binds tighter than `|`, but `Driver | (string & {})` reads better bracketed.
+      return t.types
+        .map((u) => (u.type === 'intersection' ? `(${typeName(u)})` : typeName(u)))
+        .join(' | ');
     case 'intersection':
       return t.types.map(typeName).join(' & ');
     case 'literal':
       return typeof t.value === 'string' ? `'${t.value}'` : String(t.value);
-    case 'reflection':
-      return t.declaration?.signatures?.length ? 'function' : 'object';
+    case 'reflection': {
+      const d = t.declaration ?? {};
+      if (d.signatures?.length) return 'function';
+      const index = d.indexSignatures?.[0];
+      if (index && !d.children?.length) {
+        const [key] = index.parameters ?? [];
+        return `{ [${key?.name ?? 'key'}: ${typeName(key?.type)}]: ${typeName(index.type)} }`;
+      }
+      // The empty object type, as in the `string & {}` autocomplete idiom.
+      return d.children?.length ? 'object' : '{}';
+    }
+    case 'typeOperator':
+      return `${t.operator} ${typeName(t.target)}`;
     case 'templateLiteral':
       return 'template literal';
     case 'tuple':
@@ -73,15 +87,17 @@ function typeName(t) {
 /** Escape a value for use inside a markdown table cell. */
 const cell = (s) => String(s).replace(/\|/g, '\\|').replace(/\n+/g, ' ').trim();
 
+/** Render one parameter as it reads in a signature: rest, optional, type. */
+const param = (p) =>
+  `${p.flags?.isRest ? '...' : ''}${p.name}${p.flags?.isOptional ? '?' : ''}: ${typeName(p.type)}`;
+
 /** Render one method or function as a section. */
 function renderMember(member) {
   const sig = member.signatures?.[0];
   if (!sig) return '';
 
   const params = sig.parameters ?? [];
-  const args = params
-    .map((p) => `${p.name}${p.flags?.isOptional ? '?' : ''}: ${typeName(p.type)}`)
-    .join(', ');
+  const args = params.map(param).join(', ');
 
   const lines = [
     `### ${member.name}()`,
@@ -163,9 +179,7 @@ function renderPage(node, order) {
       '## Constructor',
       '',
       '```ts',
-      `new ${node.name}(${params
-        .map((p) => `${p.name}${p.flags?.isOptional ? '?' : ''}: ${typeName(p.type)}`)
-        .join(', ')})`,
+      `new ${node.name}(${params.map(param).join(', ')})`,
       '```',
       ''
     );

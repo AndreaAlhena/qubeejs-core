@@ -6,7 +6,7 @@
  *
  * `RANGE` — the request strategy omits URL-based pagination and the
  * consumer instead applies HTTP request headers returned by
- * `NgQubeeService.paginationHeaders()`. Currently honoured only by the
+ * `QueryBuilder.paginationHeaders()`. Currently honoured only by the
  * PostgREST driver, which maps it to `Range-Unit: items` + `Range: 0-9`.
  * Other drivers ignore the setting.
  */

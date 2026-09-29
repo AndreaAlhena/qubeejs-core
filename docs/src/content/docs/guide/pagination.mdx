@@ -39,6 +39,24 @@ const page = paginator.paginate<Article>(body);
 page.data[0].title; // string
 ```
 
+### Passing a page across a serialisation boundary
+
+`PaginatedCollection` is a class, and some boundaries accept only plain data — React Server
+Components refuse to pass class instances to Client Components. `toPlain()` returns a copy that
+crosses them:
+
+```ts
+const page = paginator.paginate<Article>(body).toPlain();
+
+page.data;        // Article[] — a new array, the same rows
+page.total;       // 57
+page.nextPageUrl; // null — this backend reports no links
+```
+
+The result is a `PaginatedResult<T>`: an object literal with `data` and every pagination field. A
+field the backend did not report is `null` rather than `undefined`, so `JSON.stringify` keeps every
+key. Rows pass through as the response held them.
+
 ## Header-based pagination
 
 Some backends page over headers rather than the body — PostgREST's `Content-Range`, WordPress's

@@ -2,6 +2,7 @@ import type { Embedded } from '../types/embedded.type';
 import type { Fields } from '../types/fields.type';
 import type { Filters } from '../types/filters.type';
 import type { OperatorFilter } from '../types/operator-filter.type';
+import type { Params } from '../types/params.type';
 import type { QueryBuilderState } from '../types/query-builder-state.type';
 import type { Sort } from '../types/sort.type';
 
@@ -19,6 +20,7 @@ const INITIAL_STATE: QueryBuilderState = {
   limit: 15,
   operatorFilters: [],
   page: 1,
+  params: {},
   resource: '',
   search: '',
   select: [],
@@ -141,8 +143,8 @@ export class QubeeStore {
    * @param {Embedded} embedded - Object mapping relation names to arrays of columns to project
    * @return {void}
    * @example
-   * service.addEmbedded({ author: ['id', 'name'] });
-   * service.addEmbedded({ comments: [] });
+   * store.addEmbedded({ author: ['id', 'name'] });
+   * store.addEmbedded({ comments: [] });
    */
   public addEmbedded(embedded: Embedded): void {
     this._update((nest) => {
@@ -171,8 +173,8 @@ export class QubeeStore {
    * @param {Fields} fields - Object mapping model names to arrays of field names
    * @return {void}
    * @example
-   * service.addFields({ users: ['id', 'email', 'username'] });
-   * service.addFields({ posts: ['title', 'content'] });
+   * store.addFields({ users: ['id', 'email', 'username'] });
+   * store.addFields({ posts: ['title', 'content'] });
    */
   public addFields(fields: Fields): void {
     this._update((nest) => {
@@ -201,8 +203,8 @@ export class QubeeStore {
    * @param {Filters} filters - Object mapping filter keys to arrays of values
    * @return {void}
    * @example
-   * service.addFilters({ id: [1, 2, 3] });
-   * service.addFilters({ status: ['active', 'pending'] });
+   * store.addFilters({ id: [1, 2, 3] });
+   * store.addFilters({ status: ['active', 'pending'] });
    */
   public addFilters(filters: Filters): void {
     this._update((nest) => {
@@ -231,8 +233,8 @@ export class QubeeStore {
    * @param {string[]} includes - Array of resource names to include in the response
    * @return {void}
    * @example
-   * service.addIncludes(['profile', 'posts']);
-   * service.addIncludes(['comments']);
+   * store.addIncludes(['profile', 'posts']);
+   * store.addIncludes(['comments']);
    */
   public addIncludes(includes: string[]): void {
     this._update((nest) => {
@@ -253,8 +255,8 @@ export class QubeeStore {
    * @param {OperatorFilter[]} filters - Array of operator filter configurations
    * @return {void}
    * @example
-   * import { FilterOperatorEnum } from 'ng-qubee';
-   * service.addOperatorFilters([{ field: 'age', operator: FilterOperatorEnum.GTE, values: [18] }]);
+   * import { FilterOperatorEnum } from '@qubeejs/core';
+   * store.addOperatorFilters([{ field: 'age', operator: FilterOperatorEnum.GTE, values: [18] }]);
    */
   public addOperatorFilters(filters: OperatorFilter[]): void {
     this._update((nest) => {
@@ -290,7 +292,7 @@ export class QubeeStore {
    * @param {string[]} fields - Array of column names to select
    * @return {void}
    * @example
-   * service.addSelect(['id', 'name', 'email']);
+   * store.addSelect(['id', 'name', 'email']);
    */
   public addSelect(fields: string[]): void {
     this._update((nest) => {
@@ -309,9 +311,9 @@ export class QubeeStore {
    * @param {Sort} sort - Sort configuration with field name and order (ASC/DESC)
    * @return {void}
    * @example
-   * import { SortEnum } from 'ng-qubee';
-   * service.addSort({ field: 'created_at', order: SortEnum.DESC });
-   * service.addSort({ field: 'name', order: SortEnum.ASC });
+   * import { SortEnum } from '@qubeejs/core';
+   * store.addSort({ field: 'created_at', order: SortEnum.DESC });
+   * store.addSort({ field: 'name', order: SortEnum.ASC });
    */
   public addSort(sort: Sort): void {
     this._update((nest) => ({
@@ -325,7 +327,7 @@ export class QubeeStore {
    *
    * @param {string} baseUrl - The base URL to prepend to generated URIs
    * @example
-   * service.baseUrl = 'https://api.example.com';
+   * store.baseUrl = 'https://api.example.com';
    */
   set baseUrl(baseUrl: string) {
     this._update((nest) => ({
@@ -342,8 +344,8 @@ export class QubeeStore {
    * @param {...string[]} relations - Relation names to remove
    * @return {void}
    * @example
-   * service.deleteEmbedded('author');
-   * service.deleteEmbedded('comments', 'tags');
+   * store.deleteEmbedded('author');
+   * store.deleteEmbedded('comments', 'tags');
    */
   public deleteEmbedded(...relations: string[]): void {
     this._update((nest) => {
@@ -362,8 +364,8 @@ export class QubeeStore {
    * @param {Fields} fields - Object mapping model names to arrays of field names to remove
    * @return {void}
    * @example
-   * service.deleteFields({ users: ['email'] });
-   * service.deleteFields({ posts: ['content', 'body'] });
+   * store.deleteFields({ users: ['email'] });
+   * store.deleteFields({ posts: ['content', 'body'] });
    */
   public deleteFields(fields: Fields): void {
     this._update((nest) => {
@@ -388,8 +390,8 @@ export class QubeeStore {
    * @param {...string[]} filters - Filter keys to remove
    * @return {void}
    * @example
-   * service.deleteFilters('id');
-   * service.deleteFilters('status', 'type');
+   * store.deleteFilters('id');
+   * store.deleteFilters('status', 'type');
    */
   public deleteFilters(...filters: string[]): void {
     this._update((nest) => {
@@ -407,8 +409,8 @@ export class QubeeStore {
    * @param {...string[]} includes - Include names to remove
    * @return {void}
    * @example
-   * service.deleteIncludes('profile');
-   * service.deleteIncludes('posts', 'comments');
+   * store.deleteIncludes('profile');
+   * store.deleteIncludes('posts', 'comments');
    */
   public deleteIncludes(...includes: string[]): void {
     this._update((nest) => ({
@@ -423,8 +425,8 @@ export class QubeeStore {
    * @param {...string[]} fields - Field names of operator filters to remove
    * @return {void}
    * @example
-   * service.deleteOperatorFilters('age');
-   * service.deleteOperatorFilters('price', 'quantity');
+   * store.deleteOperatorFilters('age');
+   * store.deleteOperatorFilters('price', 'quantity');
    */
   public deleteOperatorFilters(...fields: string[]): void {
     this._update((nest) => ({
@@ -434,11 +436,30 @@ export class QubeeStore {
   }
 
   /**
+   * Remove extra query parameters by key
+   *
+   * @param {...string[]} keys - Parameter keys to remove
+   * @return {void}
+   * @example
+   * store.deleteParams('status');
+   * store.deleteParams('include', 'status');
+   */
+  public deleteParams(...keys: string[]): void {
+    this._update((nest) => {
+      const params: Params = { ...nest.params };
+
+      keys.forEach((key) => delete params[key]);
+
+      return { ...nest, params };
+    });
+  }
+
+  /**
    * Remove the search term from the state (NestJS only)
    *
    * @return {void}
    * @example
-   * service.deleteSearch();
+   * store.deleteSearch();
    */
   public deleteSearch(): void {
     this._update((nest) => ({
@@ -453,8 +474,8 @@ export class QubeeStore {
    * @param {...string[]} fields - Field names to remove from selection
    * @return {void}
    * @example
-   * service.deleteSelect('email');
-   * service.deleteSelect('name', 'email');
+   * store.deleteSelect('email');
+   * store.deleteSelect('name', 'email');
    */
   public deleteSelect(...fields: string[]): void {
     this._update((nest) => ({
@@ -469,8 +490,8 @@ export class QubeeStore {
    * @param {...string[]} sorts - Field names of sorts to remove
    * @return {void}
    * @example
-   * service.deleteSorts('created_at');
-   * service.deleteSorts('name', 'created_at');
+   * store.deleteSorts('created_at');
+   * store.deleteSorts('name', 'created_at');
    */
   public deleteSorts(...sorts: string[]): void {
     this._update((nest) => {
@@ -507,12 +528,12 @@ export class QubeeStore {
    *
    * This setter performs a raw state write. Validation of the value is the
    * responsibility of the active request strategy and is enforced upstream
-   * by `NgQubeeService.setLimit()`, because the accepted range depends on
+   * by `QueryBuilder.setLimit()`, because the accepted range depends on
    * the driver (e.g. nestjs-paginate accepts `-1` for "fetch all").
    *
    * @param {number} limit - The number of items per page
    * @example
-   * service.limit = 25;
+   * store.limit = 25;
    */
   set limit(limit: number) {
     this._update((nest) => ({
@@ -528,7 +549,7 @@ export class QubeeStore {
    * @param {number} page - The page number to fetch
    * @throws {InvalidPageNumberError} If page is not a positive integer
    * @example
-   * service.page = 2;
+   * store.page = 2;
    */
   set page(page: number) {
     this._validatePageNumber(page);
@@ -540,11 +561,11 @@ export class QubeeStore {
 
   /**
    * Reset the query builder state to initial values
-   * Clears all fields, filters, includes, sorts, and resets pagination
+   * Clears all fields, filters, includes, sorts and params, and resets pagination
    *
    * @return {void}
    * @example
-   * service.reset();
+   * store.reset();
    */
   public reset(): void {
     this._write(this._clone(INITIAL_STATE));
@@ -557,7 +578,7 @@ export class QubeeStore {
    * @param {string} resource - The API resource name (e.g., 'users', 'posts')
    * @throws {InvalidResourceNameError} If resource is not a non-empty string
    * @example
-   * service.resource = 'users';
+   * store.resource = 'users';
    */
   set resource(resource: string) {
     this._validateResourceName(resource);
@@ -568,12 +589,33 @@ export class QubeeStore {
   }
 
   /**
+   * Set an extra query parameter, replacing any values it already had
+   *
+   * Extra parameters are ones no driver models. A key that is set again
+   * keeps its original position in the query string; integer-like keys
+   * come first, as in any JavaScript object.
+   *
+   * @param {string} key - The parameter name, emitted verbatim
+   * @param {(string | number | boolean)[]} values - The values, percent-encoded and comma-joined on output
+   * @return {void}
+   * @example
+   * store.setParam('status', ['failed']);
+   * store.setParam('include', ['author', 'comments']);
+   */
+  public setParam(key: string, values: (string | number | boolean)[]): void {
+    this._update((nest) => ({
+      ...nest,
+      params: { ...nest.params, [key]: [...values] },
+    }));
+  }
+
+  /**
    * Set the full-text search term (NestJS only)
    *
    * @param {string} search - The search term
    * @return {void}
    * @example
-   * service.setSearch('john doe');
+   * store.setSearch('john doe');
    */
   public setSearch(search: string): void {
     this._update((nest) => ({
@@ -600,7 +642,7 @@ export class QubeeStore {
    * Atomically record the `lastPage` value from a paginated response and
    * flip `isLastPageKnown` to `true`
    *
-   * Called exclusively by `PaginationService.paginate()` as part of the
+   * Called exclusively by `Paginator.paginate()` as part of the
    * auto-sync contract; not intended to be invoked by consumers directly.
    * Keeping the two fields under a single write guarantees they cannot
    * drift out of sync.

@@ -37,7 +37,7 @@ createQubee({
 
 | Option | Type | Purpose |
 | --- | --- | --- |
-| `driver` | `DriverDefinition` | The driver to use — required |
+| `driver` | `DriverDefinition` | The driver to use, built-in or [your own](/extending/writing-a-driver/#keeping-a-driver-in-your-own-code) — required |
 | `pagination` | `PaginationModeEnum` | Query string or `Range` header. Defaults to query |
 | `request` | `QueryBuilderConfig` | Override emitted parameter names |
 | `response` | `PaginationConfig` | Override where metadata is read from |
@@ -93,5 +93,5 @@ const paginator = new Paginator(
 :::caution[Bee aware]
 Passing `driver.id` as `QueryBuilder`'s fourth argument is what lets capability errors name the
 driver — *"The 'laravel' driver does not support filters"* rather than *"The active driver…"*.
-`createQubee()` does this for you.
+`createQubee()` does this for you. A driver of your own can pass any string as its `id`.
 :::

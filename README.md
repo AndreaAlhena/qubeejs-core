@@ -49,13 +49,28 @@ page.total; // 57
 page.lastPage; // 6
 ```
 
+## When the driver is not enough
+
+- **A parameter no driver models** — a top-level `status`, say — goes through `setParam()`. It
+  works on every driver, and throws rather than shadow a parameter the driver emits:
+
+  ```ts
+  builder.setParam('status', 'failed'); // → …&status=failed
+  ```
+
+- **A backend no driver covers** gets a `DriverDefinition` of your own, with an `id` of its own
+  that errors will name. See
+  [Writing a driver](https://qubeejs.andreatantimonaco.me/extending/writing-a-driver/).
+- **A server-rendered page** can pass `page.toPlain()` — a plain-object copy — to a React Client
+  Component, which refuses class instances.
+
 ## Why it is small
 
 Zero runtime dependencies, and importing one driver leaves the other seventeen out of your bundle:
 
 | import                       | minified | gzipped    |
 | ---------------------------- | -------- | ---------- |
-| `STRAPI_DRIVER` (one driver) | 6.7 kB   | **2.6 kB** |
+| `STRAPI_DRIVER` (one driver) | 7.1 kB   | **2.7 kB** |
 | `DRIVERS` (all eighteen)     | 50 kB    | 9.6 kB     |
 
 Reach for `DRIVERS` only when the backend is chosen at runtime.

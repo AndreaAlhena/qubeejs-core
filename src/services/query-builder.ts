@@ -4,7 +4,7 @@ import type { SortEnum } from '../enums/sort.enum';
 // Contracts
 import type { IRequestStrategy } from '../interfaces/request-strategy.interface';
 // Types
-import type { Driver } from '../types/driver.type';
+import type { DriverId } from '../types/driver-id.type';
 import type { Fields } from '../types/fields.type';
 import type { StrategyCapabilities } from '../types/strategy-capabilities.type';
 // Services
@@ -23,12 +23,23 @@ import { UnsupportedSelectError } from '../errors/unsupported-select.error';
 import { UnsupportedSortError } from '../errors/unsupported-sort.error';
 // Models
 import { QueryBuilderOptions } from '../models/query-builder-options';
+// Utils
+import { appendParams } from '../utils/append-params';
 
+/**
+ * Fluent, capability-checked builder for one driver's query URIs.
+ *
+ * Every mutator writes to the {@link QubeeStore} it was given and returns
+ * `this`, so a whole query is one chain; `generateUri()` turns the current
+ * state into a URI through the driver's request strategy. A method the
+ * driver cannot express throws at the call site instead of emitting a
+ * parameter the backend would ignore.
+ */
 export class QueryBuilder {
   /**
    * The active driver, recorded solely so capability errors can name it.
    */
-  private readonly _driver?: Driver;
+  private readonly _driver?: DriverId;
 
   /**
    * Resolved query parameter key name options
@@ -49,13 +60,14 @@ export class QueryBuilder {
    * @param store - State container holding the query being built
    * @param requestStrategy - Driver strategy that turns state into a URI
    * @param options - Query parameter key names for the active driver
-   * @param driver - Active driver id, used to name it in capability errors
+   * @param driver - Active driver id, used to name it in capability errors;
+   * any string, so a custom driver can pass its own
    */
   constructor(
     store: QubeeStore,
     requestStrategy: IRequestStrategy,
     options: QueryBuilderOptions = new QueryBuilderOptions({}),
-    driver?: Driver
+    driver?: DriverId
   ) {
     this._driver = driver;
     this._options = options;
@@ -278,7 +290,7 @@ export class QueryBuilder {
    * Delete selected fields for the given models in the current query builder state (JSON:API and Spatie only)
    *
    * ```
-   * ngQubeeService.deleteFields({
+   * builder.deleteFields({
    *   users: ['email', 'password'],
    *   address: ['zipcode']
    * });
@@ -299,7 +311,7 @@ export class QueryBuilder {
    * Delete selected fields for the given model in the current query builder state (JSON:API and Spatie only)
    *
    * ```
-   * ngQubeeService.deleteFieldsByModel('users', 'email', 'password');
+   * builder.deleteFieldsByModel('users', 'email', 'password');
    * ```
    *
    * @param model - Model that holds the fields
@@ -381,6 +393,26 @@ export class QueryBuilder {
   }
 
   /**
+   * Remove extra query parameters set with `setParam()` (all drivers)
+   *
+   * Resets the page to 1, as removing a filter does. Calling it with no keys
+   * is a no-op.
+   *
+   * @param {string[]} keys - Parameter keys to remove
+   * @returns {this}
+   */
+  public deleteParams(...keys: string[]): this {
+    if (!keys.length) {
+      return this;
+    }
+
+    this._store.deleteParams(...keys);
+    this._store.page = 1;
+
+    return this;
+  }
+
+  /**
    * Remove search term from the query builder state (NestJS only)
    *
    * @returns {this}
@@ -448,11 +480,25 @@ export class QueryBuilder {
    * into a stream error; adapters can re-wrap it however their framework
    * prefers. Subscribe to the store to be told when the result would change.
    *
+   * Parameters set with `setParam()` are appended once the request strategy
+   * has returned, after the driver's own, so every strategy emits them.
+   *
    * @returns The generated URI
    * @throws If the resource is unset, or the state is invalid for this driver
+   * @throws {ParamCollisionError} If a param set with `setParam()` collides with a parameter the driver emits
    */
   public generateUri(): string {
-    return this._requestStrategy.buildUri(this._store.getSnapshot(), this._options);
+    const state = this._store.getSnapshot();
+
+    // The next page's URI is checked too, because PostgREST and OData leave
+    // their offset out of page 1: a param named after it must fail there,
+    // not only after the user navigates.
+    return appendParams(
+      this._requestStrategy.buildUri(state, this._options),
+      state.params,
+      this._driver,
+      () => this._requestStrategy.buildUri({ ...state, page: state.page + 1 }, this._options)
+    );
   }
 
   /**
@@ -525,7 +571,7 @@ export class QueryBuilder {
   /**
    * Navigate to the last page known from the most recent paginated response
    *
-   * @remarks Requires at least one `PaginationService.paginate()` call to have synced `state.lastPage`. Before that, the bound is unknown and this method throws.
+   * @remarks Requires at least one `Paginator.paginate()` call to have synced `state.lastPage`. Before that, the bound is unknown and this method throws.
    * @returns {this}
    * @throws {PaginationNotSyncedError} If `state.isLastPageKnown` is false (no paginated response has been synced yet)
    */
@@ -653,6 +699,50 @@ export class QueryBuilder {
   }
 
   /**
+   * Set a query parameter no driver models (all drivers)
+   *
+   * For what a backend accepts beyond the driver's own parameters — a
+   * top-level `status`, an `include` on a driver without includes. It is
+   * appended by `generateUri()` after the driver's parameters, so it works
+   * with every driver, custom ones included, and is not gated by
+   * capabilities. Params come out in the order their keys were first set,
+   * except that integer-like keys such as `'2024'` come first, as they do in
+   * any JavaScript object.
+   *
+   * The key is emitted verbatim, so bracketed names such as `meta[tag]` work
+   * — and so a key must never be built from end-user input. Each value is
+   * percent-encoded the way filter values are, then the values are joined
+   * with a literal `,` — so a comma inside a value arrives as `%2C`:
+   *
+   * ```
+   * qb.setParam('status', 'failed');  // → status=failed
+   * qb.setParam('ids', 'a,b', 'c');   // → ids=a%2Cb,c
+   * ```
+   *
+   * A key is emitted once: repeated keys (`id=1&id=2`) are not supported.
+   * Setting a key again replaces its values. Calling it with no values is a
+   * no-op; remove a key with `deleteParams()`. Resets the page to 1, as
+   * adding a filter does.
+   *
+   * A key must not collide with a parameter the driver emits: `generateUri()`
+   * throws `ParamCollisionError` rather than duplicate or override it.
+   *
+   * @param {string} key - The parameter name, emitted verbatim
+   * @param {(string | number | boolean)[]} values - The value(s)
+   * @returns {this}
+   */
+  public setParam(key: string, ...values: (string | number | boolean)[]): this {
+    if (!values.length) {
+      return this;
+    }
+
+    this._store.setParam(key, values);
+    this._store.page = 1;
+
+    return this;
+  }
+
+  /**
    * Set the API resource to run the query against
    *
    * @param {string} resource - Resource name (e.g. 'users' produces /users)
@@ -685,7 +775,7 @@ export class QueryBuilder {
   /**
    * Get the total number of pages reported by the most recent paginated response
    *
-   * @remarks Throws when called before any `paginate()` has synced a value. For a non-throwing read in a template, read `nest().isLastPageKnown` first as a guard.
+   * @remarks Throws when called before any `paginate()` has synced a value. For a non-throwing read in a template, read `store.getSnapshot().isLastPageKnown` first as a guard.
    * @returns The last page number
    * @throws {PaginationNotSyncedError} If `state.isLastPageKnown` is false (no paginated response has been synced yet)
    */

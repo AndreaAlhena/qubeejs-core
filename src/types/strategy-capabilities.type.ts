@@ -1,12 +1,13 @@
 /**
  * Capability flags declared by an `IRequestStrategy`
  *
- * Single source of truth for what a driver supports. Replaces the inline
- * `DriverEnum` allowlists previously scattered across `NgQubeeService`'s
- * `_assertDriver(...)` call sites.
+ * Single source of truth for what a driver supports. `QueryBuilder` reads
+ * it before every capability-gated method and throws an
+ * `UnsupportedCapabilityError` subclass when the flag is `false`, instead
+ * of checking the driver against a list of `DriverEnum` values.
  *
  * Adding a new driver means defining one of these objects on the new
- * strategy class — `NgQubeeService` does not need to be touched.
+ * strategy class — `QueryBuilder` does not need to be touched.
  */
 export type StrategyCapabilities = {
   /** Embedded-resource selection inside `select` (PostgREST `select=col,rel(col1)`) */

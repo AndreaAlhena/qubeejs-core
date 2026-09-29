@@ -83,8 +83,8 @@ export class DrfResponseStrategy implements IResponseStrategy {
    * Derive the last page number as `ceil(total / perPage)`
    *
    * Both inputs must be defined; an empty result set (`total === 0`)
-   * yields `lastPage = 0` which the caller treats as "no useful info"
-   * and skips the sync to `NestService.lastPage`.
+   * yields `lastPage = 0`, which `Paginator.paginate()` treats as "no
+   * useful info" and does not sync into the store.
    *
    * @param total - The total item count
    * @param perPage - The page size

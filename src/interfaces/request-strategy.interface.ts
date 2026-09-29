@@ -12,7 +12,7 @@ export interface IRequestStrategy {
   /**
    * Capability flags declared by this driver
    *
-   * Read by `NgQubeeService` to gate feature methods (e.g. `addFilter`)
+   * Read by `QueryBuilder` to gate feature methods (e.g. `addFilter`)
    * without hardcoding `DriverEnum` checks. Each strategy returns a
    * static, immutable capability map.
    */
@@ -20,6 +20,10 @@ export interface IRequestStrategy {
 
   /**
    * Build a URI string from the given query builder state
+   *
+   * Ignore `state.params`: `QueryBuilder.generateUri()` appends those after
+   * this returns, for every strategy, and checks them against the keys
+   * emitted here.
    *
    * @param state - The current query builder state
    * @param options - The query parameter key name configuration
@@ -35,10 +39,11 @@ export interface IRequestStrategy {
    * other drivers should return `null` — which is also the default when
    * a driver does not override this method.
    *
-   * When the method returns a non-null object, `NgQubeeService.buildUri`
+   * When the method returns a non-null object, this strategy's `buildUri`
    * is expected to have already omitted URL-level pagination params for
-   * that request; the consumer then merges these headers into the HTTP
-   * call so the server knows the requested range.
+   * that request; the consumer reads the headers through
+   * `QueryBuilder.paginationHeaders()` and merges them into the HTTP call
+   * so the server knows the requested range.
    *
    * @param state - The current query builder state
    * @returns A map of header name → value, or `null` when not applicable

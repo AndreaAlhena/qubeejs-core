@@ -1,3 +1,5 @@
+import type { DriverId } from '../types/driver-id.type';
+
 import { UnsupportedCapabilityError } from './unsupported-capability.error';
 
 /**
@@ -9,7 +11,7 @@ export class UnsupportedEmbeddedError extends UnsupportedCapabilityError {
   /**
    * @param driver - The active driver, when known
    */
-  constructor(driver?: string) {
+  constructor(driver?: DriverId) {
     super('embedded', driver);
   }
 }

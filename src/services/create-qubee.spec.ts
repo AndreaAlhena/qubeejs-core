@@ -64,6 +64,17 @@ describe('createQubee', () => {
     expect(() => builder.addFilter('status', 'published')).toThrowError(UnsupportedFilterError);
   });
 
+  it('names a custom driver by its own id', () => {
+    // #22: a driver defined outside the package could not name itself, so a
+    // JSON:API variant had to borrow 'json-api' and its errors named the wrong
+    // driver.
+    const { builder } = createQubee({ driver: { ...LARAVEL_DRIVER, id: 'studio-api' } });
+
+    expect(() => builder.addFilter('status', 'published')).toThrowError(
+      "The 'studio-api' driver does not support filters."
+    );
+  });
+
   it('honours request key overrides', () => {
     // Strapi hardcodes `pagination[pageSize]`; Laravel reads `options.limit`.
     const { builder } = createQubee({
