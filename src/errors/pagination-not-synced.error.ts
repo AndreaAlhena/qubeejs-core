@@ -18,7 +18,7 @@ export class PaginationNotSyncedError extends QubeeError {
   constructor(action: string) {
     super(
       'PAGINATION_NOT_SYNCED',
-      `Cannot ${action}: no paginated response has been synced yet. Call PaginationService.paginate() at least once first.`
+      `Cannot ${action}: no paginated response has been synced yet. Call Paginator.paginate() at least once first.`
     );
   }
 }

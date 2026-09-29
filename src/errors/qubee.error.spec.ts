@@ -109,6 +109,16 @@ describe('QubeeError', () => {
     });
   });
 
+  describe('pagination-not-synced message', () => {
+    it('points at the Paginator, not an ng-qubee service', () => {
+      // Regression for #22: the message told core consumers to call
+      // PaginationService.paginate(), which does not exist outside ng-qubee.
+      expect(new PaginationNotSyncedError('read totalPages').message).toBe(
+        'Cannot read totalPages: no paginated response has been synced yet. Call Paginator.paginate() at least once first.'
+      );
+    });
+  });
+
   describe('capability messages', () => {
     it('names the driver when known', () => {
       expect(new UnsupportedFilterError('odata').message).toBe(
