@@ -1225,7 +1225,7 @@ describe('QueryBuilder params', () => {
       jsonApi.setResource('jobs').setParam('page', 2);
 
       expect(() => jsonApi.generateUri()).toThrowError(
-        "The param 'page' collides with 'page[number]', which the 'json-api' driver already emits. Use the builder method that controls it, or remove the param with deleteParams('page')."
+        "The param 'page' collides with 'page[number]', which the 'json-api' driver emits. Use the builder method that controls it, or remove the param with deleteParams('page')."
       );
     });
 
@@ -1247,11 +1247,31 @@ describe('QueryBuilder params', () => {
       expect(() => builder.generateUri()).toThrowError(ParamCollisionError);
     });
 
+    it('should reserve a pagination key the driver leaves out of page 1', () => {
+      // PostgREST emits `offset` from page 2 on. Without looking ahead, the
+      // param would work on page 1 and throw once the user navigated (#22).
+      const postgrest = new QueryBuilder(new QubeeStore(), new PostgrestRequestStrategy());
+
+      postgrest.setResource('jobs').setParam('offset', 5);
+
+      expect(() => postgrest.generateUri()).toThrowError(
+        expect.objectContaining({ driverKey: 'offset', key: 'offset' })
+      );
+    });
+
+    it('should reserve pagination keys on later pages too', () => {
+      const postgrest = new QueryBuilder(new QubeeStore(), new PostgrestRequestStrategy());
+
+      postgrest.setResource('jobs').setParam('offset', 5).setPage(3);
+
+      expect(() => postgrest.generateUri()).toThrowError(ParamCollisionError);
+    });
+
     it('should name an unknown driver generically', () => {
       builder.setParam('limit', 5);
 
       expect(() => builder.generateUri()).toThrowError(
-        "The param 'limit' collides with 'limit', which the active driver already emits."
+        "The param 'limit' collides with 'limit', which the active driver emits."
       );
     });
   });

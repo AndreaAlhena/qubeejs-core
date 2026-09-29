@@ -102,6 +102,27 @@ describe('appendParams', () => {
       );
     });
 
+    it("reserves the keys of the next page's URI", () => {
+      // PostgREST leaves `offset` out of page 1 and emits it from page 2 on.
+      expect(() =>
+        appendParams(
+          '/jobs?limit=15',
+          { offset: ['5'] },
+          'postgrest',
+          () => '/jobs?limit=15&offset=15'
+        )
+      ).toThrowError(expect.objectContaining({ driverKey: 'offset', key: 'offset' }));
+    });
+
+    it('builds the next page only when there are params to check', () => {
+      const nextPageUri = vi.fn(() => '/jobs?limit=15&offset=15');
+
+      appendParams('/jobs?limit=15', {}, 'postgrest', nextPageUri);
+      appendParams('/jobs?limit=15', { empty: [] }, 'postgrest', nextPageUri);
+
+      expect(nextPageUri).not.toHaveBeenCalled();
+    });
+
     it('ignores a key with no values', () => {
       expect(appendParams('/jobs?page=1', { page: [] })).toBe('/jobs?page=1');
     });

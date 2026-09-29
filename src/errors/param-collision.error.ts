@@ -13,7 +13,9 @@ import { QubeeError } from './qubee.error';
  *
  * The check runs against the URI the driver actually generated, so a key is
  * free until the driver needs it: `setParam('sort', …)` works until
- * `addSort()` makes the driver emit `sort` itself.
+ * `addSort()` makes the driver emit `sort` itself. Pagination keys are the
+ * exception — the next page's URI is checked too, so a key a driver leaves
+ * out of page 1 (PostgREST `offset`, OData `$skip`) collides on every page.
  */
 export class ParamCollisionError extends QubeeError {
   /**
@@ -41,7 +43,7 @@ export class ParamCollisionError extends QubeeError {
 
     super(
       'PARAM_COLLISION',
-      `The param '${key}' collides with '${driverKey}', which ${subject} already emits. Use the builder method that controls it, or remove the param with deleteParams('${key}').`,
+      `The param '${key}' collides with '${driverKey}', which ${subject} emits. Use the builder method that controls it, or remove the param with deleteParams('${key}').`,
       {
         context: { driver, driverKey, key },
       }

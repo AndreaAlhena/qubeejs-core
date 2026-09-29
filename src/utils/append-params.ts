@@ -22,18 +22,25 @@ import { ParamCollisionError } from '../errors/param-collision.error';
  * @param uri - The URI the request strategy returned
  * @param params - The extra parameters, in emission order; absent from a state written before they existed
  * @param driver - The active driver, named in a collision error
+ * @param nextPageUri - Builds the URI for the next page. Its keys are reserved too, so a
+ *   pagination key a driver leaves out of page 1 — PostgREST `offset`, OData `$skip` — collides
+ *   on every page rather than only once the user navigates. Called only when there are params.
  * @returns The URI with the parameters appended
- * @throws {ParamCollisionError} If a key collides with one the URI already carries
+ * @throws {ParamCollisionError} If a key collides with one the driver emits
  */
-export function appendParams(uri: string, params?: Params, driver?: DriverId): string {
+export function appendParams(
+  uri: string,
+  params?: Params,
+  driver?: DriverId,
+  nextPageUri?: () => string
+): string {
   const entries = Object.entries(params ?? {}).filter(([, values]) => values.length);
 
   if (!entries.length) {
     return uri;
   }
 
-  const query = uri.indexOf('?');
-  const emitted = query === -1 ? [] : emittedKeys(uri.slice(query + 1));
+  const emitted = [...emittedKeys(uri), ...emittedKeys(nextPageUri?.() ?? '')];
 
   const segments = entries.map(([key, values]) => {
     const clash = emitted.find((emittedKey) => collides(key, emittedKey));
@@ -45,7 +52,7 @@ export function appendParams(uri: string, params?: Params, driver?: DriverId): s
     return `${key}=${values.map((value) => encodeURIComponent(String(value))).join(',')}`;
   });
 
-  return `${uri}${query === -1 ? '?' : '&'}${segments.join('&')}`;
+  return `${uri}${uri.includes('?') ? '&' : '?'}${segments.join('&')}`;
 }
 
 /**
@@ -63,15 +70,24 @@ function collides(key: string, emittedKey: string): boolean {
 }
 
 /**
- * Read the parameter names out of a query string a strategy emitted.
+ * Read the parameter names out of a URI a strategy emitted.
  *
  * Values never contain a raw `&` — they arrive percent-encoded — so each
  * `&`-separated segment is one parameter, named by what precedes its first
  * `=`.
  *
- * @param query - The query string, without the leading `?`
- * @returns The emitted keys, in order, duplicates included
+ * @param uri - A URI as a request strategy returned it
+ * @returns The emitted keys, in order, duplicates included; none when there is no query string
  */
-function emittedKeys(query: string): string[] {
-  return query.split('&').map((segment) => segment.split('=', 1)[0]);
+function emittedKeys(uri: string): string[] {
+  const query = uri.indexOf('?');
+
+  if (query === -1) {
+    return [];
+  }
+
+  return uri
+    .slice(query + 1)
+    .split('&')
+    .map((segment) => segment.split('=', 1)[0]);
 }

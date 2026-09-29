@@ -147,6 +147,17 @@ describe('DRIVERS registry', () => {
         expect(extra.get('extra')).toBe(reserved);
       });
 
+      it('refuses, on page 1, a param named after a key the driver emits only later', () => {
+        const firstPage = [...parseQuery(build().generateUri()).keys()];
+        const laterOnly = [...parseQuery(build().setPage(2).generateUri()).keys()].filter(
+          (key) => !firstPage.includes(key)
+        );
+
+        laterOnly.forEach((key) => {
+          expect(() => build().setParam(key, 'x').generateUri()).toThrowError(ParamCollisionError);
+        });
+      });
+
       it('refuses a param that collides with one the driver emits', () => {
         const [emitted] = [...parseQuery(build().generateUri()).keys()];
 

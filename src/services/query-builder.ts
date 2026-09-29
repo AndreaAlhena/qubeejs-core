@@ -490,10 +490,14 @@ export class QueryBuilder {
   public generateUri(): string {
     const state = this._store.getSnapshot();
 
+    // The next page's URI is checked too, because PostgREST and OData leave
+    // their offset out of page 1: a param named after it must fail there,
+    // not only after the user navigates.
     return appendParams(
       this._requestStrategy.buildUri(state, this._options),
       state.params,
-      this._driver
+      this._driver,
+      () => this._requestStrategy.buildUri({ ...state, page: state.page + 1 }, this._options)
     );
   }
 
