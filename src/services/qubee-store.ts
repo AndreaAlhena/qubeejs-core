@@ -2,6 +2,7 @@ import type { Embedded } from '../types/embedded.type';
 import type { Fields } from '../types/fields.type';
 import type { Filters } from '../types/filters.type';
 import type { OperatorFilter } from '../types/operator-filter.type';
+import type { Params } from '../types/params.type';
 import type { QueryBuilderState } from '../types/query-builder-state.type';
 import type { Sort } from '../types/sort.type';
 
@@ -19,6 +20,7 @@ const INITIAL_STATE: QueryBuilderState = {
   limit: 15,
   operatorFilters: [],
   page: 1,
+  params: {},
   resource: '',
   search: '',
   select: [],
@@ -434,6 +436,25 @@ export class QubeeStore {
   }
 
   /**
+   * Remove extra query parameters by key
+   *
+   * @param {...string[]} keys - Parameter keys to remove
+   * @return {void}
+   * @example
+   * store.deleteParams('status');
+   * store.deleteParams('include', 'status');
+   */
+  public deleteParams(...keys: string[]): void {
+    this._update((nest) => {
+      const params: Params = { ...nest.params };
+
+      keys.forEach((key) => delete params[key]);
+
+      return { ...nest, params };
+    });
+  }
+
+  /**
    * Remove the search term from the state (NestJS only)
    *
    * @return {void}
@@ -540,7 +561,7 @@ export class QubeeStore {
 
   /**
    * Reset the query builder state to initial values
-   * Clears all fields, filters, includes, sorts, and resets pagination
+   * Clears all fields, filters, includes, sorts and params, and resets pagination
    *
    * @return {void}
    * @example
@@ -564,6 +585,26 @@ export class QubeeStore {
     this._update((nest) => ({
       ...nest,
       resource,
+    }));
+  }
+
+  /**
+   * Set an extra query parameter, replacing any values it already had
+   *
+   * Extra parameters are ones no driver models. A key that is set again
+   * keeps its original position in the query string.
+   *
+   * @param {string} key - The parameter name, emitted verbatim
+   * @param {(string | number | boolean)[]} values - The values, percent-encoded and comma-joined on output
+   * @return {void}
+   * @example
+   * store.setParam('status', ['failed']);
+   * store.setParam('include', ['author', 'comments']);
+   */
+  public setParam(key: string, values: (string | number | boolean)[]): void {
+    this._update((nest) => ({
+      ...nest,
+      params: { ...nest.params, [key]: [...values] },
     }));
   }
 

@@ -145,6 +145,73 @@ describe('QubeeStore', () => {
     expect(store.getSnapshot().resource).toEqual('');
   });
 
+  describe('params', () => {
+    it('should start with no params', () => {
+      expect(store.getSnapshot().params).toEqual({});
+    });
+
+    it('should set a param', () => {
+      store.setParam('status', ['failed']);
+
+      expect(store.getSnapshot().params).toEqual({ status: ['failed'] });
+    });
+
+    it('should replace the values of a param that is set again', () => {
+      store.setParam('status', ['failed', 'queued']);
+      store.setParam('status', ['done']);
+
+      expect(store.getSnapshot().params).toEqual({ status: ['done'] });
+    });
+
+    it('should keep a key in its original position when it is set again', () => {
+      store.setParam('include', ['author']);
+      store.setParam('status', ['failed']);
+      store.setParam('include', ['comments']);
+
+      expect(Object.keys(store.getSnapshot().params ?? {})).toEqual(['include', 'status']);
+    });
+
+    it('should copy the values rather than keep the caller array', () => {
+      const values = ['failed'];
+
+      store.setParam('status', values);
+      values.push('queued');
+
+      expect(store.getSnapshot().params).toEqual({ status: ['failed'] });
+    });
+
+    it('should leave an earlier snapshot untouched', () => {
+      const before = store.getSnapshot();
+
+      store.setParam('status', ['failed']);
+
+      expect(before.params).toEqual({});
+    });
+
+    it('should delete the named params only', () => {
+      store.setParam('include', ['author']);
+      store.setParam('status', ['failed']);
+      store.setParam('tag', ['news']);
+      store.deleteParams('include', 'tag');
+
+      expect(store.getSnapshot().params).toEqual({ status: ['failed'] });
+    });
+
+    it('should ignore deleting a param that is not set', () => {
+      store.setParam('status', ['failed']);
+      store.deleteParams('include');
+
+      expect(store.getSnapshot().params).toEqual({ status: ['failed'] });
+    });
+
+    it('should clear params on reset', () => {
+      store.setParam('status', ['failed']);
+      store.reset();
+
+      expect(store.getSnapshot().params).toEqual({});
+    });
+  });
+
   // Duplicate Prevention Tests
   describe('Duplicate Prevention', () => {
     describe('addEmbedded', () => {
@@ -734,6 +801,7 @@ describe('QubeeStore', () => {
           limit: 15,
           operatorFilters: [],
           page: 1,
+          params: {},
           resource: '',
           search: '',
           select: [],
