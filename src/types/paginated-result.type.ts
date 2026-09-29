@@ -1,8 +1,8 @@
 import type { PaginatedObject } from './paginated-object.type';
 
 /**
- * One page of rows as a plain, JSON-safe object — what
- * `PaginatedCollection.toPlain()` returns.
+ * One page of rows as a plain object — what `PaginatedCollection.toPlain()`
+ * returns.
  *
  * Carries the same fields as `PaginatedCollection`, in a shape that can cross
  * a serialisation boundary such as a React Server Component handing props to
@@ -12,7 +12,8 @@ import type { PaginatedObject } from './paginated-object.type';
  * - a field the backend did not report is `null` rather than `undefined`, so
  *   `JSON.stringify` keeps every key.
  *
- * Rows are passed through as the response held them.
+ * Rows are passed through as the response held them, so the whole object is
+ * JSON-safe exactly when they are — as rows parsed from a JSON body always are.
  */
 export type PaginatedResult<T extends PaginatedObject> = {
   /** The rows on this page */

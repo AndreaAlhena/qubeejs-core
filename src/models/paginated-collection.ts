@@ -9,7 +9,7 @@ import { KeyNotFoundError } from '../errors/key-not-found.error';
  *
  * Built by a response strategy — usually through `Paginator.paginate()` —
  * rather than by hand. Metadata a backend does not report is `undefined`.
- * Call `toPlain()` for a plain, JSON-safe copy.
+ * Call `toPlain()` for a plain-object copy.
  */
 export class PaginatedCollection<T extends PaginatedObject> {
   /**
@@ -84,7 +84,8 @@ export class PaginatedCollection<T extends PaginatedObject> {
    * Components, and `JSON.stringify` drops `undefined` values; the result
    * avoids both. Every pagination field is present, `null` when the backend
    * did not report it. `data` is a new array holding the same rows, which
-   * are passed through unchanged. The collection itself is not modified.
+   * are passed through unchanged, so the result is JSON-safe exactly when
+   * they are. The collection itself is not modified.
    *
    * ```ts
    * const page = paginator.paginate<Article>(body).toPlain();
