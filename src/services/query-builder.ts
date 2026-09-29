@@ -23,6 +23,8 @@ import { UnsupportedSelectError } from '../errors/unsupported-select.error';
 import { UnsupportedSortError } from '../errors/unsupported-sort.error';
 // Models
 import { QueryBuilderOptions } from '../models/query-builder-options';
+// Utils
+import { appendParams } from '../utils/append-params';
 
 /**
  * Fluent, capability-checked builder for one driver's query URIs.
@@ -391,6 +393,26 @@ export class QueryBuilder {
   }
 
   /**
+   * Remove extra query parameters set with `setParam()` (all drivers)
+   *
+   * Resets the page to 1, as removing a filter does. Calling it with no keys
+   * is a no-op.
+   *
+   * @param {string[]} keys - Parameter keys to remove
+   * @returns {this}
+   */
+  public deleteParams(...keys: string[]): this {
+    if (!keys.length) {
+      return this;
+    }
+
+    this._store.deleteParams(...keys);
+    this._store.page = 1;
+
+    return this;
+  }
+
+  /**
    * Remove search term from the query builder state (NestJS only)
    *
    * @returns {this}
@@ -458,11 +480,21 @@ export class QueryBuilder {
    * into a stream error; adapters can re-wrap it however their framework
    * prefers. Subscribe to the store to be told when the result would change.
    *
+   * Parameters set with `setParam()` are appended once the request strategy
+   * has returned, after the driver's own, so every strategy emits them.
+   *
    * @returns The generated URI
    * @throws If the resource is unset, or the state is invalid for this driver
+   * @throws {ParamCollisionError} If a param set with `setParam()` collides with a parameter the driver emits
    */
   public generateUri(): string {
-    return this._requestStrategy.buildUri(this._store.getSnapshot(), this._options);
+    const state = this._store.getSnapshot();
+
+    return appendParams(
+      this._requestStrategy.buildUri(state, this._options),
+      state.params,
+      this._driver
+    );
   }
 
   /**
@@ -658,6 +690,48 @@ export class QueryBuilder {
    */
   public setPage(page: number): this {
     this._store.page = page;
+
+    return this;
+  }
+
+  /**
+   * Set a query parameter no driver models (all drivers)
+   *
+   * For what a backend accepts beyond the driver's own parameters — a
+   * top-level `status`, an `include` on a driver without includes. It is
+   * appended by `generateUri()` after the driver's parameters, in the order
+   * keys were first set, so it works with every driver, custom ones
+   * included, and is not gated by capabilities.
+   *
+   * The key is emitted verbatim, so bracketed names such as `page[cursor]`
+   * work. Each value is percent-encoded the way filter values are, then the
+   * values are joined with a literal `,` — so a comma inside a value arrives
+   * as `%2C`:
+   *
+   * ```
+   * qb.setParam('status', 'failed');  // → status=failed
+   * qb.setParam('ids', 'a,b', 'c');   // → ids=a%2Cb,c
+   * ```
+   *
+   * A key is emitted once: repeated keys (`id=1&id=2`) are not supported.
+   * Setting a key again replaces its values. Calling it with no values is a
+   * no-op; remove a key with `deleteParams()`. Resets the page to 1, as
+   * adding a filter does.
+   *
+   * A key must not collide with a parameter the driver emits: `generateUri()`
+   * throws `ParamCollisionError` rather than duplicate or override it.
+   *
+   * @param {string} key - The parameter name, emitted verbatim
+   * @param {(string | number | boolean)[]} values - The value(s)
+   * @returns {this}
+   */
+  public setParam(key: string, ...values: (string | number | boolean)[]): this {
+    if (!values.length) {
+      return this;
+    }
+
+    this._store.setParam(key, values);
+    this._store.page = 1;
 
     return this;
   }

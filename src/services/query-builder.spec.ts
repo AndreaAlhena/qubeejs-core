@@ -1,9 +1,12 @@
+import type { IRequestStrategy } from '../interfaces/request-strategy.interface';
+
 import { FilterOperatorEnum } from '../enums/filter-operator.enum';
 import { PaginationModeEnum } from '../enums/pagination-mode.enum';
 import { SortEnum } from '../enums/sort.enum';
 import { InvalidLimitError } from '../errors/invalid-limit.error';
 import { InvalidPageNumberError } from '../errors/invalid-page-number.error';
 import { PaginationNotSyncedError } from '../errors/pagination-not-synced.error';
+import { ParamCollisionError } from '../errors/param-collision.error';
 import { UnselectableModelError } from '../errors/unselectable-model.error';
 import { UnsupportedEmbeddedError } from '../errors/unsupported-embedded.error';
 import { UnsupportedFieldSelectionError } from '../errors/unsupported-field-selection.error';
@@ -14,6 +17,7 @@ import { UnsupportedSearchError } from '../errors/unsupported-search.error';
 import { UnsupportedSelectError } from '../errors/unsupported-select.error';
 import { UnsupportedSortError } from '../errors/unsupported-sort.error';
 import { QueryBuilderOptions } from '../models/query-builder-options';
+import { JsonApiRequestStrategy } from '../strategies/json-api-request.strategy';
 import { LaravelRequestStrategy } from '../strategies/laravel-request.strategy';
 import { NestjsRequestStrategy } from '../strategies/nestjs-request.strategy';
 import { PostgrestRequestStrategy } from '../strategies/postgrest-request.strategy';
@@ -1080,5 +1084,223 @@ describe('QueryBuilder paginationHeaders (other drivers return null)', () => {
     const builder = new QueryBuilder(new QubeeStore(), new SpatieRequestStrategy());
 
     expect(builder.paginationHeaders()).toBeNull();
+  });
+});
+
+describe('QueryBuilder params', () => {
+  let builder: QueryBuilder;
+  let store: QubeeStore;
+
+  beforeEach(() => {
+    store = new QubeeStore();
+    builder = new QueryBuilder(store, new NestjsRequestStrategy()).setResource('jobs');
+  });
+
+  describe('setParam', () => {
+    it('should append a param after the parameters the driver emits', () => {
+      // The thekage-fe case: a top-level `status`, not `filter.status` (#22).
+      expect(builder.setParam('status', 'failed').generateUri()).toBe(
+        '/jobs?limit=15&page=1&status=failed'
+      );
+    });
+
+    it('should append params in the order their keys were first set', () => {
+      builder.setParam('include', 'queue').setParam('status', 'failed').setParam('include', 'user');
+
+      expect(builder.generateUri()).toBe('/jobs?limit=15&page=1&include=user&status=failed');
+    });
+
+    it('should replace the values of a key that is set again', () => {
+      builder.setParam('status', 'failed').setParam('status', 'done');
+
+      expect(builder.generateUri()).toBe('/jobs?limit=15&page=1&status=done');
+    });
+
+    it('should join several values with a literal comma, encoding each', () => {
+      expect(builder.setParam('ids', 'a,b', 'c').generateUri()).toBe(
+        '/jobs?limit=15&page=1&ids=a%2Cb,c'
+      );
+    });
+
+    it('should percent-encode values the way filter values are', () => {
+      builder.setParam('q', '%foo & bar#+').addFilter('name', '%foo & bar#+');
+
+      const uri = builder.generateUri();
+
+      expect(uri).toContain('filter.name=%25foo%20%26%20bar%23%2B');
+      expect(uri).toContain('q=%25foo%20%26%20bar%23%2B');
+    });
+
+    it('should accept numbers and booleans', () => {
+      expect(builder.setParam('flags', 1, true).generateUri()).toContain('flags=1,true');
+    });
+
+    it('should emit the key verbatim', () => {
+      expect(builder.setParam('meta[tag]', 'news').generateUri()).toContain('meta[tag]=news');
+    });
+
+    it('should reset the page to 1', () => {
+      builder.setPage(4).setParam('status', 'failed');
+
+      expect(builder.currentPage()).toBe(1);
+    });
+
+    it('should do nothing when called with no values', () => {
+      builder.setPage(4).setParam('status');
+
+      expect(builder.currentPage()).toBe(4);
+      expect(store.getSnapshot().params).toEqual({});
+    });
+
+    it('should not be gated by capabilities', () => {
+      // Laravel declares no filters, sorts, includes or search at all.
+      const laravel = new QueryBuilder(
+        new QubeeStore(),
+        new LaravelRequestStrategy(),
+        undefined,
+        'laravel'
+      );
+
+      expect(laravel.setResource('jobs').setParam('include', 'author').generateUri()).toBe(
+        '/jobs?limit=15&page=1&include=author'
+      );
+    });
+
+    it('should start the query string when the driver emits none', () => {
+      const range = new QueryBuilder(
+        new QubeeStore(),
+        new PostgrestRequestStrategy(PaginationModeEnum.RANGE)
+      );
+
+      expect(range.setResource('jobs').setParam('status', 'eq.failed').generateUri()).toBe(
+        '/jobs?status=eq.failed'
+      );
+    });
+  });
+
+  describe('deleteParams', () => {
+    it('should remove the named params', () => {
+      builder.setParam('include', 'queue').setParam('status', 'failed').deleteParams('include');
+
+      expect(builder.generateUri()).toBe('/jobs?limit=15&page=1&status=failed');
+    });
+
+    it('should reset the page to 1', () => {
+      builder.setParam('status', 'failed').setPage(4).deleteParams('status');
+
+      expect(builder.currentPage()).toBe(1);
+    });
+
+    it('should do nothing when called with no keys', () => {
+      builder.setParam('status', 'failed').setPage(4).deleteParams();
+
+      expect(builder.currentPage()).toBe(4);
+      expect(builder.generateUri()).toContain('status=failed');
+    });
+  });
+
+  describe('reset', () => {
+    it('should clear params', () => {
+      builder.setParam('status', 'failed').reset().setResource('jobs');
+
+      expect(builder.generateUri()).toBe('/jobs?limit=15&page=1');
+    });
+  });
+
+  describe('collisions', () => {
+    it('should throw ParamCollisionError for a key the driver emits', () => {
+      builder.setParam('page', 2);
+
+      expect(() => builder.generateUri()).toThrowError(ParamCollisionError);
+    });
+
+    it('should throw for a plain key the driver emits in bracket form', () => {
+      const jsonApi = new QueryBuilder(
+        new QubeeStore(),
+        new JsonApiRequestStrategy(),
+        undefined,
+        'json-api'
+      );
+
+      jsonApi.setResource('jobs').setParam('page', 2);
+
+      expect(() => jsonApi.generateUri()).toThrowError(
+        "The param 'page' collides with 'page[number]', which the 'json-api' driver already emits. Use the builder method that controls it, or remove the param with deleteParams('page')."
+      );
+    });
+
+    it('should allow a sibling of a bracketed key the driver emits', () => {
+      const jsonApi = new QueryBuilder(new QubeeStore(), new JsonApiRequestStrategy());
+
+      expect(jsonApi.setResource('jobs').setParam('page[cursor]', 'abc').generateUri()).toBe(
+        '/jobs?page[number]=1&page[size]=15&page[cursor]=abc'
+      );
+    });
+
+    it('should leave a key free until the driver emits it', () => {
+      builder.setParam('sortBy', 'name:DESC');
+
+      expect(builder.generateUri()).toContain('sortBy=name%3ADESC');
+
+      builder.addSort('name', SortEnum.ASC);
+
+      expect(() => builder.generateUri()).toThrowError(ParamCollisionError);
+    });
+
+    it('should name an unknown driver generically', () => {
+      builder.setParam('limit', 5);
+
+      expect(() => builder.generateUri()).toThrowError(
+        "The param 'limit' collides with 'limit', which the active driver already emits."
+      );
+    });
+  });
+
+  describe('custom request strategies', () => {
+    // A strategy that implements the contract directly and never reaches
+    // AbstractRequestStrategy.parts() must still get its params (#22).
+    const bare = (uri: string): IRequestStrategy => ({
+      buildUri: () => uri,
+      capabilities: {
+        embedded: false,
+        fields: false,
+        filters: false,
+        includes: false,
+        operatorFilters: false,
+        search: false,
+        select: false,
+        sort: false,
+      },
+      validateLimit: () => undefined,
+    });
+
+    it('should append params to a URI with no query string', () => {
+      const custom = new QueryBuilder(new QubeeStore(), bare('/jobs'), undefined, 'studio-api');
+
+      expect(custom.setParam('status', 'failed').generateUri()).toBe('/jobs?status=failed');
+    });
+
+    it('should append params to a URI with a query string', () => {
+      const custom = new QueryBuilder(new QubeeStore(), bare('/jobs?cursor=abc'));
+
+      expect(custom.setParam('status', 'failed').generateUri()).toBe(
+        '/jobs?cursor=abc&status=failed'
+      );
+    });
+
+    it('should detect a collision with a key the custom strategy emits', () => {
+      const custom = new QueryBuilder(
+        new QubeeStore(),
+        bare('/jobs?cursor=abc'),
+        undefined,
+        'studio-api'
+      );
+
+      custom.setParam('cursor', 'def');
+
+      expect(() => custom.generateUri()).toThrowError(
+        expect.objectContaining({ driver: 'studio-api', driverKey: 'cursor', key: 'cursor' })
+      );
+    });
   });
 });

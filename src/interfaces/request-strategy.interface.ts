@@ -21,6 +21,10 @@ export interface IRequestStrategy {
   /**
    * Build a URI string from the given query builder state
    *
+   * Ignore `state.params`: `QueryBuilder.generateUri()` appends those after
+   * this returns, for every strategy, and checks them against the keys
+   * emitted here.
+   *
    * @param state - The current query builder state
    * @param options - The query parameter key name configuration
    * @returns The composed URI string
