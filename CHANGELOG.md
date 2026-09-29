@@ -7,6 +7,56 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-09-30
+
+### Added
+
+- **Parameters no driver models.** `QueryBuilder.setParam(key, ...values)` and
+  `deleteParams(...keys)` emit what a backend accepts beyond the driver's own parameters — a
+  top-level `status`, an `include` on a driver without includes. `generateUri()` appends them
+  after the request strategy returns, so all eighteen drivers emit them, and so does a custom
+  strategy that implements `IRequestStrategy` directly. No capability gates them. Keys are
+  literal; each value is percent-encoded like a filter value, then the values are joined with a
+  literal `,` (`setParam('ids', 'a,b', 'c')` → `ids=a%2Cb,c`). Both methods reset the page to 1,
+  and `reset()` clears them. They live in the new `QueryBuilderState.params` (`Params`), which
+  is optional in the type so state literals written against 1.1 still compile; the store always
+  sets it (#22)
+- `ParamCollisionError` (`PARAM_COLLISION`), thrown by `generateUri()` when a param would
+  duplicate or override one the driver emits: its key equals one in the generated URI, or one
+  key is the other followed by `[` (`page` against JSON:API's `page[number]`). The check reads
+  the URI the driver actually produced, so it covers custom strategies and leaves a key free
+  until the driver needs it — except pagination keys: the next page's URI is checked too, so
+  PostgREST's `offset` and OData's `$skip` collide on page 1, where they are not yet emitted (#22)
+- `DriverId`, `Driver | (string & {})`: any string, while editors keep suggesting the eighteen
+  built-in ids (#22)
+- `PaginatedCollection.toPlain()`, returning a `PaginatedResult<T>`: an object literal with a new
+  `data` array and every pagination field, `null` where the backend reported nothing so
+  `JSON.stringify` keeps every key. React Server Components refuse to pass class instances to
+  Client Components; this is the shape to hand them. The collection itself is unchanged (#22)
+
+### Changed
+
+- **Custom drivers can name themselves.** `DriverDefinition.id`, `QueryBuilder`'s `driver`
+  argument and `UnsupportedCapabilityError.driver` (with its eight subclasses) are typed
+  `DriverId` rather than `Driver`. A driver defined outside the package no longer has to borrow a
+  built-in id, so its capability errors name it. `DRIVERS` stays keyed by `DriverEnum` and
+  `Config.driver` stays `Driver`, since both resolve through the registry. Code that passes a
+  definition's `id` somewhere typed `Driver` now needs a check first (#22)
+- JSDoc names `QueryBuilder`, `Paginator` and `QubeeStore` where it still named ng-qubee's
+  `NgQubeeService`, `PaginationService`, `NestService`, `nest()` and `provideNgQubee` — on
+  `PaginationModeEnum`, `StrategyCapabilities`, `IRequestStrategy`, `QubeeStore`, `QueryBuilder`
+  and several strategies. `QueryBuilder` and `PaginatedCollection` gain the class comments they
+  lacked (#22)
+- The generated API reference renders `{}`, index signatures, `keyof` and rest parameters as
+  declared, so `DriverId`, `Params` and `setParam()` read as they are written (#22)
+- A single-driver import is 2.7 kB gzipped, up from 2.6 kB: every response strategy now carries
+  `toPlain()`. All eighteen drivers stay at 9.6 kB (#22)
+
+### Fixed
+
+- `PaginationNotSyncedError` told core consumers to call `PaginationService.paginate()`, which
+  exists only in ng-qubee. It now names `Paginator.paginate()`; the code is unchanged (#22)
+
 ## [1.1.0] - 2026-09-25
 
 ### Changed
@@ -127,6 +177,7 @@ Carried over from `ng-qubee`, where these are still present:
 - CI verifies both entry points resolve, that there are no runtime dependencies, and that a
   single-driver import still tree-shakes (#12)
 
-[unreleased]: https://github.com/AndreaAlhena/qubeejs-core/compare/v1.1.0...HEAD
+[unreleased]: https://github.com/AndreaAlhena/qubeejs-core/compare/v1.2.0...HEAD
+[1.2.0]: https://github.com/AndreaAlhena/qubeejs-core/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/AndreaAlhena/qubeejs-core/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/AndreaAlhena/qubeejs-core/releases/tag/v1.0.0

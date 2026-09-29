@@ -1,9 +1,30 @@
 import type { Normalized } from '../types/normalized.type';
 import type { PaginatedObject } from '../types/paginated-object.type';
+import type { PaginatedResult } from '../types/paginated-result.type';
 
 import { KeyNotFoundError } from '../errors/key-not-found.error';
 
+/**
+ * One page of rows plus the pagination metadata the backend reported.
+ *
+ * Built by a response strategy — usually through `Paginator.paginate()` —
+ * rather than by hand. Metadata a backend does not report is `undefined`.
+ * Call `toPlain()` for a plain-object copy.
+ */
 export class PaginatedCollection<T extends PaginatedObject> {
+  /**
+   * @param data - The rows on this page
+   * @param page - The current page number, 1-based
+   * @param from - Position of the first row on this page within the whole result set, 1-based
+   * @param to - Position of the last row on this page within the whole result set, 1-based
+   * @param total - Number of rows in the whole result set
+   * @param perPage - Number of rows per page
+   * @param prevPageUrl - URL of the previous page, when the backend reports links
+   * @param nextPageUrl - URL of the next page, when the backend reports links
+   * @param lastPage - Number of the last page
+   * @param firstPageUrl - URL of the first page, when the backend reports links
+   * @param lastPageUrl - URL of the last page, when the backend reports links
+   */
   constructor(
     public data: T[],
     public readonly page: number,
@@ -54,5 +75,38 @@ export class PaginatedCollection<T extends PaginatedObject> {
     };
 
     return { [this.page]: this.data.map(read) } as Normalized;
+  }
+
+  /**
+   * Copy the page into a plain object that survives serialisation.
+   *
+   * React Server Components refuse to pass class instances to Client
+   * Components, and `JSON.stringify` drops `undefined` values; the result
+   * avoids both. Every pagination field is present, `null` when the backend
+   * did not report it. `data` is a new array holding the same rows, which
+   * are passed through unchanged, so the result is JSON-safe exactly when
+   * they are. The collection itself is not modified.
+   *
+   * ```ts
+   * const page = paginator.paginate<Article>(body).toPlain();
+   * // { data: [...], page: 2, total: 57, nextPageUrl: null, ... }
+   * ```
+   *
+   * @returns The rows and every pagination field as a plain object
+   */
+  public toPlain(): PaginatedResult<T> {
+    return {
+      data: [...this.data],
+      firstPageUrl: this.firstPageUrl ?? null,
+      from: this.from ?? null,
+      lastPage: this.lastPage ?? null,
+      lastPageUrl: this.lastPageUrl ?? null,
+      nextPageUrl: this.nextPageUrl ?? null,
+      page: this.page,
+      perPage: this.perPage ?? null,
+      prevPageUrl: this.prevPageUrl ?? null,
+      to: this.to ?? null,
+      total: this.total ?? null,
+    };
   }
 }

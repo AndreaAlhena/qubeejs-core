@@ -7,8 +7,11 @@ import type { QueryBuilderState } from '../src/types/query-builder-state.type';
 import { DRIVERS } from '../src/drivers/driver-registry';
 import { DriverEnum } from '../src/enums/driver.enum';
 import { PaginationModeEnum } from '../src/enums/pagination-mode.enum';
+import { ParamCollisionError } from '../src/errors/param-collision.error';
 import { QueryBuilderOptions } from '../src/models/query-builder-options';
 import { ResponseOptions } from '../src/models/response-options';
+import { QubeeStore } from '../src/services/qubee-store';
+import { QueryBuilder } from '../src/services/query-builder';
 
 const driversDir = join(fileURLToPath(new URL('.', import.meta.url)), '..', 'src', 'drivers');
 
@@ -120,6 +123,48 @@ describe('DRIVERS registry', () => {
           expect([...encoded.values()]).toContain(reserved);
         }
       );
+    });
+
+    describe('extra params', () => {
+      /**
+       * A builder over this driver with the resource already set.
+       *
+       * @returns A fresh builder on its own store
+       */
+      const build = (): QueryBuilder =>
+        new QueryBuilder(
+          new QubeeStore(),
+          definition.createRequestStrategy(PaginationModeEnum.QUERY),
+          undefined,
+          definition.id
+        ).setResource('items');
+
+      it('appends a param intact after the driver parameters and splits off none', () => {
+        const plain = parseQuery(build().generateUri());
+        const extra = parseQuery(build().setParam('extra', reserved).generateUri());
+
+        expect([...extra.keys()]).toEqual([...plain.keys(), 'extra']);
+        expect(extra.get('extra')).toBe(reserved);
+      });
+
+      it('refuses, on page 1, a param named after a key the driver emits only later', () => {
+        const firstPage = [...parseQuery(build().generateUri()).keys()];
+        const laterOnly = [...parseQuery(build().setPage(2).generateUri()).keys()].filter(
+          (key) => !firstPage.includes(key)
+        );
+
+        laterOnly.forEach((key) => {
+          expect(() => build().setParam(key, 'x').generateUri()).toThrowError(ParamCollisionError);
+        });
+      });
+
+      it('refuses a param that collides with one the driver emits', () => {
+        const [emitted] = [...parseQuery(build().generateUri()).keys()];
+
+        expect(() => build().setParam(emitted, 'x').generateUri()).toThrowError(
+          ParamCollisionError
+        );
+      });
     });
   });
 });

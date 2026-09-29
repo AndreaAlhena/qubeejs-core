@@ -1,3 +1,4 @@
+import type { DriverId } from '../types/driver-id.type';
 import type { StrategyCapabilities } from '../types/strategy-capabilities.type';
 
 import { QubeeError } from './qubee.error';
@@ -35,13 +36,13 @@ export class UnsupportedCapabilityError extends QubeeError {
   /**
    * The driver that does not support it, when known.
    */
-  public readonly driver?: string;
+  public readonly driver?: DriverId;
 
   /**
    * @param capability - The capability flag that was not supported
    * @param driver - The active driver, when known
    */
-  constructor(capability: keyof StrategyCapabilities, driver?: string) {
+  constructor(capability: keyof StrategyCapabilities, driver?: DriverId) {
     const subject = driver === undefined ? 'The active driver' : `The '${driver}' driver`;
 
     super(

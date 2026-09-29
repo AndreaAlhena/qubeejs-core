@@ -4,10 +4,12 @@ import type { PaginationMode } from './pagination-mode.type';
 import type { QueryBuilderConfig } from './query-builder-config.type';
 
 /**
- * Main configuration interface for ng-qubee
+ * Driver configuration that names the driver by its id
  *
- * Allows configuring the pagination driver and customizing
- * both request query parameter keys and response field keys.
+ * The id-based counterpart of {@link QubeeConfig}, for configuration that
+ * arrives as a string: resolve the driver with `DRIVERS[config.driver]`.
+ * Allows configuring the pagination driver and customizing both request
+ * query parameter keys and response field keys.
  *
  * @example
  * ```typescript

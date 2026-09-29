@@ -2,6 +2,7 @@ import type { Embedded } from '../types/embedded.type';
 import type { Fields } from './fields.type';
 import type { Filters } from './filters.type';
 import type { OperatorFilter } from './operator-filter.type';
+import type { Params } from './params.type';
 import type { Sort } from './sort.type';
 
 /**
@@ -31,6 +32,15 @@ export type QueryBuilderState = {
   operatorFilters: OperatorFilter[];
   /** Current page number (all drivers) */
   page: number;
+  /**
+   * Extra query parameters no driver models (all drivers)
+   *
+   * Appended by `QueryBuilder.generateUri()` after the request strategy
+   * returns, so a strategy must not emit them itself. Optional only so
+   * state literals written before 1.2 still compile; the store always sets
+   * it, `{}` by default.
+   */
+  params?: Params;
   /** The API resource name for URI generation (all drivers) */
   resource: string;
   /** Full-text search term (NestJS only) */

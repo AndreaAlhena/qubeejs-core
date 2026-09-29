@@ -1,3 +1,5 @@
+import type { PaginatedResult } from '../types/paginated-result.type';
+
 import { KeyNotFoundError } from '../errors/key-not-found.error';
 import { PaginatedCollection } from './paginated-collection';
 
@@ -70,6 +72,99 @@ describe('PaginatedCollection', () => {
       const uuids = new PaginatedCollection([{ id: 'a1' }, { id: 'b2' }], 1);
 
       expect(uuids.normalize()).toEqual({ 1: ['a1', 'b2'] });
+    });
+  });
+
+  describe('toPlain', () => {
+    const full = (): PaginatedCollection<Row> =>
+      new PaginatedCollection<Row>(
+        rows,
+        2,
+        16,
+        30,
+        57,
+        15,
+        '/articles?page=1',
+        '/articles?page=3',
+        4,
+        '/articles?page=1',
+        '/articles?page=4'
+      );
+
+    it('returns a plain object rather than a class instance', () => {
+      // React Server Components refuse to pass class instances to Client
+      // Components (#22).
+      expect(Object.getPrototypeOf(full().toPlain())).toBe(Object.prototype);
+    });
+
+    it('carries the rows and every pagination field', () => {
+      expect(full().toPlain()).toStrictEqual({
+        data: rows,
+        firstPageUrl: '/articles?page=1',
+        from: 16,
+        lastPage: 4,
+        lastPageUrl: '/articles?page=4',
+        nextPageUrl: '/articles?page=3',
+        page: 2,
+        perPage: 15,
+        prevPageUrl: '/articles?page=1',
+        to: 30,
+        total: 57,
+      });
+    });
+
+    it('keeps a key for every field the collection has', () => {
+      // Guards against a field added to the class but not to toPlain().
+      const collection = full();
+
+      expect(Object.keys(collection.toPlain()).sort()).toEqual(Object.keys(collection).sort());
+    });
+
+    it('reports a field the backend did not send as null', () => {
+      expect(new PaginatedCollection<Row>(rows, 1).toPlain()).toStrictEqual({
+        data: rows,
+        firstPageUrl: null,
+        from: null,
+        lastPage: null,
+        lastPageUrl: null,
+        nextPageUrl: null,
+        page: 1,
+        perPage: null,
+        prevPageUrl: null,
+        to: null,
+        total: null,
+      });
+    });
+
+    it('survives a JSON round trip with every key intact', () => {
+      const sparse = new PaginatedCollection<Row>(rows, 1).toPlain();
+
+      expect(JSON.parse(JSON.stringify(sparse))).toStrictEqual(sparse);
+      expect(JSON.parse(JSON.stringify(full().toPlain()))).toStrictEqual(full().toPlain());
+    });
+
+    it('copies the rows array rather than sharing it', () => {
+      const collection = collect();
+      const plain = collection.toPlain();
+
+      plain.data.push({ id: 11, slug: 'third', title: 'Third' });
+
+      expect(collection.data).toHaveLength(2);
+      expect(plain.data[0]).toBe(collection.data[0]);
+    });
+
+    it('leaves the collection unchanged', () => {
+      const collection = collect();
+
+      collection.toPlain();
+
+      expect(collection).toBeInstanceOf(PaginatedCollection);
+      expect(collection.data).toBe(rows);
+      expect(collection.nextPageUrl).toBeUndefined();
+    });
+
+    it('is typed as a PaginatedResult of the row type', () => {
+      expectTypeOf(collect().toPlain()).toEqualTypeOf<PaginatedResult<Row>>();
     });
   });
 });
