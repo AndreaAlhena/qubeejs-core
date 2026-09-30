@@ -31,6 +31,9 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   `createQubee()` instance. It applies the page **last** — after the list's filters, sorts and
   limit, which reset it — so the page in the URL is the page requested. `headers` carries
   PostgREST's `Range` in RANGE mode, and `paginate` parses with the same instance's paginator (#27)
+- Helpers for list controls: `getPageWindow()` — page numbers with gaps, at a constant length, and
+  never throwing on an unknown last page — `getPageRange()` — the numbers behind "21–34 of 34" —
+  and `toggleSort()` and `getAriaSort()` for sortable column headers (#28)
 
 ### Fixed
 

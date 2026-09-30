@@ -118,3 +118,63 @@ page.normalize();                        // { 2: [7, 9] }
 page.normalize('slug');                  // { 2: ['first', 'second'] }
 page.normalize((row) => `row-${row.id}`); // { 2: ['row-7', 'row-9'] }
 ```
+
+## Building pagination and sort controls
+
+Four helpers do the arithmetic every list control repeats. They render nothing — the markup is
+yours.
+
+### Page numbers
+
+`getPageWindow()` lists the places a pagination bar shows, with `'gap'` where a run of pages is
+folded:
+
+```ts
+import { getPageWindow } from '@qubeejs/core';
+
+getPageWindow(5, 12);  // [1, 'gap', 4, 5, 6, 'gap', 12]
+getPageWindow(1, 12);  // [1, 2, 3, 4, 5, 'gap', 12]
+getPageWindow(12, 12); // [1, 'gap', 8, 9, 10, 11, 12]
+getPageWindow(3, 5);   // [1, 2, 3, 4, 5]
+```
+
+The window keeps a **constant length** — `2 × boundaries + 2 × siblings + 3`, seven by default — so
+the buttons do not shift as the user pages, and a gap never hides a single page. `boundaries` sets
+how many pages show at each end, `siblings` how many either side of the current one:
+
+```ts
+getPageWindow(10, 20, { boundaries: 2, siblings: 2 });
+// [1, 2, 'gap', 8, 9, 10, 11, 12, 'gap', 19, 20]
+```
+
+It never throws: a page outside `1`–`lastPage` is clamped, and a last page that is `0`, `NaN` or
+`Infinity` — a backend that reports no count — is treated as `1`.
+
+### "21–34 of 34"
+
+`getPageRange()` gives the numbers; the wording stays yours:
+
+```ts
+import { getPageRange } from '@qubeejs/core';
+
+const { from, to, total } = getPageRange(page); // a PaginatedCollection, or its toPlain()
+`${from}–${to} of ${total}`;                    // '21–34 of 34'
+```
+
+It uses the backend's own `from` and `to` when the driver reports them, and otherwise computes them
+from the page, the page size and the rows. An empty page is `{ from: 0, to: 0, total }`; `total` is
+`null` when the backend does not count.
+
+### Sortable column headers
+
+```ts
+import { getAriaSort, toggleSort } from '@qubeejs/core';
+
+toggleSort(sorts, 'title');                     // title ascending — or flipped, if already sorted
+toggleSort(sorts, 'title', { multiple: true }); // keeps the other sorts
+getAriaSort(sorts, 'title');                    // 'ascending' | 'descending' | 'none'
+```
+
+`toggleSort()` replaces the other sorts unless `multiple` is set. `getAriaSort()` reports a direction
+only for the **primary** sort — ARIA allows one sorted column per table — and `'none'` for every
+other column.
