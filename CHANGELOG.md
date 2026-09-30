@@ -15,7 +15,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - **Lists in the page URL.** `defineList()` declares a list once — its resource, qubee
   configuration, page-URL params and how its state becomes builder calls — and `readListState()`
   reads a page's query into typed state. It never throws: a missing, malformed or repeated value
-  takes the param's default. Six params ship — `integerParam`, `stringParam`, `enumParam`,
+  takes the param's default — a single-value param falls back on a repeated key, while `listParam`
+  merges repeated keys. Six params ship — `integerParam`, `stringParam`, `enumParam`,
   `booleanParam`, `listParam`, `sortParam` — and any object of the `ListParam<T>` shape is a
   param. `toSearchParams()` normalises a `URLSearchParams` from any realm, a query string or
   Next's `searchParams` record. The core's boundary is now **pure transformations in core;
@@ -30,10 +31,13 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - `buildListRequest()` turns list state into `{ uri, headers, paginate }` on a fresh
   `createQubee()` instance. It applies the page **last** — after the list's filters, sorts and
   limit, which reset it — so the page in the URL is the page requested. `headers` carries
-  PostgREST's `Range` in RANGE mode, and `paginate` parses with the same instance's paginator (#27)
+  PostgREST's `Range` in RANGE mode, and `paginate` parses with the same instance's paginator. A
+  URL page the store would reject — zero, negative or fractional — falls back to the list's default
+  page (#27)
 - Helpers for list controls: `getPageWindow()` — page numbers with gaps, at a constant length, and
   never throwing on an unknown last page — `getPageRange()` — the numbers behind "21–34 of 34" —
-  and `toggleSort()` and `getAriaSort()` for sortable column headers — `toggleSort()` flips only the primary sort and starts any other field ascending (#28, #32)
+  and `toggleSort()` and `getAriaSort()` for sortable column headers —
+  `toggleSort()` flips only the primary sort and starts any other field ascending (#28, #32)
 
 ### Fixed
 
@@ -41,7 +45,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   `useSyncExternalStore(store.subscribe, store.getSnapshot)` works. Both were prototype methods
   and threw `Cannot read properties of undefined` when passed on their own. They are now
   arrow-function members — one per store, with a stable identity — and read as properties in the
-  API reference (#23)
+  API reference. Because they are now instance properties, a subclass that overrides them, or
+  `vi.spyOn(QubeeStore.prototype, 'subscribe')`, no longer works (#23)
 
 ## [1.2.0] - 2026-09-30
 

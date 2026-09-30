@@ -10,6 +10,10 @@ import { readListState } from './read-list-state';
 const at = (search: SearchParamsInput): ListLocation => ({ pathname: '/articles', search });
 
 describe('buildListHref', () => {
+  it('should write the canonical order of a hand-edited query', () => {
+    expect(buildListHref(articleList, at('?q=react&page=3'))).toBe('/articles?page=3&q=react');
+  });
+
   it('should return the bare path for the default state', () => {
     expect(buildListHref(articleList, at(''))).toBe('/articles');
   });

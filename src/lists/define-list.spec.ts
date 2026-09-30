@@ -10,8 +10,21 @@ import { stringParam } from '../params/string-param';
 import { defineList } from './define-list';
 
 describe('defineList', () => {
-  it('should return the definition it was given', () => {
-    expect(articleList.resource).toBe('articles');
+  it('should return a frozen copy of the definition, leaving the input unfrozen', () => {
+    const definition = {
+      params: { page: integerParam('page', { default: 1 }) },
+      qubee: { driver: STRAPI_DRIVER },
+      resource: 'articles',
+    };
+    const list = defineList(definition);
+
+    expect(list).not.toBe(definition);
+    expect(list.resource).toBe('articles');
+    expect(Object.isFrozen(definition)).toBe(false);
+    expect(Object.isFrozen(definition.params)).toBe(false);
+  });
+
+  it('should keep the params in the order they were declared', () => {
     expect(Object.keys(articleList.params)).toEqual(['page', 'q', 'status', 'sort']);
   });
 
