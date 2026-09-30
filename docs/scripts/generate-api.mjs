@@ -242,10 +242,12 @@ function renderPage(node, order) {
 
 // ---- run ----------------------------------------------------------------
 
+// Run the repo's TypeDoc bin with this Node rather than through `npx`: on Windows
+// `npx` is `npx.cmd`, which execFileSync can only launch through a shell.
 execFileSync(
-  'npx',
+  process.execPath,
   [
-    'typedoc',
+    join(repo, 'node_modules', 'typedoc', 'bin', 'typedoc'),
     '--json',
     jsonPath,
     '--entryPoints',
