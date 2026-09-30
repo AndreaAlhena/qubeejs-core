@@ -7,13 +7,14 @@
  */
 import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const outDir = join(here, '..', 'src', 'content', 'docs', 'drivers');
 
+// import() takes a URL, not a path: a bare `C:\…` path fails on Windows.
 const { DRIVERS, DriverEnum, QubeeStore, QueryBuilder, SortEnum } = await import(
-  join(here, '..', '..', 'dist', 'index.js')
+  pathToFileURL(join(here, '..', '..', 'dist', 'index.js')).href
 );
 
 const CAPABILITIES = [
