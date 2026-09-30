@@ -18,6 +18,9 @@ import { createQubee } from '../services/create-qubee';
  * `setParam()` and `setResource()` all reset the page to 1, so the page must
  * come after them to survive.
  *
+ * A page the store would reject — zero, negative or fractional, as a hand-edited
+ * URL can carry when the page param sets no `min` — falls back to the list's default page.
+ *
  * Errors from `apply` or `generateUri()` — a capability the driver lacks, a
  * param collision, an empty resource — are programmer errors and propagate.
  *
@@ -40,7 +43,9 @@ export function buildListRequest<TParams extends ListParams>(
 
   builder.setResource(list.resource);
   list.apply?.(builder, state);
-  builder.setPage(state.page);
+  builder.setPage(
+    Number.isInteger(state.page) && state.page >= 1 ? state.page : list.params.page.default
+  );
 
   return {
     headers: builder.paginationHeaders(),

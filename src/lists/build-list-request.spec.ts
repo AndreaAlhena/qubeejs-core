@@ -122,6 +122,21 @@ describe('buildListRequest', () => {
     );
   });
 
+  it.each(['?page=0', '?page=-2'])(
+    'should fall back to the default page when %s is one the store rejects',
+    (search) => {
+      const list = defineList({
+        params: { page: integerParam('page', { default: 1 }) },
+        qubee: { driver: STRAPI_DRIVER },
+        resource: 'articles',
+      });
+
+      expect(buildListRequest(list, readListState(list, search)).uri).toBe(
+        buildListRequest(list, readListState(list, '')).uri
+      );
+    }
+  );
+
   it('should refuse an empty resource', () => {
     const list = defineList({
       params: { page: integerParam('page', { default: 1 }) },
