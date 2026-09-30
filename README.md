@@ -15,8 +15,9 @@ standards.
 
 ## What it does
 
-Builds query URIs and parses paginated responses. **It performs no I/O** — there is no HTTP client
-and no transport layer. You fetch however you like and hand the response body back.
+Builds query URIs, parses paginated responses, and reads and writes list state in the page URL.
+**It performs no I/O** — there is no HTTP client and no transport layer, and it never navigates or
+subscribes to a router. You fetch however you like and hand the response body back.
 
 That is what makes it framework-agnostic: no Angular, no React, no RxJS, no Signals.
 
