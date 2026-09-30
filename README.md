@@ -50,6 +50,24 @@ page.total; // 57
 page.lastPage; // 6
 ```
 
+## Lists in the page URL
+
+A list page that keeps its query in the URL — `/articles?q=react&sort=title&page=2` — declares the
+list once, and the core does the string work in both directions:
+
+```ts
+import { buildListHref, buildListRequest, readListState } from '@qubeejs/core';
+
+// articleList = defineList({ resource, qubee, params, apply }) — see the guide
+const state = readListState(articleList, location.search); // typed; never throws
+const href = buildListHref(articleList, location, { q: 'vue' }); // back to page 1
+const { uri, headers, paginate } = buildListRequest(articleList, state); // page applied last
+```
+
+These are pure transformations too: the core reads and writes URLs, but never navigates, subscribes
+to a router or fetches. See
+[Lists & URL state](https://qubeejs.andreatantimonaco.me/guide/lists/).
+
 ## When the driver is not enough
 
 - **A parameter no driver models** — a top-level `status`, say — goes through `setParam()`. It

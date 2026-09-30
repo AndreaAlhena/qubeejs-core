@@ -184,3 +184,48 @@ strings.
 
 Because the function is pure, a server can render every pagination link and filter chip as a plain
 `<a href>`.
+
+## Building the request
+
+`buildListRequest()` turns state into everything needed to fetch the page:
+
+```ts
+import { buildListRequest, readListState } from '@qubeejs/core';
+
+const request = buildListRequest(articleList, readListState(articleList, '?page=2'));
+
+request.uri;     // '/articles?sort[0]=publishedAt:desc&pagination[page]=2&pagination[pageSize]=20'
+request.headers; // null — or PostgREST's Range, in RANGE mode
+
+const response = await fetch(`https://example.com/api${request.uri}`, {
+  headers: request.headers ?? {},
+});
+const page = request.paginate<Article>(await response.json());
+```
+
+Each call builds on a fresh `createQubee()` instance: it sets the resource, runs `apply`, and applies
+the page **last**. `addFilter()`, `addSort()`, `setLimit()` and the rest reset the page to 1, so a
+page set before them would be lost; the list does the ordering for you.
+
+`paginate` parses with the paginator of the same instance. `[request.uri, request.headers]` is a
+complete cache key — TanStack Query's `queryKey`, SWR's `key`:
+
+```ts
+useQuery({
+  queryFn: async () => {
+    const response = await fetch(request.uri, { headers: request.headers ?? {} });
+
+    return request.paginate<Article>(await response.json()).toPlain();
+  },
+  queryKey: ['articles', request.uri, request.headers],
+});
+```
+
+Errors from `apply` — a filter your driver cannot express, say — are programmer errors and
+propagate.
+
+:::caution[Bee aware]
+When the backend lives elsewhere, put its base URL in the list's `qubee` config rather than in front
+of `request.uri`: `qubee: { baseUrl: 'https://example.com/api', driver: STRAPI_DRIVER }`. Then
+`request.uri` is absolute, and the cache key names the backend too.
+:::
