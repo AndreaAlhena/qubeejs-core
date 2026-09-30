@@ -1,4 +1,5 @@
 import { FilterOperatorEnum } from '../enums/filter-operator.enum';
+import { DuplicateListParamError } from './duplicate-list-param.error';
 import { InvalidFilterOperatorValueError } from './invalid-filter-operator-value.error';
 import { InvalidLimitError } from './invalid-limit.error';
 import { InvalidPageNumberError } from './invalid-page-number.error';
@@ -19,6 +20,11 @@ import { UnsupportedSelectError } from './unsupported-select.error';
 import { UnsupportedSortError } from './unsupported-sort.error';
 
 const ALL = [
+  [
+    'DuplicateListParamError',
+    new DuplicateListParamError('q', ['search', 'term']),
+    'DUPLICATE_LIST_PARAM',
+  ],
   [
     'InvalidFilterOperatorValueError',
     new InvalidFilterOperatorValueError(FilterOperatorEnum.BTW, 'needs 2'),
@@ -145,6 +151,24 @@ describe('QubeeError', () => {
       expect(error.driverKey).toBe('page[number]');
       expect(error.driver).toBe('json-api');
       expect(error.context).toEqual({ driver: 'json-api', driverKey: 'page[number]', key: 'page' });
+    });
+  });
+
+  describe('duplicate-list-param message', () => {
+    it('names the key and every param holding it', () => {
+      const error = new DuplicateListParamError('q', ['search', 'term']);
+
+      expect(error.message).toBe(
+        "The list params 'search' and 'term' share the key 'q'. Give each param a key of its own."
+      );
+      expect([error.key, error.names]).toEqual(['q', ['search', 'term']]);
+      expect(error.context).toEqual({ key: 'q', names: ['search', 'term'] });
+    });
+
+    it('asks for a key when one is empty', () => {
+      expect(new DuplicateListParamError('', ['page']).message).toBe(
+        "Give 'page' a page-URL key: an empty key cannot be read from a URL."
+      );
     });
   });
 

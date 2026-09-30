@@ -12,6 +12,17 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - `QubeeConfig.baseUrl`: `createQubee({ baseUrl, driver })` prefixes every generated URI, as
   `setBaseUrl()` does, so one config object describes a whole instance. `reset()` clears it, as
   it clears `setBaseUrl()` (#24)
+- **Lists in the page URL.** `defineList()` declares a list once — its resource, qubee
+  configuration, page-URL params and how its state becomes builder calls — and `readListState()`
+  reads a page's query into typed state. It never throws: a missing, malformed or repeated value
+  takes the param's default. Six params ship — `integerParam`, `stringParam`, `enumParam`,
+  `booleanParam`, `listParam`, `sortParam` — and any object of the `ListParam<T>` shape is a
+  param. `toSearchParams()` normalises a `URLSearchParams` from any realm, a query string or
+  Next's `searchParams` record. The core's boundary is now **pure transformations in core;
+  navigation, subscriptions and fetching in the adapters** — it still never navigates, subscribes
+  to a router or fetches (#25)
+- `DuplicateListParamError` (`DUPLICATE_LIST_PARAM`), thrown by `defineList()` when two params
+  share a page-URL key or a key is empty (#25)
 
 ### Fixed
 

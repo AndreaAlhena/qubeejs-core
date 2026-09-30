@@ -5,9 +5,11 @@ sidebar:
   order: 1
 ---
 
-`@qubeejs/core` builds query URIs and parses paginated responses. That is the whole remit.
+`@qubeejs/core` builds query URIs, parses paginated responses, and reads and writes
+[list state in the page URL](/guide/lists/). That is the whole remit: pure transformations.
 
-**It performs no I/O.** There is no HTTP client, no transport layer, no interceptors and no cache.
+**It performs no I/O.** There is no HTTP client, no transport layer, no interceptors and no cache,
+and it never navigates or subscribes to a router.
 You fetch however you like — `fetch`, `axios`, `HttpClient`, a server action — and hand the
 response body back.
 
