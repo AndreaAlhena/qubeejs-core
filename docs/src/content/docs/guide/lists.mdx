@@ -154,3 +154,33 @@ readListState(articleList, await searchParams); // { q: 'react', tag: ['a', 'b']
 ```
 
 `toSearchParams()` performs that normalisation on its own, when you need a `URLSearchParams`.
+
+## Building links
+
+`buildListHref()` writes state back into a link, changing only what you ask:
+
+```ts
+import { buildListHref } from '@qubeejs/core';
+
+const location = { pathname: '/articles', search: '?q=react&page=3' };
+
+buildListHref(articleList, location, { page: 4 });         // '/articles?page=4&q=react'
+buildListHref(articleList, location, { status: 'draft' }); // '/articles?q=react&status=draft'
+buildListHref(articleList, location, { q: undefined });    // '/articles'
+```
+
+- **Defaults stay out of the URL**, so the default state is the bare path.
+- **A change to anything but the page returns to page 1** — page 3 of one search means nothing in
+  another. Setting a param to the value it already holds keeps the page, and naming `page` yourself
+  always wins.
+- **`undefined` means "back to the default"**, which is how you clear a filter.
+- **Keys the list does not own are kept** — a drawer's `?panel=edit` survives paging — ahead of the
+  list's own, which follow in declaration order.
+- An unreadable value in the current URL is dropped, and so is the hash.
+
+Commas are left unescaped, so sorts stay readable: `?sort=-publishedAt,title`. To compare two
+queries, compare `toSearchParams(a).toString()` with `toSearchParams(b).toString()` — never the raw
+strings.
+
+Because the function is pure, a server can render every pagination link and filter chip as a plain
+`<a href>`.

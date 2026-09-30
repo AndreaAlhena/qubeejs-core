@@ -23,6 +23,10 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   to a router or fetches (#25)
 - `DuplicateListParamError` (`DUPLICATE_LIST_PARAM`), thrown by `defineList()` when two params
   share a page-URL key or a key is empty (#25)
+- `buildListHref()` writes list state back into a link. Defaults stay out of the URL; a change to
+  anything but the page returns to page 1, while setting a param to its current value keeps it and
+  an explicit `page` always wins; keys the list does not own are kept; commas stay readable
+  (`sort=-publishedAt,title`) (#26)
 
 ### Fixed
 

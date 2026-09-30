@@ -41,7 +41,7 @@ src/
 ├─ enums/        DriverEnum, FilterOperatorEnum, PaginationModeEnum, SortEnum
 ├─ errors/       QubeeError base + 17 concrete errors
 ├─ interfaces/   IRequestStrategy, IResponseStrategy — the only two class contracts
-├─ lists/        defineList, readListState
+├─ lists/        defineList, readListState, buildListHref
 ├─ models/       PaginatedCollection, QueryBuilderOptions, ResponseOptions
 ├─ params/       integerParam, stringParam, enumParam, booleanParam, listParam, sortParam
 ├─ services/     QueryBuilder, QubeeStore, Paginator
