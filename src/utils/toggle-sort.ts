@@ -6,9 +6,11 @@ import { SortEnum } from '../enums/sort.enum';
 /**
  * The sorts after a click on a column header.
  *
- * An unsorted field sorts ascending; a sorted one flips. The field becomes
- * the only sort, unless `multiple` keeps the others — the field then flips in
- * place, or is appended. The input is left untouched.
+ * By default the field becomes the only sort. It flips only when it is the
+ * primary sort — the first one, the one `getAriaSort()` announces — and starts
+ * ascending otherwise, even if a secondary sort already names it. With
+ * `multiple` the other sorts are kept: the field flips in place wherever it
+ * is, or is appended ascending. The input is left untouched.
  *
  * @param sorts - The current sorts
  * @param field - The API field clicked
@@ -22,15 +24,18 @@ export function toggleSort(
   field: string,
   options: ToggleSortOptions = {}
 ): readonly Sort[] {
-  const existing = sorts.find((sort) => sort.field === field);
-  const toggled: Sort = {
+  const flipped = (sort: Sort | undefined): Sort => ({
     field,
-    order: existing?.order === SortEnum.ASC ? SortEnum.DESC : SortEnum.ASC,
-  };
+    order: sort?.order === SortEnum.ASC ? SortEnum.DESC : SortEnum.ASC,
+  });
 
   if (!options.multiple) {
-    return [toggled];
+    return [flipped(sorts[0]?.field === field ? sorts[0] : undefined)];
   }
 
-  return existing ? sorts.map((sort) => (sort === existing ? toggled : sort)) : [...sorts, toggled];
+  const existing = sorts.find((sort) => sort.field === field);
+
+  return existing
+    ? sorts.map((sort) => (sort === existing ? flipped(existing) : sort))
+    : [...sorts, flipped(undefined)];
 }

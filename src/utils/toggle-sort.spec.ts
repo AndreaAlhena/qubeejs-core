@@ -22,6 +22,16 @@ describe('toggleSort', () => {
     ]);
   });
 
+  it('should flip only the primary sort by default', () => {
+    expect(toggleSort([byDateDesc, byTitle], 'publishedAt')).toEqual([
+      { field: 'publishedAt', order: SortEnum.ASC },
+    ]);
+  });
+
+  it('should start a secondary sort ascending by default', () => {
+    expect(toggleSort([byDateDesc, byTitle], 'title')).toEqual([byTitle]);
+  });
+
   it('should flip in place with multiple', () => {
     expect(toggleSort([byTitle, byDateDesc], 'publishedAt', { multiple: true })).toEqual([
       byTitle,

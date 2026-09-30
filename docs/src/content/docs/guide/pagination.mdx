@@ -170,11 +170,13 @@ from the page, the page size and the rows. An empty page is `{ from: 0, to: 0, t
 ```ts
 import { getAriaSort, toggleSort } from '@qubeejs/core';
 
-toggleSort(sorts, 'title');                     // title ascending — or flipped, if already sorted
+toggleSort(sorts, 'title');                     // title ascending — or flipped, if it is the primary sort
 toggleSort(sorts, 'title', { multiple: true }); // keeps the other sorts
 getAriaSort(sorts, 'title');                    // 'ascending' | 'descending' | 'none'
 ```
 
-`toggleSort()` replaces the other sorts unless `multiple` is set. `getAriaSort()` reports a direction
+`toggleSort()` replaces the other sorts unless `multiple` is set, and flips a field only when it is the
+**primary** sort — the one `getAriaSort()` announces; any other field starts ascending. With `multiple`, a
+field flips in place wherever it is. `getAriaSort()` reports a direction
 only for the **primary** sort — ARIA allows one sorted column per table — and `'none'` for every
 other column.
