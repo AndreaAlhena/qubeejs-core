@@ -14,12 +14,13 @@ const DECL =
 const read = (dir: string, prefix: string): SourceFile[] =>
   globSync('**/*.ts', { cwd: dir }).map((p: string): SourceFile => {
     const text = readFileSync(join(dir, p), 'utf8');
+    const rel = p.replaceAll('\\', '/');
     const declarations = [...text.matchAll(DECL)].map((m) => ({
       exported: Boolean(m[1]),
       kind: m[2].replace('abstract class', 'class'),
       name: m[3],
     }));
-    return { declarations, name: p.split('/').pop() as string, path: `${prefix}${p}`, text };
+    return { declarations, name: rel.split('/').pop() as string, path: `${prefix}${rel}`, text };
   });
 
 /** Everything under src/, excluding specs — the shipped library. */
