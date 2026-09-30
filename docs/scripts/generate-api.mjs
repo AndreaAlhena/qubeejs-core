@@ -268,7 +268,7 @@ mkdirSync(outDir, { recursive: true });
 
 const GROUPS = [
   { dir: 'services', match: (n) => ['QueryBuilder', 'QubeeStore', 'Paginator'].includes(n.name) },
-  { dir: 'models', match: (n) => n.name.endsWith('Options') || n.name === 'PaginatedCollection' },
+  { dir: 'models', match: (n) => (n.kind === 128 && n.name.endsWith('Options')) || n.name === 'PaginatedCollection' },
   { dir: 'errors', match: (n) => n.name.endsWith('Error') },
   { dir: 'enums', match: (n) => n.kind === 8 },
   { dir: 'strategies', match: (n) => n.name.endsWith('Strategy') },
