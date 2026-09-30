@@ -35,8 +35,9 @@ import { DuplicateListParamError } from '../errors/duplicate-list-param.error';
  * ```
  *
  * @param definition - The list
- * @returns The same list, with it and its params map frozen — shallowly, since
- * the driver is a shared constant such as `STRAPI_DRIVER`
+ * @returns A frozen shallow copy of the list, with its params map frozen too —
+ * the input stays unfrozen, and so does the driver, a shared constant such as
+ * `STRAPI_DRIVER`
  * @throws {DuplicateListParamError} If two params share a key, or a key is empty
  */
 export function defineList<TParams extends ListParams>(

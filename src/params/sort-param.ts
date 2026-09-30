@@ -10,7 +10,9 @@ import { SortEnum } from '../enums/sort.enum';
  * Reads one value of comma-separated tokens; a leading `-` sorts descending.
  * A token outside `fields`, a field sorted twice, or a key given twice falls
  * back to the default. State always holds API field names, even when
- * `fields` renames them for the URL. Defaults to no sort.
+ * `fields` renames them for the URL. Defaults to no sort. Clearing the sort in a link (`[]`) leaves the key
+ * out, which reads back as the default — give it an empty default if users
+ * must be able to clear it.
  *
  * The result carries `sortFields`, which `@qubeejs/react` reads to type
  * `toggleSort()`.

@@ -20,8 +20,10 @@ import { readListState } from './read-list-state';
  * - Keys the list does not own are kept, ahead of the list's own, which follow
  *   in declaration order. The hash is dropped.
  * - Commas are left unescaped, so sorts read `sort=-publishedAt,title`.
- *   Compare two queries through `toSearchParams(…).toString()`, never as raw
- *   strings.
+ *   Never compare raw query strings. `toSearchParams(…).toString()` evens out
+ *   encoding (`,` against `%2C`) but not key order; to test whether the URL
+ *   already shows a state, compare `buildListHref(list, location, changes)`
+ *   with `buildListHref(list, location)`, the current URL in canonical form.
  *
  * ```ts
  * buildListHref(articleList, { pathname: '/articles', search: '?page=3' }, { q: 'react' });

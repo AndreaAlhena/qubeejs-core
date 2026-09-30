@@ -50,7 +50,7 @@ export const articleList = defineList({
       fields: ['publishedAt', 'title'],
     }),
   },
-  qubee: { driver: STRAPI_DRIVER },
+  qubee: { baseUrl: 'https://example.com/api', driver: STRAPI_DRIVER },
   resource: 'articles',
 });
 ```
@@ -98,6 +98,11 @@ A param with a default always holds a value; one without holds `undefined` when 
 Every param falls back to its default when the URL holds nothing it can read — including a
 single-value param that finds its key twice (`?page=1&page=2`). `listParam` and `sortParam` default
 to `[]`.
+
+Because clearing a param means going back to its default, a multi-select whose default is not empty
+cannot be cleared through a link: `buildListHref(list, location, { status: [] })` leaves the key out,
+and that reads back as the default. Give a `listParam` or `sortParam` an empty default if users must
+be able to clear it.
 
 `stringParam` keeps surrounding spaces unless you pass `trim: true`. A search box whose value is read
 back from list state would otherwise lose the space its user has just typed; trim on the server, or
@@ -150,7 +155,9 @@ It takes the query in whatever shape your router hands over — a `URLSearchPara
 Next's `useSearchParams()`), a query string, or the `searchParams` record a Next page receives:
 
 ```ts
-readListState(articleList, await searchParams); // { q: 'react', tag: ['a', 'b'] }
+// searchParams: { q: 'react', tag: ['a', 'b'] } — `tag` is not one of articleList's params
+readListState(articleList, await searchParams);
+// { page: 1, q: 'react', status: undefined, sort: [{ field: 'publishedAt', order: SortEnum.DESC }] }
 ```
 
 `toSearchParams()` performs that normalisation on its own, when you need a `URLSearchParams`.
@@ -173,14 +180,25 @@ buildListHref(articleList, location, { q: undefined });    // '/articles'
 - **A change to anything but the page returns to page 1** — page 3 of one search means nothing in
   another. Setting a param to the value it already holds keeps the page, and naming `page` yourself
   always wins.
-- **`undefined` means "back to the default"**, which is how you clear a filter.
+- **`undefined` means "back to the default"**, which is how you clear a filter that has none — the
+  same goes for `[]` on a list or sort param. A param whose default is not empty resets to that
+  default instead.
 - **Keys the list does not own are kept** — a drawer's `?panel=edit` survives paging — ahead of the
   list's own, which follow in declaration order.
 - An unreadable value in the current URL is dropped, and so is the hash.
 
-Commas are left unescaped, so sorts stay readable: `?sort=-publishedAt,title`. To compare two
-queries, compare `toSearchParams(a).toString()` with `toSearchParams(b).toString()` — never the raw
-strings.
+Commas are left unescaped, so sorts stay readable: `?sort=-publishedAt,title`. Never compare raw
+query strings. `toSearchParams(a).toString()` against `toSearchParams(b).toString()` evens out
+encoding (`,` against `%2C`, `+` against `%20`) but **not key order**: `?q=react&page=3` and
+`?page=3&q=react` still differ. To ask whether the URL already shows a state — an active link, a
+"did it change?" check — compare `buildListHref(list, location, changes)` with
+`buildListHref(list, location)`, which is the current URL in canonical form, or compare the states
+`readListState()` returns:
+
+```ts
+buildListHref(articleList, location);                        // '/articles?page=3&q=react'
+buildListHref(articleList, location, { page: 3 }) === buildListHref(articleList, location); // true — already there
+```
 
 Because the function is pure, a server can render every pagination link and filter chip as a plain
 `<a href>`.
@@ -194,12 +212,10 @@ import { buildListRequest, readListState } from '@qubeejs/core';
 
 const request = buildListRequest(articleList, readListState(articleList, '?page=2'));
 
-request.uri;     // '/articles?sort[0]=publishedAt:desc&pagination[page]=2&pagination[pageSize]=20'
+request.uri;     // 'https://example.com/api/articles?sort[0]=publishedAt:desc&pagination[page]=2&pagination[pageSize]=20'
 request.headers; // null — or PostgREST's Range, in RANGE mode
 
-const response = await fetch(`https://example.com/api${request.uri}`, {
-  headers: request.headers ?? {},
-});
+const response = await fetch(request.uri, { headers: request.headers ?? {} });
 const page = request.paginate<Article>(await response.json());
 ```
 
@@ -222,10 +238,12 @@ useQuery({
 ```
 
 Errors from `apply` — a filter your driver cannot express, say — are programmer errors and
-propagate.
+propagate. So does a value a validating builder method refuses: give `min` and `max` to any param
+that `apply` passes to one such as `setLimit()`, since a hand-edited value outside the builder's
+range would throw.
 
 :::caution[Bee aware]
-When the backend lives elsewhere, put its base URL in the list's `qubee` config rather than in front
-of `request.uri`: `qubee: { baseUrl: 'https://example.com/api', driver: STRAPI_DRIVER }`. Then
-`request.uri` is absolute, and the cache key names the backend too.
+When the backend lives elsewhere, put its base URL in the list's `qubee` config, as `articleList`
+above does, rather than in front of `request.uri`. Then `request.uri` is absolute, and the cache key
+names the backend too.
 :::

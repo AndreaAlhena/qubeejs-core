@@ -7,7 +7,9 @@ import type { ListParam } from '../types/list-param.type';
  * Reads every value of the key, each split on the separator, so both
  * `?tag=a,b` and `?tag=a&tag=b` hold `['a', 'b']`. Empty items, duplicates and
  * items outside `values` are dropped; when none is left, the default applies.
- * Writes the items as one value, joined with the separator. Defaults to `[]`.
+ * Writes the items as one value, joined with the separator. Defaults to `[]`. Clearing the param in a link (`[]`) leaves the key out,
+ * which reads back as the default — give a multi-select an empty default if
+ * users must be able to clear it.
  *
  * @param key - The page-URL key
  * @param options - The accepted items, the default and the separator
