@@ -8,6 +8,14 @@ import type { QueryBuilderConfig } from './query-builder-config.type';
  */
 export type QubeeConfig = {
   /**
+   * Prepended to every generated URI, as `QueryBuilder.setBaseUrl()` would —
+   * `https://example.com/api` turns `/articles?…` into
+   * `https://example.com/api/articles?…`. Omit it for root-relative URIs.
+   * `reset()` clears it.
+   */
+  baseUrl?: string;
+
+  /**
    * The driver to use, as its exported definition — `STRAPI_DRIVER`, say.
    *
    * A definition rather than an id, deliberately: it keeps `createQubee` from
