@@ -93,11 +93,11 @@ REST · Strapi · WordPress REST
 
 ## Adapters
 
-| Package                                                | Framework            |
-| ------------------------------------------------------ | -------------------- |
-| `@qubeejs/core`                                        | none — vanilla TS/JS |
-| [`ng-qubee`](https://github.com/AndreaAlhena/ng-qubee) | Angular              |
-| `@qubee/react`                                         | React _(planned)_    |
+| Package                                                           | Framework            |
+| ----------------------------------------------------------------- | -------------------- |
+| `@qubeejs/core`                                                   | none — vanilla TS/JS |
+| [`ng-qubee`](https://github.com/AndreaAlhena/ng-qubee)            | Angular              |
+| [`@qubeejs/react`](https://github.com/AndreaAlhena/qubeejs-react) | React                |
 
 ## Contributing
 

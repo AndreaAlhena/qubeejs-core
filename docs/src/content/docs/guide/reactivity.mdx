@@ -15,7 +15,8 @@ store.subscribe(fn); // returns an unsubscribe function
 
 That is deliberately React's
 [`useSyncExternalStore`](https://react.dev/reference/react/useSyncExternalStore) contract, which
-also happens to be the smallest sensible one.
+also happens to be the smallest sensible one. Both are bound to their store, so each can be passed
+on its own — exactly what `useSyncExternalStore` does with them.
 
 ## React
 

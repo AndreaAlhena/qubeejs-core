@@ -48,6 +48,37 @@ export class QubeeStore {
   private _snapshot: QueryBuilderState = this._freeze(this._clone(this._state));
 
   /**
+   * Read the current state.
+   *
+   * The returned object is a defensive copy whose identity is stable until the
+   * next write, which is exactly the contract `useSyncExternalStore` expects.
+   *
+   * An arrow function, so it stays bound to its store when passed on its own —
+   * `useSyncExternalStore(store.subscribe, store.getSnapshot)`.
+   *
+   * @returns The current query builder state
+   */
+  public readonly getSnapshot = (): QueryBuilderState => this._snapshot;
+
+  /**
+   * Register a listener invoked after every state change.
+   *
+   * An arrow function, so it stays bound to its store when passed on its own.
+   * Its identity is stable for the life of the store.
+   *
+   * @param listener - Called after each write; receives no arguments and should
+   * read the new state via {@link getSnapshot}
+   * @returns A function that removes the listener
+   */
+  public readonly subscribe = (listener: () => void): (() => void) => {
+    this._listeners.add(listener);
+
+    return () => {
+      this._listeners.delete(listener);
+    };
+  };
+
+  /**
    * Deep-copy a value so state can never be mutated through a handed-out reference.
    *
    * `structuredClone` replaces ng-qubee's `JSON.parse(JSON.stringify())`: it is
@@ -512,18 +543,6 @@ export class QubeeStore {
   }
 
   /**
-   * Read the current state.
-   *
-   * The returned object is a defensive copy whose identity is stable until the
-   * next write, which is exactly the contract `useSyncExternalStore` expects.
-   *
-   * @returns The current query builder state
-   */
-  public getSnapshot(): QueryBuilderState {
-    return this._snapshot;
-  }
-
-  /**
    * Set the limit for paginated results
    *
    * This setter performs a raw state write. Validation of the value is the
@@ -623,21 +642,6 @@ export class QubeeStore {
       search,
     }));
   }
-  /**
-   * Register a listener invoked after every state change.
-   *
-   * @param listener - Called after each write; receives no arguments and should
-   * read the new state via {@link getSnapshot}
-   * @returns A function that removes the listener
-   */
-  public subscribe(listener: () => void): () => void {
-    this._listeners.add(listener);
-
-    return () => {
-      this._listeners.delete(listener);
-    };
-  }
-
   /**
    * Atomically record the `lastPage` value from a paginated response and
    * flip `isLastPageKnown` to `true`
