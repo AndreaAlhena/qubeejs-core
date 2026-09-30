@@ -216,14 +216,15 @@ request.uri;     // 'https://example.com/api/articles?sort[0]=publishedAt:desc&p
 request.headers; // null — or PostgREST's Range, in RANGE mode
 
 const response = await fetch(request.uri, { headers: request.headers ?? {} });
-const page = request.paginate<Article>(await response.json());
+const page = request.paginate<Article>(await response.json(), response.headers);
 ```
 
 Each call builds on a fresh `createQubee()` instance: it sets the resource, runs `apply`, and applies
 the page **last**. `addFilter()`, `addSort()`, `setLimit()` and the rest reset the page to 1, so a
 page set before them would be lost; the list does the ordering for you.
 
-`paginate` parses with the paginator of the same instance. `[request.uri, request.headers]` is a
+`paginate` parses with the paginator of the same instance; the headers matter for drivers that page
+over them, such as PostgREST's `Content-Range`. `[request.uri, request.headers]` is a
 complete cache key — TanStack Query's `queryKey`, SWR's `key`:
 
 ```ts
@@ -231,7 +232,7 @@ useQuery({
   queryFn: async () => {
     const response = await fetch(request.uri, { headers: request.headers ?? {} });
 
-    return request.paginate<Article>(await response.json()).toPlain();
+    return request.paginate<Article>(await response.json(), response.headers).toPlain();
   },
   queryKey: ['articles', request.uri, request.headers],
 });
