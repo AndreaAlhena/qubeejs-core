@@ -190,3 +190,15 @@ export { listParam } from './params/list-param';
 export { sortParam } from './params/sort-param';
 export { stringParam } from './params/string-param';
 export { toSearchParams } from './utils/to-search-params';
+
+// List controls — pagination and sorting helpers
+export type { AriaSort } from './types/aria-sort.type';
+export type { PageRange } from './types/page-range.type';
+export type { PageRangeInput } from './types/page-range-input.type';
+export type { PageWindowItem } from './types/page-window-item.type';
+export type { PageWindowOptions } from './types/page-window-options.type';
+export type { ToggleSortOptions } from './types/toggle-sort-options.type';
+export { getAriaSort } from './utils/get-aria-sort';
+export { getPageRange } from './utils/get-page-range';
+export { getPageWindow } from './utils/get-page-window';
+export { toggleSort } from './utils/toggle-sort';
