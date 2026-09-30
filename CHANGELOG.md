@@ -27,6 +27,10 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   anything but the page returns to page 1, while setting a param to its current value keeps it and
   an explicit `page` always wins; keys the list does not own are kept; commas stay readable
   (`sort=-publishedAt,title`) (#26)
+- `buildListRequest()` turns list state into `{ uri, headers, paginate }` on a fresh
+  `createQubee()` instance. It applies the page **last** — after the list's filters, sorts and
+  limit, which reset it — so the page in the URL is the page requested. `headers` carries
+  PostgREST's `Range` in RANGE mode, and `paginate` parses with the same instance's paginator (#27)
 
 ### Fixed
 
