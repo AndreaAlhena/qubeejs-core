@@ -138,6 +138,7 @@ export { WORDPRESS_DRIVER } from './drivers/wordpress.driver';
 
 // Errors
 export { QubeeError } from './errors/qubee.error';
+export { DuplicateListParamError } from './errors/duplicate-list-param.error';
 export { UnsupportedCapabilityError } from './errors/unsupported-capability.error';
 export { InvalidFilterOperatorValueError } from './errors/invalid-filter-operator-value.error';
 export { InvalidLimitError } from './errors/invalid-limit.error';
@@ -176,6 +177,8 @@ export type { SearchParamsInput } from './types/search-params-input.type';
 export type { SortParam } from './types/sort-param.type';
 export type { SortParamOptions } from './types/sort-param-options.type';
 export type { StringParamOptions } from './types/string-param-options.type';
+export { defineList } from './lists/define-list';
+export { readListState } from './lists/read-list-state';
 export { booleanParam } from './params/boolean-param';
 export { enumParam } from './params/enum-param';
 export { integerParam } from './params/integer-param';

@@ -1,5 +1,5 @@
 /**
- * The statuses of an article, shared by the list-param specs.
+ * The statuses the articles fixture filters by.
  */
 export enum ArticleStatusEnum {
   DRAFT = 'draft',
