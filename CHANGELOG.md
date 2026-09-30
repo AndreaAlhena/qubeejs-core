@@ -7,6 +7,12 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- `QubeeConfig.baseUrl`: `createQubee({ baseUrl, driver })` prefixes every generated URI, as
+  `setBaseUrl()` does, so one config object describes a whole instance. `reset()` clears it, as
+  it clears `setBaseUrl()` (#24)
+
 ### Fixed
 
 - `QubeeStore.subscribe` and `getSnapshot` are bound to their store, so the documented

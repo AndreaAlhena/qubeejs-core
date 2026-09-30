@@ -25,13 +25,23 @@ import { QueryBuilder } from './query-builder';
  * Constructing the three by hand remains supported, and is what you want when
  * they should not share state.
  *
- * @param config - The driver, plus optional request and response key overrides
+ * @param config - The driver, plus an optional base URL and request and response key overrides
  * @returns The builder, paginator and the store they share
  */
 export function createQubee(config: QubeeConfig): Qubee {
-  const { driver, pagination = PaginationModeEnum.QUERY, request = {}, response = {} } = config;
+  const {
+    baseUrl,
+    driver,
+    pagination = PaginationModeEnum.QUERY,
+    request = {},
+    response = {},
+  } = config;
 
   const store = new QubeeStore();
+
+  if (baseUrl) {
+    store.baseUrl = baseUrl;
+  }
 
   return {
     builder: new QueryBuilder(

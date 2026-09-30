@@ -28,6 +28,7 @@ builder.totalPages();  // 6
 
 ```ts
 createQubee({
+  baseUrl: 'https://example.com/api',   // prefixed to every URI
   driver: POSTGREST_DRIVER,
   pagination: PaginationModeEnum.RANGE, // wire-level mechanism; PostgREST only
   request: { limit: 'perPage' },        // rename emitted query parameters
@@ -41,6 +42,7 @@ createQubee({
 | `pagination` | `PaginationModeEnum` | Query string or `Range` header. Defaults to query |
 | `request` | `QueryBuilderConfig` | Override emitted parameter names |
 | `response` | `PaginationConfig` | Override where metadata is read from |
+| `baseUrl` | `string` | Prefixed to every generated URI, as `setBaseUrl()` does. `reset()` clears it |
 
 ## Why it takes a definition, not an id
 
