@@ -7,6 +7,14 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Fixed
+
+- `QubeeStore.subscribe` and `getSnapshot` are bound to their store, so the documented
+  `useSyncExternalStore(store.subscribe, store.getSnapshot)` works. Both were prototype methods
+  and threw `Cannot read properties of undefined` when passed on their own. They are now
+  arrow-function members — one per store, with a stable identity — and read as properties in the
+  API reference (#23)
+
 ## [1.2.0] - 2026-09-30
 
 ### Added
