@@ -7,6 +7,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-09-30
+
 ### Added
 
 - `QubeeConfig.baseUrl`: `createQubee({ baseUrl, driver })` prefixes every generated URI, as
@@ -34,10 +36,10 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   PostgREST's `Range` in RANGE mode, and `paginate` parses with the same instance's paginator. A
   URL page the store would reject — zero, negative or fractional — falls back to the list's default
   page (#27)
-- Helpers for list controls: `getPageWindow()` — page numbers with gaps, at a constant length, and
-  never throwing on an unknown last page — `getPageRange()` — the numbers behind "21–34 of 34" —
-  and `toggleSort()` and `getAriaSort()` for sortable column headers —
-  `toggleSort()` flips only the primary sort and starts any other field ascending (#28, #32)
+- Helpers for list controls. `getPageWindow()` gives page numbers with gaps, at a constant length,
+  and never throws on an unknown last page. `getPageRange()` gives the numbers behind "21–34 of
+  34". `toggleSort()` and `getAriaSort()` serve sortable column headers, and `toggleSort()` flips
+  only the primary sort and starts any other field ascending (#28, #32)
 
 ### Fixed
 
@@ -218,7 +220,8 @@ Carried over from `ng-qubee`, where these are still present:
 - CI verifies both entry points resolve, that there are no runtime dependencies, and that a
   single-driver import still tree-shakes (#12)
 
-[unreleased]: https://github.com/AndreaAlhena/qubeejs-core/compare/v1.2.0...HEAD
+[unreleased]: https://github.com/AndreaAlhena/qubeejs-core/compare/v1.3.0...HEAD
+[1.3.0]: https://github.com/AndreaAlhena/qubeejs-core/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/AndreaAlhena/qubeejs-core/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/AndreaAlhena/qubeejs-core/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/AndreaAlhena/qubeejs-core/releases/tag/v1.0.0
