@@ -27,7 +27,7 @@ import { createQubee } from '../services/create-qubee';
  * ```ts
  * const request = buildListRequest(articleList, readListState(articleList, '?page=3'));
  * const response = await fetch(request.uri, { headers: request.headers ?? {} });
- * const page = request.paginate<Article>(await response.json());
+ * const page = request.paginate<Article>(await response.json(), response.headers);
  * ```
  *
  * @param list - The list, as `defineList()` returned it
