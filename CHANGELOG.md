@@ -7,6 +7,49 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-09-30
+
+### Added
+
+- `QubeeConfig.baseUrl`: `createQubee({ baseUrl, driver })` prefixes every generated URI, as
+  `setBaseUrl()` does, so one config object describes a whole instance. `reset()` clears it, as
+  it clears `setBaseUrl()` (#24)
+- **Lists in the page URL.** `defineList()` declares a list once — its resource, qubee
+  configuration, page-URL params and how its state becomes builder calls — and `readListState()`
+  reads a page's query into typed state. It never throws: a missing, malformed or repeated value
+  takes the param's default — a single-value param falls back on a repeated key, while `listParam`
+  merges repeated keys. Six params ship — `integerParam`, `stringParam`, `enumParam`,
+  `booleanParam`, `listParam`, `sortParam` — and any object of the `ListParam<T>` shape is a
+  param. `toSearchParams()` normalises a `URLSearchParams` from any realm, a query string or
+  Next's `searchParams` record. The core's boundary is now **pure transformations in core;
+  navigation, subscriptions and fetching in the adapters** — it still never navigates, subscribes
+  to a router or fetches (#25)
+- `DuplicateListParamError` (`DUPLICATE_LIST_PARAM`), thrown by `defineList()` when two params
+  share a page-URL key or a key is empty (#25)
+- `buildListHref()` writes list state back into a link. Defaults stay out of the URL; a change to
+  anything but the page returns to page 1, while setting a param to its current value keeps it and
+  an explicit `page` always wins; keys the list does not own are kept; commas stay readable
+  (`sort=-publishedAt,title`) (#26)
+- `buildListRequest()` turns list state into `{ uri, headers, paginate }` on a fresh
+  `createQubee()` instance. It applies the page **last** — after the list's filters, sorts and
+  limit, which reset it — so the page in the URL is the page requested. `headers` carries
+  PostgREST's `Range` in RANGE mode, and `paginate` parses with the same instance's paginator. A
+  URL page the store would reject — zero, negative or fractional — falls back to the list's default
+  page (#27)
+- Helpers for list controls. `getPageWindow()` gives page numbers with gaps, at a constant length,
+  and never throws on an unknown last page. `getPageRange()` gives the numbers behind "21–34 of
+  34". `toggleSort()` and `getAriaSort()` serve sortable column headers, and `toggleSort()` flips
+  only the primary sort and starts any other field ascending (#28, #32)
+
+### Fixed
+
+- `QubeeStore.subscribe` and `getSnapshot` are bound to their store, so the documented
+  `useSyncExternalStore(store.subscribe, store.getSnapshot)` works. Both were prototype methods
+  and threw `Cannot read properties of undefined` when passed on their own. They are now
+  arrow-function members — one per store, with a stable identity — and read as properties in the
+  API reference. Because they are now instance properties, a subclass that overrides them, or
+  `vi.spyOn(QubeeStore.prototype, 'subscribe')`, no longer works (#23)
+
 ## [1.2.0] - 2026-09-30
 
 ### Added
@@ -177,7 +220,8 @@ Carried over from `ng-qubee`, where these are still present:
 - CI verifies both entry points resolve, that there are no runtime dependencies, and that a
   single-driver import still tree-shakes (#12)
 
-[unreleased]: https://github.com/AndreaAlhena/qubeejs-core/compare/v1.2.0...HEAD
+[unreleased]: https://github.com/AndreaAlhena/qubeejs-core/compare/v1.3.0...HEAD
+[1.3.0]: https://github.com/AndreaAlhena/qubeejs-core/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/AndreaAlhena/qubeejs-core/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/AndreaAlhena/qubeejs-core/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/AndreaAlhena/qubeejs-core/releases/tag/v1.0.0

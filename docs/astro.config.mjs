@@ -30,6 +30,7 @@ export default defineConfig({
             { label: 'Building a query', slug: 'guide/building-a-query' },
             { label: 'Filters and operators', slug: 'guide/filters' },
             { label: 'Pagination', slug: 'guide/pagination' },
+            { label: 'Lists & URL state', slug: 'guide/lists' },
             { label: 'Reactivity', slug: 'guide/reactivity' },
             { label: 'Errors', slug: 'guide/errors' },
             { label: 'Bundle size', slug: 'guide/bundle-size' },

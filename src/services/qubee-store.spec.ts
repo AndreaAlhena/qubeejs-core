@@ -1234,4 +1234,33 @@ describe('QubeeStore', () => {
       expect(store.getSnapshot().includes).toEqual(['author']);
     });
   });
+
+  describe('binding', () => {
+    it('should read the snapshot through a detached getSnapshot', () => {
+      const { getSnapshot } = store;
+
+      store.page = 3;
+
+      expect(getSnapshot().page).toBe(3);
+    });
+
+    it('should notify a listener registered through a detached subscribe', () => {
+      const { subscribe } = store;
+      const listener = vi.fn();
+
+      const unsubscribe = subscribe(listener);
+      store.page = 2;
+      unsubscribe();
+      store.page = 3;
+
+      expect(listener).toHaveBeenCalledTimes(1);
+    });
+
+    it('should keep one getSnapshot and one subscribe per store', () => {
+      // useSyncExternalStore resubscribes whenever `subscribe` changes identity.
+      expect(store.getSnapshot).toBe(store.getSnapshot);
+      expect(store.subscribe).toBe(store.subscribe);
+      expect(store.subscribe).not.toBe(new QubeeStore().subscribe);
+    });
+  });
 });

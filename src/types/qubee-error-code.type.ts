@@ -10,6 +10,7 @@
  * ```
  */
 export type QubeeErrorCode =
+  | 'DUPLICATE_LIST_PARAM'
   | 'INVALID_FILTER_OPERATOR_VALUE'
   | 'INVALID_LIMIT'
   | 'INVALID_PAGE_NUMBER'

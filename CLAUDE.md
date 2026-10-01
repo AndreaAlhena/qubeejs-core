@@ -1,7 +1,7 @@
 # qubee
 
-Framework-agnostic query builder and paginator. Extracted from `ng-qubee`; consumed by
-`@qubee/angular` and `@qubee/react` adapters.
+Framework-agnostic query builder and paginator. Extracted from `ng-qubee`; consumed by the
+`ng-qubee` (Angular) and `@qubeejs/react` adapters.
 
 ## Coding standards
 
@@ -30,20 +30,25 @@ npm run format
 
 ## Architecture
 
-The library **builds URIs and parses responses — it performs no I/O.** There is no HTTP client and
-no transport layer; consumers fetch however they like and hand the response body back.
+The library performs **pure transformations** — page URL ⇄ typed list state ⇄ API URI, response
+body → paginated collection — and **no I/O**. It never navigates, subscribes to a router or fetches:
+there is no HTTP client and no transport layer; consumers and adapters do that. **Pure
+transformations in core; navigation, subscriptions and fetching in the adapters.**
 
 ```
 src/
 ├─ drivers/      one <driver>.driver.ts per backend + driver-registry.ts composing them
 ├─ enums/        DriverEnum, FilterOperatorEnum, PaginationModeEnum, SortEnum
-├─ errors/       QubeeError base + 16 concrete errors
+├─ errors/       QubeeError base + 17 concrete errors
 ├─ interfaces/   IRequestStrategy, IResponseStrategy — the only two class contracts
+├─ lists/        defineList, readListState, buildListHref, buildListRequest
 ├─ models/       PaginatedCollection, QueryBuilderOptions, ResponseOptions
+├─ params/       integerParam, stringParam, enumParam, booleanParam, listParam, sortParam
 ├─ services/     QueryBuilder, QubeeStore, Paginator
 ├─ strategies/   18 request + 18 response strategies, over 3 abstract bases
 ├─ types/        data shapes and derived unions
-└─ utils/        append-params, encode-values, read-header, read-path, stringify
+└─ utils/        append-params, encode-values, read-header, read-path, stringify, to-search-params,
+                 get-page-window, get-page-range, toggle-sort, get-aria-sort
 ```
 
 **Adding a driver:** four steps — a `DriverEnum` member, a request strategy extending

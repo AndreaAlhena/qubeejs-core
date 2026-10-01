@@ -15,8 +15,9 @@ standards.
 
 ## What it does
 
-Builds query URIs and parses paginated responses. **It performs no I/O** — there is no HTTP client
-and no transport layer. You fetch however you like and hand the response body back.
+Builds query URIs, parses paginated responses, and reads and writes list state in the page URL.
+**It performs no I/O** — there is no HTTP client and no transport layer, and it never navigates or
+subscribes to a router. You fetch however you like and hand the response body back.
 
 That is what makes it framework-agnostic: no Angular, no React, no RxJS, no Signals.
 
@@ -48,6 +49,24 @@ page.data; // rows
 page.total; // 57
 page.lastPage; // 6
 ```
+
+## Lists in the page URL
+
+A list page that keeps its query in the URL — `/articles?q=react&sort=title&page=2` — declares the
+list once, and the core does the string work in both directions:
+
+```ts
+import { buildListHref, buildListRequest, readListState } from '@qubeejs/core';
+
+// articleList = defineList({ resource, qubee, params, apply }) — see the guide
+const state = readListState(articleList, location.search); // typed; never throws
+const href = buildListHref(articleList, location, { q: 'vue' }); // back to page 1
+const { uri, headers, paginate } = buildListRequest(articleList, state); // page applied last
+```
+
+These are pure transformations too: the core reads and writes URLs, but never navigates, subscribes
+to a router or fetches. See
+[Lists & URL state](https://qubeejs.andreatantimonaco.me/guide/lists/).
 
 ## When the driver is not enough
 
@@ -93,11 +112,11 @@ REST · Strapi · WordPress REST
 
 ## Adapters
 
-| Package                                                | Framework            |
-| ------------------------------------------------------ | -------------------- |
-| `@qubeejs/core`                                        | none — vanilla TS/JS |
-| [`ng-qubee`](https://github.com/AndreaAlhena/ng-qubee) | Angular              |
-| `@qubee/react`                                         | React _(planned)_    |
+| Package                                                           | Framework            |
+| ----------------------------------------------------------------- | -------------------- |
+| `@qubeejs/core`                                                   | none — vanilla TS/JS |
+| [`ng-qubee`](https://github.com/AndreaAlhena/ng-qubee)            | Angular              |
+| [`@qubeejs/react`](https://github.com/AndreaAlhena/qubeejs-react) | React                |
 
 ## Contributing
 

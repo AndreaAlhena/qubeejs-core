@@ -1,0 +1,250 @@
+---
+title: Lists & URL state
+description: Declare a list once, read its state from the page URL, write it back into links, and turn it into a request.
+sidebar:
+  order: 6
+---
+
+A list page that keeps its query in the page URL — `/articles?q=react&sort=title&page=2` —
+survives a reload, can be shared, and works with the back button. The string work behind it is the
+same on every page: read the query into typed values, fall back when someone hand-edits it, write
+it back without defaults, return to page 1 when a filter changes. The `lists` functions do that work
+once.
+
+They are pure transformations, like the rest of the core. They read and write URLs; they never
+navigate, subscribe to a router or fetch. That is left to your framework — or to an adapter such
+as [`@qubeejs/react`](https://qubeejs-react.andreatantimonaco.me).
+
+## Declaring a list
+
+```ts
+import {
+  defineList,
+  enumParam,
+  integerParam,
+  SortEnum,
+  sortParam,
+  STRAPI_DRIVER,
+  stringParam,
+} from '@qubeejs/core';
+
+export const articleList = defineList({
+  apply: (builder, { q, sort, status }) => {
+    builder.setLimit(20);
+    sort.forEach(({ field, order }) => builder.addSort(field, order));
+
+    if (q) {
+      builder.addFilter('title', q);
+    }
+
+    if (status) {
+      builder.addFilter('status', status);
+    }
+  },
+  params: {
+    page: integerParam('page', { default: 1, min: 1 }),
+    q: stringParam('q'),
+    status: enumParam('status', ['draft', 'published']),
+    sort: sortParam('sort', {
+      default: [{ field: 'publishedAt', order: SortEnum.DESC }],
+      fields: ['publishedAt', 'title'],
+    }),
+  },
+  qubee: { baseUrl: 'https://example.com/api', driver: STRAPI_DRIVER },
+  resource: 'articles',
+});
+```
+
+- **`params`** maps each name in list state to the page-URL key it lives in. Keys appear in links in
+  the order you declare them.
+- **`page` is required**, and must hold a number with a default. The list returns to it when
+  anything else changes, and applies it last when it builds a request.
+- **`apply`** turns state into builder calls. It runs on a fresh builder whose resource is set.
+- **`qubee`** is what [`createQubee()`](/guide/factory/) takes: the driver, a base URL, key
+  overrides.
+
+Declare each list **once, as a module-level constant**, and import it wherever you need it. It
+holds functions, so it cannot travel as serialised data — as a prop from a React Server Component,
+for instance. Two params with the same key, or an empty key, throw `DuplicateListParamError` where
+the list is declared.
+
+The state type comes from the definition:
+
+```ts
+import type { ListState } from '@qubeejs/core';
+
+type ArticleListState = ListState<typeof articleList>;
+// {
+//   readonly page: number;
+//   readonly q: string | undefined;
+//   readonly status: 'draft' | 'published' | undefined;
+//   readonly sort: readonly Sort[];
+// }
+```
+
+A param with a default always holds a value; one without holds `undefined` when the URL has none.
+
+## Params
+
+| Param | Holds | Reads | Writes |
+| --- | --- | --- | --- |
+| `integerParam(key, { default?, min?, max? })` | `number` | digits with an optional `-`, within `min`–`max` | `'3'` |
+| `stringParam(key, { default?, trim? })` | `string` | any non-empty value | the value; nothing for `''` |
+| `enumParam(key, values, { default? })` | a member of `values` | one of `values` — a string enum or a tuple | the value |
+| `booleanParam(key, { default? })` | `boolean` | `true` / `1`, `false` / `0` | `'true'` / `'false'` |
+| `listParam(key, { values?, default?, separator? })` | `readonly T[]` | every value, split on `,`; unknown items dropped | one value, joined with `,` |
+| `sortParam(key, { fields, default? })` | `readonly Sort[]` | `-publishedAt,title` — `-` is descending | the same |
+
+Every param falls back to its default when the URL holds nothing it can read — including a
+single-value param that finds its key twice (`?page=1&page=2`). `listParam` and `sortParam` default
+to `[]`.
+
+Because clearing a param means going back to its default, a multi-select whose default is not empty
+cannot be cleared through a link: `buildListHref(list, location, { status: [] })` leaves the key out,
+and that reads back as the default. Give a `listParam` or `sortParam` an empty default if users must
+be able to clear it.
+
+`stringParam` keeps surrounding spaces unless you pass `trim: true`. A search box whose value is read
+back from list state would otherwise lose the space its user has just typed; trim on the server, or
+in `apply`.
+
+`sortParam` can rename fields for the URL. State always holds the API's field names:
+
+```ts
+sortParam('sort', { fields: { newest: 'publishedAt', title: 'title' } });
+// ?sort=-newest  →  [{ field: 'publishedAt', order: SortEnum.DESC }]
+```
+
+### Writing your own
+
+A param is any object of the `ListParam<T>` shape, so one can be backed by zod, a date library,
+anything:
+
+```ts
+import type { ListParam } from '@qubeejs/core';
+
+const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
+
+export const sinceParam: ListParam<string | undefined> = {
+  default: undefined,
+  key: 'since',
+  parse: (values) => (values.length === 1 && ISO_DATE.test(values[0]) ? values[0] : undefined),
+  serialize: (value) => (value === undefined ? [] : [value]),
+};
+```
+
+`parse` receives every value the URL holds for the key, and is never called with none. Returning
+`undefined` — or throwing — falls back to the default. `serialize` returns `[]` to leave the key out.
+
+## Reading the URL
+
+```ts
+import { readListState } from '@qubeejs/core';
+
+readListState(articleList, '?q=react&sort=title&page=2');
+// { page: 2, q: 'react', status: undefined, sort: [{ field: 'title', order: SortEnum.ASC }] }
+
+readListState(articleList, '?page=banana&status=archived');
+// { page: 1, q: undefined, status: undefined, sort: [{ field: 'publishedAt', order: SortEnum.DESC }] }
+```
+
+**It never throws.** A missing, unreadable or repeated value takes the param's default, and keys the
+list does not own are ignored.
+
+It takes the query in whatever shape your router hands over — a `URLSearchParams` (React Router,
+Next's `useSearchParams()`), a query string, or the `searchParams` record a Next page receives:
+
+```ts
+// searchParams: { q: 'react', tag: ['a', 'b'] } — `tag` is not one of articleList's params
+readListState(articleList, await searchParams);
+// { page: 1, q: 'react', status: undefined, sort: [{ field: 'publishedAt', order: SortEnum.DESC }] }
+```
+
+`toSearchParams()` performs that normalisation on its own, when you need a `URLSearchParams`.
+
+## Building links
+
+`buildListHref()` writes state back into a link, changing only what you ask:
+
+```ts
+import { buildListHref } from '@qubeejs/core';
+
+const location = { pathname: '/articles', search: '?q=react&page=3' };
+
+buildListHref(articleList, location, { page: 4 });         // '/articles?page=4&q=react'
+buildListHref(articleList, location, { status: 'draft' }); // '/articles?q=react&status=draft'
+buildListHref(articleList, location, { q: undefined });    // '/articles'
+```
+
+- **Defaults stay out of the URL**, so the default state is the bare path.
+- **A change to anything but the page returns to page 1** — page 3 of one search means nothing in
+  another. Setting a param to the value it already holds keeps the page, and naming `page` yourself
+  always wins.
+- **`undefined` means "back to the default"**, which is how you clear a filter that has none — the
+  same goes for `[]` on a list or sort param. A param whose default is not empty resets to that
+  default instead.
+- **Keys the list does not own are kept** — a drawer's `?panel=edit` survives paging — ahead of the
+  list's own, which follow in declaration order.
+- An unreadable value in the current URL is dropped, and so is the hash.
+
+Commas are left unescaped, so sorts stay readable: `?sort=-publishedAt,title`. Never compare raw
+query strings. `toSearchParams(a).toString()` against `toSearchParams(b).toString()` evens out
+encoding (`,` against `%2C`, `+` against `%20`) but **not key order**: `?q=react&page=3` and
+`?page=3&q=react` still differ. To ask whether the URL already shows a state — an active link, a
+"did it change?" check — compare `buildListHref(list, location, changes)` with
+`buildListHref(list, location)`, which is the current URL in canonical form, or compare the states
+`readListState()` returns:
+
+```ts
+buildListHref(articleList, location);                        // '/articles?page=3&q=react'
+buildListHref(articleList, location, { page: 3 }) === buildListHref(articleList, location); // true — already there
+```
+
+Because the function is pure, a server can render every pagination link and filter chip as a plain
+`<a href>`.
+
+## Building the request
+
+`buildListRequest()` turns state into everything needed to fetch the page:
+
+```ts
+import { buildListRequest, readListState } from '@qubeejs/core';
+
+const request = buildListRequest(articleList, readListState(articleList, '?page=2'));
+
+request.uri;     // 'https://example.com/api/articles?sort[0]=publishedAt:desc&pagination[page]=2&pagination[pageSize]=20'
+request.headers; // null — or PostgREST's Range, in RANGE mode
+
+const response = await fetch(request.uri, { headers: request.headers ?? {} });
+const page = request.paginate<Article>(await response.json(), response.headers);
+```
+
+Each call builds on a fresh `createQubee()` instance: it sets the resource, runs `apply`, and applies
+the page **last**. `addFilter()`, `addSort()`, `setLimit()` and the rest reset the page to 1, so a
+page set before them would be lost; the list does the ordering for you.
+
+`paginate` parses with the paginator of the same instance; the headers matter for drivers that page
+over them, such as PostgREST's `Content-Range`. `[request.uri, request.headers]` is a
+complete cache key — TanStack Query's `queryKey`, SWR's `key`:
+
+```ts
+useQuery({
+  queryFn: async () => {
+    const response = await fetch(request.uri, { headers: request.headers ?? {} });
+
+    return request.paginate<Article>(await response.json(), response.headers).toPlain();
+  },
+  queryKey: ['articles', request.uri, request.headers],
+});
+```
+
+Errors from `apply` — a filter your driver cannot express, say — are programmer errors and
+propagate. So does a value a validating builder method refuses: give `min` and `max` to any param
+that `apply` passes to one such as `setLimit()`, since a hand-edited value outside the builder's
+range would throw.
+
+:::caution[Bee aware]
+When the backend lives elsewhere, put its base URL in the list's `qubee` config, as `articleList`
+above does, rather than in front of `request.uri`. Then `request.uri` is absolute, and the cache key
+names the backend too.
+:::

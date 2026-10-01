@@ -116,6 +116,31 @@ describe('createQubee', () => {
     expect(builder.setResource('articles').setLimit(10).generateUri()).toContain('limit=10');
   });
 
+  it('prefixes every URI with baseUrl', () => {
+    const { builder } = createQubee({ baseUrl: 'https://example.com/api', driver: STRAPI_DRIVER });
+
+    expect(builder.setResource('articles').setPage(2).generateUri()).toBe(
+      'https://example.com/api/articles?pagination[page]=2&pagination[pageSize]=15'
+    );
+  });
+
+  it('keeps URIs root-relative without baseUrl', () => {
+    const { builder } = createQubee({ driver: STRAPI_DRIVER });
+
+    expect(builder.setResource('articles').generateUri()).toMatch(/^\/articles\?/);
+  });
+
+  it('lets reset() clear baseUrl, as it clears setBaseUrl()', () => {
+    const { builder, store } = createQubee({
+      baseUrl: 'https://example.com/api',
+      driver: STRAPI_DRIVER,
+    });
+
+    builder.reset();
+
+    expect(store.getSnapshot().baseUrl).toBe('');
+  });
+
   it('gives each call an independent store', () => {
     const a = createQubee({ driver: STRAPI_DRIVER });
     const b = createQubee({ driver: STRAPI_DRIVER });

@@ -28,6 +28,7 @@ builder.totalPages();  // 6
 
 ```ts
 createQubee({
+  baseUrl: 'https://example.com/api',   // prefixed to every URI
   driver: POSTGREST_DRIVER,
   pagination: PaginationModeEnum.RANGE, // wire-level mechanism; PostgREST only
   request: { limit: 'perPage' },        // rename emitted query parameters
@@ -41,6 +42,7 @@ createQubee({
 | `pagination` | `PaginationModeEnum` | Query string or `Range` header. Defaults to query |
 | `request` | `QueryBuilderConfig` | Override emitted parameter names |
 | `response` | `PaginationConfig` | Override where metadata is read from |
+| `baseUrl` | `string` | Prefixed to every generated URI, as `setBaseUrl()` does. `reset()` clears it |
 
 ## Why it takes a definition, not an id
 
@@ -50,11 +52,11 @@ use one or not.
 
 | | minified | gzipped |
 | --- | --- | --- |
-| hand-wiring the three classes | 15,727 B | 4,659 B |
-| `createQubee` | 15,835 B | 4,711 B |
-| `createQubee({ driver: DRIVERS[id] })` | 59,099 B | 11,688 B |
+| hand-wiring the three classes | 17,633 B | 5,296 B |
+| `createQubee` | 17,792 B | 5,365 B |
+| `createQubee({ driver: DRIVERS[id] })` | 61,108 B | 12,398 B |
 
-Taking a definition costs **108 bytes** over wiring by hand and keeps the registry out of your
+Taking a definition costs **159 bytes** over wiring by hand and keeps the registry out of your
 bundle. Runtime selection is still one line — you just opt into the cost yourself:
 
 ```ts

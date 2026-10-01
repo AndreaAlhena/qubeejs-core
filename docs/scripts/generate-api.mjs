@@ -242,10 +242,12 @@ function renderPage(node, order) {
 
 // ---- run ----------------------------------------------------------------
 
+// Run the repo's TypeDoc bin with this Node rather than through `npx`: on Windows
+// `npx` is `npx.cmd`, which execFileSync can only launch through a shell.
 execFileSync(
-  'npx',
+  process.execPath,
   [
-    'typedoc',
+    join(repo, 'node_modules', 'typedoc', 'bin', 'typedoc'),
     '--json',
     jsonPath,
     '--entryPoints',
@@ -266,7 +268,7 @@ mkdirSync(outDir, { recursive: true });
 
 const GROUPS = [
   { dir: 'services', match: (n) => ['QueryBuilder', 'QubeeStore', 'Paginator'].includes(n.name) },
-  { dir: 'models', match: (n) => n.name.endsWith('Options') || n.name === 'PaginatedCollection' },
+  { dir: 'models', match: (n) => (n.kind === 128 && n.name.endsWith('Options')) || n.name === 'PaginatedCollection' },
   { dir: 'errors', match: (n) => n.name.endsWith('Error') },
   { dir: 'enums', match: (n) => n.kind === 8 },
   { dir: 'strategies', match: (n) => n.name.endsWith('Strategy') },
