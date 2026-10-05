@@ -26,6 +26,11 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   the input's constraint refuses, so the input fell back to `{}` and `buildListRequest()` asked for
   a third argument. They now declare no input, as leaving the parameter out does; `null` is still
   refused (#40)
+- `readListState()`, `buildListHref()` and `ListState<TList>` take a list written by hand whose
+  `apply` requires its input. They took `ListDefinition<TParams>`, whose input is `never`, which
+  such a list is not assignable to, so its state could not be read nor its links built, and
+  `ListState` was `never`; `buildListRequest()` already took it. They now take any input, as
+  `buildListRequest()` does (#41)
 
 ## [1.4.0] - 2026-10-05
 
