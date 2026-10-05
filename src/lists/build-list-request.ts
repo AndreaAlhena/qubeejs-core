@@ -1,6 +1,7 @@
 import type { PaginatedCollection } from '../models/paginated-collection';
 import type { HeaderBag } from '../types/header-bag.type';
 import type { ListDefinition } from '../types/list-definition.type';
+import type { ListInput } from '../types/list-input.type';
 import type { ListParams } from '../types/list-params.type';
 import type { ListRequest } from '../types/list-request.type';
 import type { PaginatedObject } from '../types/paginated-object.type';
@@ -37,6 +38,11 @@ import { createQubee } from '../services/create-qubee';
  * buildListRequest(taskList, readListState(taskList, search), { projectId: '42' });
  * ```
  *
+ * The input is read from `apply`'s parameters with `ListInput<TList>`, so it does not depend on
+ * how the list's type is written: through an alias such as
+ * `type LooseList = ListDefinition<ListParams>`, a list declares none.
+ *
+ * @typeParam TList - The list's type
  * @param list - The list, as `defineList()` returned it
  * @param state - The list state, as `readListState()` returned it
  * @param input - What the list's request needs besides URL state, for a list that declares an
@@ -45,19 +51,18 @@ import { createQubee } from '../services/create-qubee';
  * @throws If `apply` asks for something the driver cannot express, or the resource is invalid
  */
 export function buildListRequest<
-  TParams extends ListParams,
-  TInput extends NonNullable<unknown> = never,
+  // Widened to any input: a list written by hand whose `apply` requires its input is not
+  // assignable to `ListDefinition<ListParams>`, whose input is `never`.
+  TList extends ListDefinition<ListParams, NonNullable<unknown>>,
 >(
-  list: ListDefinition<TParams, TInput>,
-  state: ParamsState<TParams>,
-  // `NoInfer`: without it, a call that leaves the input out infers `never` from the empty
-  // tuple, and compiles.
-  ...input: [NoInfer<TInput>] extends [never] ? [] : [input: NoInfer<TInput>]
+  list: TList,
+  state: ParamsState<TList['params']>,
+  ...input: [ListInput<TList>] extends [never] ? [] : [input: ListInput<TList>]
 ): ListRequest {
   const { builder, paginator } = createQubee(list.qubee);
 
   builder.setResource(list.resource);
-  // `input` is `[]` or `[input]`, a tuple TypeScript cannot resolve while `TInput` is generic. Its
+  // `input` is `[]` or `[input]`, a tuple TypeScript cannot resolve while `TList` is generic. Its
   // first item is the input, or `undefined` for a list that declares none.
   list.apply?.(builder, state, input[0]);
   builder.setPage(

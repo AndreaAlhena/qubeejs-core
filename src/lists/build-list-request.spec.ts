@@ -1,7 +1,11 @@
+import type { QueryBuilder } from '../services/query-builder';
 import type { ListDefinition } from '../types/list-definition.type';
 import type { ListInput } from '../types/list-input.type';
+import type { ListParam } from '../types/list-param.type';
 import type { ListParams } from '../types/list-params.type';
 import type { ListRequest } from '../types/list-request.type';
+import type { ParamsState } from '../types/params-state.type';
+import type { QubeeConfig } from '../types/qubee-config.type';
 import type { SearchParamsInput } from '../types/search-params-input.type';
 
 import { articleList } from '../../test/fixtures/article-list';
@@ -19,6 +23,20 @@ import { stringParam } from '../params/string-param';
 import { buildListRequest } from './build-list-request';
 import { defineList } from './define-list';
 import { readListState } from './read-list-state';
+
+/** The loose list through an alias of its own, as an adapter declares it. */
+type LooseList = ListDefinition<ListParams>;
+
+/** The params of the lists written by hand below. */
+type PlainParams = { page: ListParam<number> };
+
+/** A list written by hand, whose `apply` takes the input it is given. */
+type PlainList<TApply> = {
+  apply: TApply;
+  params: PlainParams;
+  qubee: QubeeConfig;
+  resource: string;
+};
 
 /**
  * Build a list's request from generic code, holding the list the way an adapter does: the
@@ -319,6 +337,98 @@ describe('buildListRequest', () => {
 
       // @ts-expect-error — through the loose type, the list declares no input
       buildListRequest(loose, looseState, { projectId: '42' });
+    });
+
+    it('should compile without the input through another alias of ListDefinition<ListParams>', () => {
+      const loose: LooseList = articleList;
+
+      expect(buildListRequest(loose, readListState(loose, '?page=3')).uri).toBe(
+        buildListRequest(articleList, readListState(articleList, '?page=3')).uri
+      );
+    });
+
+    it('should refuse a third argument through another alias of ListDefinition<ListParams>', () => {
+      const loose: LooseList = taskList;
+      const looseState = readListState(loose, '');
+
+      // @ts-expect-error — through the loose type, the list declares no input
+      buildListRequest(loose, looseState, { projectId: '42' });
+    });
+
+    it('should compile without the input for a list spread into a new object', () => {
+      const labelled = { ...articleList, label: 'Articles' };
+
+      expect(buildListRequest(labelled, readListState(labelled, '?page=3')).uri).toBe(
+        buildListRequest(articleList, readListState(articleList, '?page=3')).uri
+      );
+    });
+
+    it('should require the input of a list spread into a new object', () => {
+      const labelled = { ...taskList, label: 'Tasks' };
+      const labelledState = readListState(labelled, '');
+
+      // @ts-expect-error — the spread list still declares an input
+      expect(() => buildListRequest(labelled, labelledState)).toThrowError(TypeError);
+      expect(buildListRequest(labelled, labelledState, { projectId: '42' }).uri).toBe(
+        buildListRequest(taskList, labelledState, { projectId: '42' }).uri
+      );
+    });
+
+    it('should build a list written by hand whose apply takes two parameters', () => {
+      const plain: PlainList<(builder: QueryBuilder, state: ParamsState<PlainParams>) => void> = {
+        apply: (builder) => {
+          builder.setLimit(5);
+        },
+        params: { page: integerParam('page', { default: 1, min: 1 }) },
+        qubee: { driver: STRAPI_DRIVER },
+        resource: 'tasks',
+      };
+
+      expect(buildListRequest(plain, readListState(plain, '?page=2')).uri).toBe(
+        '/tasks?pagination[page]=2&pagination[pageSize]=5'
+      );
+    });
+
+    it('should build a list written by hand whose input is never', () => {
+      const plain: PlainList<
+        (builder: QueryBuilder, state: ParamsState<PlainParams>, input?: never) => void
+      > = {
+        apply: (builder) => {
+          builder.setLimit(5);
+        },
+        params: { page: integerParam('page', { default: 1, min: 1 }) },
+        qubee: { driver: STRAPI_DRIVER },
+        resource: 'tasks',
+      };
+
+      expect(buildListRequest(plain, readListState(plain, '?page=2')).uri).toBe(
+        '/tasks?pagination[page]=2&pagination[pageSize]=5'
+      );
+    });
+
+    it('should take the input of a list written by hand', () => {
+      const plain: PlainList<
+        (
+          builder: QueryBuilder,
+          state: ParamsState<PlainParams>,
+          input: { projectId: string }
+        ) => void
+      > = {
+        apply: (builder, _state, { projectId }) => {
+          builder.addFilter('project', projectId);
+        },
+        params: { page: integerParam('page', { default: 1, min: 1 }) },
+        qubee: { driver: STRAPI_DRIVER },
+        resource: 'tasks',
+      };
+      // readListState() takes the input as ListDefinition declares it, optional; this one is not.
+      const plainState: ParamsState<PlainParams> = { page: 1 };
+
+      // @ts-expect-error — the list declares an input
+      expect(() => buildListRequest(plain, plainState)).toThrowError(TypeError);
+      expect(buildListRequest(plain, plainState, { projectId: '42' }).uri).toBe(
+        '/tasks?filters[project][$eq]=42&pagination[page]=1&pagination[pageSize]=15'
+      );
     });
   });
 
