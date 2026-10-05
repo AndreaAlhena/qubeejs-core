@@ -10,8 +10,8 @@ export type QubeeConfig = {
   /**
    * Prepended to every generated URI, as `QueryBuilder.setBaseUrl()` would —
    * `https://example.com/api` turns `/articles?…` into
-   * `https://example.com/api/articles?…`. Omit it for root-relative URIs.
-   * `reset()` clears it.
+   * `https://example.com/api/articles?…`. A trailing slash makes no
+   * difference. Omit it for root-relative URIs. `reset()` clears it.
    */
   baseUrl?: string;
 

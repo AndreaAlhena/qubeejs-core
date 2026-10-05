@@ -657,6 +657,10 @@ export class QueryBuilder {
   /**
    * Set the base URL to use for composing the address
    *
+   * Trailing slashes are dropped when the URI is joined, so
+   * `https://api.dev/` and `https://api.dev` both produce
+   * `https://api.dev/articles`. The state keeps the value as given.
+   *
    * @param {string} baseUrl - The base URL
    * @returns {this}
    */
@@ -745,7 +749,17 @@ export class QueryBuilder {
   /**
    * Set the API resource to run the query against
    *
-   * @param {string} resource - Resource name (e.g. 'users' produces /users)
+   * A path works too: `projects/42/tasks` produces `/projects/42/tasks`.
+   * Leading slashes are dropped when the URI is joined, so the URI never
+   * starts with `//`; a trailing slash is kept, for backends whose routes end
+   * in one. The resource is **not encoded**: encode any path segment that
+   * comes from data — `` `projects/${encodeURIComponent(id)}/tasks` ``.
+   *
+   * On JSON:API and Spatie, a nested resource names no type the path can tell
+   * (`users/42/followers` returns `users`), so `addFields()` keys go out as
+   * given, unchecked.
+   *
+   * @param {string} resource - Resource name or path (e.g. 'users' produces /users)
    * @returns {this}
    */
   public setResource(resource: string): this {
