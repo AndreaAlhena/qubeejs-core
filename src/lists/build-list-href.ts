@@ -36,7 +36,9 @@ import { readListState } from './read-list-state';
  * @returns The path, with its query when there is one
  */
 export function buildListHref<TParams extends ListParams>(
-  list: ListDefinition<TParams>,
+  // Any input, which never reaches a link: a list written by hand whose `apply` requires its
+  // input is not assignable to `ListDefinition<TParams>`, whose input is `never`.
+  list: ListDefinition<TParams, NonNullable<unknown>>,
   location: ListLocation,
   changes: Partial<ParamsState<TParams>> = {}
 ): string {

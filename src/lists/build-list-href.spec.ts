@@ -3,6 +3,7 @@ import type { SearchParamsInput } from '../types/search-params-input.type';
 
 import { articleList } from '../../test/fixtures/article-list';
 import { ArticleStatusEnum } from '../../test/fixtures/article-status.enum';
+import { plainTaskList } from '../../test/fixtures/plain-task-list';
 import { taskList } from '../../test/fixtures/task-list';
 import { SortEnum } from '../enums/sort.enum';
 import { buildListHref } from './build-list-href';
@@ -137,6 +138,12 @@ describe('buildListHref', () => {
     it('should refuse the input as a change', () => {
       // @ts-expect-error — the input is not a param, so it cannot go into a link
       expect(buildListHref(taskList, tasksAt(''), { projectId: '7' })).toBe('/projects/42/tasks');
+    });
+
+    it('should write a link for a list written by hand whose apply requires its input', () => {
+      expect(buildListHref(plainTaskList, tasksAt('?page=3'), { q: 'api' })).toBe(
+        '/projects/42/tasks?q=api'
+      );
     });
   });
 });

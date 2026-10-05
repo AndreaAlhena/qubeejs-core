@@ -9,6 +9,7 @@ import type { QubeeConfig } from '../types/qubee-config.type';
 import type { SearchParamsInput } from '../types/search-params-input.type';
 
 import { articleList } from '../../test/fixtures/article-list';
+import { plainTaskList } from '../../test/fixtures/plain-task-list';
 import { taskList } from '../../test/fixtures/task-list';
 import { JSON_API_DRIVER } from '../drivers/json-api.driver';
 import { LARAVEL_DRIVER } from '../drivers/laravel.driver';
@@ -406,28 +407,13 @@ describe('buildListRequest', () => {
       );
     });
 
-    it('should take the input of a list written by hand', () => {
-      const plain: PlainList<
-        (
-          builder: QueryBuilder,
-          state: ParamsState<PlainParams>,
-          input: { projectId: string }
-        ) => void
-      > = {
-        apply: (builder, _state, { projectId }) => {
-          builder.addFilter('project', projectId);
-        },
-        params: { page: integerParam('page', { default: 1, min: 1 }) },
-        qubee: { driver: STRAPI_DRIVER },
-        resource: 'tasks',
-      };
-      // readListState() takes the input as ListDefinition declares it, optional; this one is not.
-      const plainState: ParamsState<PlainParams> = { page: 1 };
+    it('should take the input of a list written by hand whose apply requires it', () => {
+      const plainState = readListState(plainTaskList, '?q=api');
 
       // @ts-expect-error — the list declares an input
-      expect(() => buildListRequest(plain, plainState)).toThrowError(TypeError);
-      expect(buildListRequest(plain, plainState, { projectId: '42' }).uri).toBe(
-        '/tasks?filters[project][$eq]=42&pagination[page]=1&pagination[pageSize]=15'
+      expect(() => buildListRequest(plainTaskList, plainState)).toThrowError(TypeError);
+      expect(buildListRequest(plainTaskList, plainState, { projectId: '42' }).uri).toBe(
+        '/tasks?filters[project][$eq]=42&filters[title][$eq]=api&pagination[page]=1&pagination[pageSize]=15'
       );
     });
   });

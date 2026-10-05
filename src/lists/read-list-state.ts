@@ -24,7 +24,9 @@ import { toSearchParams } from '../utils/to-search-params';
  * @returns The list state
  */
 export function readListState<TParams extends ListParams>(
-  list: ListDefinition<TParams>,
+  // Any input, which is never read here: a list written by hand whose `apply` requires its input
+  // is not assignable to `ListDefinition<TParams>`, whose input is `never`.
+  list: ListDefinition<TParams, NonNullable<unknown>>,
   search: SearchParamsInput
 ): ParamsState<TParams> {
   const query = toSearchParams(search);

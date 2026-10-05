@@ -1,4 +1,5 @@
 import type { ArticleStatusEnum } from '../../test/fixtures/article-status.enum';
+import type { plainTaskList } from '../../test/fixtures/plain-task-list';
 import type { ListInput } from '../types/list-input.type';
 import type { ListState } from '../types/list-state.type';
 import type { Sort } from '../types/sort.type';
@@ -76,6 +77,11 @@ describe('defineList', () => {
         ArticleStatusEnum | undefined
       >();
       expectTypeOf<ListState<typeof articleList>['sort']>().toEqualTypeOf<readonly Sort[]>();
+    });
+
+    it('should read the state of a list written by hand whose apply requires its input', () => {
+      expectTypeOf<ListState<typeof plainTaskList>['page']>().toEqualTypeOf<number>();
+      expectTypeOf<ListState<typeof plainTaskList>['q']>().toEqualTypeOf<string | undefined>();
     });
 
     it('should require a numeric page with a default', () => {
