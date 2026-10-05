@@ -52,11 +52,11 @@ use one or not.
 
 | | minified | gzipped |
 | --- | --- | --- |
-| hand-wiring the three classes | 17,633 B | 5,296 B |
-| `createQubee` | 17,792 B | 5,365 B |
-| `createQubee({ driver: DRIVERS[id] })` | 61,108 B | 12,398 B |
+| hand-wiring the three classes | 17,671 B | 5,328 B |
+| `createQubee` | 17,814 B | 5,392 B |
+| `createQubee({ driver: DRIVERS[id] })` | 61,237 B | 12,448 B |
 
-Taking a definition costs **159 bytes** over wiring by hand and keeps the registry out of your
+Taking a definition costs **143 bytes** over wiring by hand and keeps the registry out of your
 bundle. Runtime selection is still one line — you just opt into the cost yourself:
 
 ```ts
