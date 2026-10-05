@@ -7,6 +7,17 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- **Lists that need more than the URL.** A list declares a typed input, what its request needs
+  besides URL state (such as a project id from the route path), by annotating `apply`'s third
+  parameter, and `buildListRequest(list, state, input)` passes it to `apply`. Leaving a declared
+  input out is a compile error, and so is passing one to a list that declares none; `null` and
+  `undefined` are refused as inputs. `ListInput<TList>` reads a list's input, for adapters. The
+  input never reaches the URL: `readListState()` and `buildListHref()` are unchanged, and the page
+  is still applied last. Existing lists and two-argument `apply`s are unchanged, and code that
+  calls `apply` with two arguments keeps compiling (#35)
+
 ### Fixed
 
 - Exactly one slash joins the base URL and the resource. A trailing slash on the base URL
