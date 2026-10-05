@@ -70,6 +70,10 @@ const features = [
               <a class="btn" href={`${base}/api/services/query-builder/`}>API reference</a>
               <code class="install"><span class="prompt">$</span> npm i @qubeejs/core</code>
             </div>
+            <p class="adapter">
+              Using React? Check the
+              <a href="https://qubeejs-react.andreatantimonaco.me">React adapter</a>.
+            </p>
           </div>
           <div class="hero-mark">
             <img src={`${base}/mark.png`} alt="qubee" width="320" height="230" />
@@ -318,6 +322,8 @@ const features = [
         padding: 11px 15px;
       }
       .prompt { color: #6b7280; margin-right: 6px; }
+      .adapter { color: var(--muted); font-size: 14.5px; margin: 18px 0 0; }
+      .adapter a { color: var(--honey-hi); text-decoration: underline; text-underline-offset: 3px; }
 
       /* --- hexagons --- */
       .hex {

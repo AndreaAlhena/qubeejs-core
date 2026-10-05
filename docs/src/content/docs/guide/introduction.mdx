@@ -56,7 +56,9 @@ qb.setResource('articles').addFilter('status', 'published').addSort('createdAt',
 
 qubee was extracted from [ng-qubee](https://github.com/AndreaAlhena/ng-qubee), an Angular library
 that had grown a framework-agnostic core inside it. `ng-qubee` remains supported; this package is
-the same engine with the Angular removed, so React and vanilla consumers can use it too.
+the same engine with the Angular removed. React apps use it through
+[`@qubeejs/react`](https://qubeejs-react.andreatantimonaco.me), the React adapter, which binds the
+store and the list functions to hooks; vanilla consumers call the core directly.
 
 The extraction is verified, not asserted: every driver builds a byte-identical URI to
 `ng-qubee@3.8.0` for the same query, checked by `npm run test:parity` before each release. The only
