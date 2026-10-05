@@ -70,6 +70,9 @@ const features = [
               <a class="btn" href={`${base}/api/services/query-builder/`}>API reference</a>
               <code class="install"><span class="prompt">$</span> npm i @qubeejs/core</code>
             </div>
+            <p class="adapter">
+              Using React? Check the <a href="https://qubeejs-react.andreatantimonaco.me">React adapter</a>.
+            </p>
           </div>
           <div class="hero-mark">
             <img src={`${base}/mark.png`} alt="qubee" width="320" height="230" />
@@ -318,6 +321,8 @@ const features = [
         padding: 11px 15px;
       }
       .prompt { color: #6b7280; margin-right: 6px; }
+      .adapter { color: var(--muted); font-size: 14.5px; margin: 18px 0 0; }
+      .adapter a { color: var(--honey-hi); text-decoration: underline; text-underline-offset: 3px; }
 
       /* --- hexagons --- */
       .hex {
@@ -331,13 +336,21 @@ const features = [
       .hex.sm { flex: none; height: 15px; margin: 0; width: 13px; }
 
       /* --- features --- */
+      /* Fixed column counts, not auto-fit: 4 boxes at a 250px minimum need 1054px, the container
+         leaves 1036px, and auto-fit wrapped them 3 + 1. Four boxes split evenly as 4, 2 or 1. */
       .features {
         display: grid;
         gap: 18px;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        grid-template-columns: minmax(0, 1fr);
         margin: 0 auto;
         max-width: 1080px;
         padding: 64px 22px;
+      }
+      @media (min-width: 560px) {
+        .features { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      }
+      @media (min-width: 980px) {
+        .features { grid-template-columns: repeat(4, minmax(0, 1fr)); }
       }
       .features article {
         background: var(--surface);
