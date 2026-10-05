@@ -339,6 +339,18 @@ describe('buildListRequest', () => {
       );
     });
 
+    it('should build a list written by hand with no apply', () => {
+      const plain = {
+        params: { page: integerParam('page', { default: 1, min: 1 }) },
+        qubee: { driver: STRAPI_DRIVER },
+        resource: 'tasks',
+      };
+
+      expect(buildRequestFor(plain, '?page=2')?.uri).toBe(
+        '/tasks?pagination[page]=2&pagination[pageSize]=15'
+      );
+    });
+
     it('should keep its callers checked', () => {
       // @ts-expect-error — taskList declares an input
       expect(() => buildRequestFor(taskList, '')).toThrowError(TypeError);

@@ -35,7 +35,15 @@ import type { ListParams } from './list-params.type';
  * copy: called on the generic `TList`, `buildListRequest()` asks for a third
  * argument.
  *
+ * A list written by hand with no `apply` at all declares no input either: with
+ * nothing to infer from, `TInput` would otherwise fall back to its
+ * constraint, and generic code would ask that list for an input.
+ *
  * @typeParam TList - The list, as `defineList()` returned it
  */
 export type ListInput<TList> =
-  TList extends ListDefinition<ListParams, infer TInput> ? TInput : never;
+  TList extends ListDefinition<ListParams, infer TInput>
+    ? 'apply' extends keyof TList
+      ? TInput
+      : never
+    : never;

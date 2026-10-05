@@ -2,7 +2,9 @@ import type { articleList } from '../../test/fixtures/article-list';
 import type { taskList } from '../../test/fixtures/task-list';
 import type { ListDefinition } from './list-definition.type';
 import type { ListInput } from './list-input.type';
+import type { ListParam } from './list-param.type';
 import type { ListParams } from './list-params.type';
+import type { QubeeConfig } from './qubee-config.type';
 
 import { STRAPI_DRIVER } from '../drivers/strapi.driver';
 import { defineList } from '../lists/define-list';
@@ -43,6 +45,14 @@ describe('ListInput', () => {
 
   it('should be never for a list that declares none', () => {
     expectTypeOf<ListInput<typeof articleList>>().toBeNever();
+  });
+
+  it('should be never for a list written by hand with no apply', () => {
+    // A plain object type satisfies ListDefinition<ListParams> too; with no apply to infer from,
+    // its input must not fall back to the constraint.
+    expectTypeOf<
+      ListInput<{ params: { page: ListParam<number> }; qubee: QubeeConfig; resource: string }>
+    >().toBeNever();
   });
 
   it('should be never through ListDefinition<ListParams>, where the requirement is erased', () => {
