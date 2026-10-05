@@ -168,6 +168,7 @@ export type { EnumParamOptions } from './types/enum-param-options.type';
 export type { EnumValues } from './types/enum-values.type';
 export type { IntegerParamOptions } from './types/integer-param-options.type';
 export type { ListDefinition } from './types/list-definition.type';
+export type { ListInput } from './types/list-input.type';
 export type { ListLocation } from './types/list-location.type';
 export type { ListParam } from './types/list-param.type';
 export type { ListParamOptions } from './types/list-param-options.type';

@@ -206,6 +206,35 @@ describe('QueryBuilder standard config', () => {
     expect(uri).toContain('https://domain.com/users');
   });
 
+  it('should not double the slash after a base URL that ends in one', () => {
+    builder.setResource('users');
+    builder.setBaseUrl('https://domain.com/');
+
+    expect(builder.generateUri()).toBe('https://domain.com/users?limit=15&page=1');
+  });
+
+  it('should not double the slash before a resource that starts with one', () => {
+    builder.setResource('/projects/42/tasks');
+    builder.setBaseUrl('https://domain.com/');
+
+    expect(builder.generateUri()).toBe('https://domain.com/projects/42/tasks?limit=15&page=1');
+  });
+
+  it('should keep a URI relative to the host when the resource starts with a slash', () => {
+    // `//projects/42/tasks` would be protocol-relative: `fetch` resolves it against a host
+    // named `projects`.
+    builder.setResource('/projects/42/tasks');
+
+    expect(builder.generateUri()).toBe('/projects/42/tasks?limit=15&page=1');
+  });
+
+  it('should keep a trailing slash on the resource', () => {
+    // Django REST Framework routes end in a slash.
+    builder.setResource('users/');
+
+    expect(builder.generateUri()).toBe('/users/?limit=15&page=1');
+  });
+
   it('should throw an error if the model requested as field is not the model property / included in the includes object', () => {
     builder.addFields('users', ['email', 'name']);
     builder.addFields('settings', ['field1', 'field2']);

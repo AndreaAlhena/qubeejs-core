@@ -10,7 +10,7 @@ import { stringParam } from '../params/string-param';
 import { defineList } from './define-list';
 
 describe('defineList', () => {
-  it('should return a frozen copy of the definition, leaving the input unfrozen', () => {
+  it('should return a frozen copy of the definition, leaving the definition passed in unfrozen', () => {
     const definition = {
       params: { page: integerParam('page', { default: 1 }) },
       qubee: { driver: STRAPI_DRIVER },

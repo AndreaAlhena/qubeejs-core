@@ -15,6 +15,30 @@ They are pure transformations, like the rest of the core. They read and write UR
 navigate, subscribe to a router or fetch. That is left to your framework — or to an adapter such
 as [`@qubeejs/react`](https://qubeejs-react.andreatantimonaco.me).
 
+## URL or memory?
+
+Keep a list's state in the page URL when the list **is** the page: an article index, search
+results, an admin table. Those are the pages people reload, share and come back to with the back
+button, and a server can render them from the URL it receives, with no client state to wait for.
+
+Keep it in memory when the list lives **inside** something else — a dialog, a picker, an
+autocomplete, a second table on the same screen — or when the app has no routing. Written to the
+URL, its state would add history entries nobody goes back to, and its keys could clash with the
+page's own.
+
+Both run on the same builder; a list only declares what drives it. In memory, you have two options:
+
+- **The same list, with its query kept outside the address bar.** The functions on this page read
+  the query from a value and write it back as a string; they never touch the address bar, so the
+  query can just as well live in a component's state. `@qubeejs/react`'s `MemoryAdapter` runs a
+  list this way.
+- **The builder alone**, through [`createQubee()`](/guide/factory/), when the state is not worth
+  declaring as params: call `addFilter()`, `nextPage()` and the rest yourself, and
+  [subscribe to its store](/guide/reactivity/).
+
+Pick one place per list. If the URL and a store both hold the same state, every change has to be
+synced in both directions.
+
 ## Declaring a list
 
 ```ts
@@ -59,9 +83,12 @@ export const articleList = defineList({
   the order you declare them.
 - **`page` is required**, and must hold a number with a default. The list returns to it when
   anything else changes, and applies it last when it builds a request.
-- **`apply`** turns state into builder calls. It runs on a fresh builder whose resource is set.
+- **`apply`** turns state into builder calls. It runs on a fresh builder whose resource is set. A
+  list whose request needs more than the URL takes a third argument; see
+  [Lists that need more than the URL](#lists-that-need-more-than-the-url).
 - **`qubee`** is what [`createQubee()`](/guide/factory/) takes: the driver, a base URL, key
   overrides.
+- **`resource`** is the default resource, which `apply` may replace with `setResource()`.
 
 Declare each list **once, as a module-level constant**, and import it wherever you need it. It
 holds functions, so it cannot travel as serialised data — as a prop from a React Server Component,
@@ -248,3 +275,122 @@ When the backend lives elsewhere, put its base URL in the list's `qubee` config,
 above does, rather than in front of `request.uri`. Then `request.uri` is absolute, and the cache key
 names the backend too.
 :::
+
+## Lists that need more than the URL
+
+Some lists depend on something the query string does not hold. `/projects/42/tasks?status=open`
+shows the tasks of project 42, but `42` lives in the path. A list declares what its request needs
+besides URL state as its **input**: `apply` receives it as a third argument, and
+`buildListRequest()` takes it as a third argument too.
+
+```ts
+import {
+  buildListRequest,
+  defineList,
+  enumParam,
+  integerParam,
+  readListState,
+  STRAPI_DRIVER,
+} from '@qubeejs/core';
+
+export const taskList = defineList({
+  apply: (builder, { status }, { projectId }: { projectId: string }) => {
+    builder.addFilter('project', projectId);
+
+    if (status) {
+      builder.addFilter('status', status);
+    }
+  },
+  params: {
+    page: integerParam('page', { default: 1, min: 1 }),
+    status: enumParam('status', ['open', 'done']),
+  },
+  qubee: { driver: STRAPI_DRIVER },
+  resource: 'tasks',
+});
+
+// projectId and search are what your router gives you for /projects/42/tasks?status=open
+const request = buildListRequest(taskList, readListState(taskList, search), { projectId });
+
+request.uri; // '/tasks?filters[project][$eq]=42&filters[status][$eq]=open&pagination[page]=1&pagination[pageSize]=15'
+```
+
+- **Annotate `apply`'s third parameter** to declare the input: its type becomes the list's input.
+  Without the annotation, the input is typed `undefined`, so using it in `apply`, or passing one
+  to `buildListRequest()`, fails to compile.
+- **A declared input is required.** Leaving it out is a compile error, and so is passing one to a
+  list that declares none.
+- **Prefer an object** such as `{ projectId }`: adding a value later then breaks no call site. A
+  bare value (`projectId: string`) works too. `null` and `undefined` are refused, so optional parts
+  go inside the object, as in `{ tenantId?: string }`, passed as `{}` when empty.
+- **The input never reaches the URL.** `readListState()` and `buildListHref()` don't take it, and
+  links carry only params. `[request.uri, request.headers]` stays a complete cache key, because the
+  input only reaches the request through the builder.
+
+### Lookups and request-scoped data
+
+The core does no I/O, so anything asynchronous is resolved before the call. When the URL holds a
+slug and the API filters by id, look the id up first:
+
+```ts
+const projectId = await findProjectId(slug); // your own lookup
+const request = buildListRequest(taskList, readListState(taskList, search), { projectId });
+```
+
+Session data works the same way: a tenant, or the current user for "my items", goes into the input,
+not into a param.
+
+### Nested resources
+
+`resource` is the default, and `apply` may replace it. For an API that nests tasks under their
+project, set the resource from the input:
+
+```ts
+apply: (builder, { status }, { projectId }: { projectId: string }) => {
+  builder.setResource(`projects/${encodeURIComponent(projectId)}/tasks`);
+
+  if (status) {
+    builder.addFilter('status', status);
+  }
+},
+// '/projects/42/tasks?filters[status][$eq]=open&pagination[page]=1&pagination[pageSize]=15'
+```
+
+The resource is **not encoded**, so encode every path segment that comes from data, as above. The
+page is still applied after `apply` returns, so replacing the resource does not lose it.
+
+### Generic code
+
+A list with an input is still a `ListDefinition<ListParams>`, so generic code, such as an adapter's
+hook or a helper that takes any list, accepts it. Through that type, though, the requirement is
+erased: `buildListRequest(list, state)` compiles without the input, `apply` receives `undefined`,
+and a third argument is refused. Generic code carries the input itself, typed with
+`ListInput<TList>`, and forwards it by holding the list twice, loose and widened:
+
+```ts
+import type {
+  ListDefinition,
+  ListInput,
+  ListParams,
+  ListRequest,
+  SearchParamsInput,
+} from '@qubeejs/core';
+
+function buildRequestFor<TList extends ListDefinition<ListParams>>(
+  list: TList,
+  search: SearchParamsInput,
+  ...args: [ListInput<TList>] extends [never] ? [] : [input: ListInput<TList>]
+): ListRequest {
+  const loose: ListDefinition<ListParams> = list;
+  const wide: ListDefinition<ListParams, NonNullable<unknown>> = list;
+  const [input] = args;
+  const state = readListState(loose, search);
+
+  return input === undefined ? buildListRequest(loose, state) : buildListRequest(wide, state, input);
+}
+```
+
+`ListInput<typeof list>` is `never` for a list that declares no input, and
+`[ListInput<TList>] extends [never]` is how generic code tells the two apart. The no-input branch
+needs the loose copy: called on the generic `TList`, `buildListRequest()` asks for a third
+argument. Callers stay checked: `buildRequestFor(taskList, search)` is a compile error.

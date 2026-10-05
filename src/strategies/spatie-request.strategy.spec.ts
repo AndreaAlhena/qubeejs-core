@@ -88,6 +88,44 @@ describe('SpatieRequestStrategy', () => {
 
       expect(() => strategy.buildUri(state, options)).toThrowError(UnselectableModelError);
     });
+
+    it('should throw if the resource is missing from the fields', () => {
+      const state = {
+        ...baseState,
+        fields: { settings: ['field1'] },
+        includes: ['settings'],
+      };
+
+      expect(() => strategy.buildUri(state, options)).toThrowError(
+        'Key users is missing in the fields object'
+      );
+    });
+
+    it('should read the model of a resource written with slashes around it', () => {
+      const state = { ...baseState, fields: { users: ['email'] }, resource: '/users/' };
+
+      expect(strategy.buildUri(state, options)).toContain('fields[users]=email');
+    });
+
+    describe('nested resource', () => {
+      // `users/42/followers` returns `users`, and `users/me` ends in `me`: the model cannot be
+      // read from the path, so the fields go out as given and the server checks them.
+      it('should send fields named after the last segment', () => {
+        const state = {
+          ...baseState,
+          fields: { followers: ['name'] },
+          resource: 'users/42/followers',
+        };
+
+        expect(strategy.buildUri(state, options)).toContain('fields[followers]=name');
+      });
+
+      it('should send fields named after another model', () => {
+        const state = { ...baseState, fields: { users: ['name'] }, resource: 'users/42/followers' };
+
+        expect(strategy.buildUri(state, options)).toContain('fields[users]=name');
+      });
+    });
   });
 
   // Filters
