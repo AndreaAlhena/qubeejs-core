@@ -21,6 +21,11 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   list's own type as its one type parameter, `<TList>` instead of `<TParams, TInput>`, with `state`
   typed `ParamsState<TList['params']>`; calls that leave the type arguments to inference are
   unchanged (#39)
+- `defineList()` no longer declares an input for an `apply` whose input is annotated as none.
+  `input?: never`, `input: undefined` and `input?: undefined` were inferred as `undefined`, which
+  the input's constraint refuses, so the input fell back to `{}` and `buildListRequest()` asked for
+  a third argument. They now declare no input, as leaving the parameter out does; `null` is still
+  refused (#40)
 
 ## [1.4.0] - 2026-10-05
 
