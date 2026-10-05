@@ -7,6 +7,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.4.1] - 2026-10-05
+
 ### Fixed
 
 - A list's input no longer depends on how its type is written. TypeScript read the input from the
@@ -259,7 +261,8 @@ Carried over from `ng-qubee`, where these are still present:
 - CI verifies both entry points resolve, that there are no runtime dependencies, and that a
   single-driver import still tree-shakes (#12)
 
-[unreleased]: https://github.com/AndreaAlhena/qubeejs-core/compare/v1.4.0...HEAD
+[unreleased]: https://github.com/AndreaAlhena/qubeejs-core/compare/v1.4.1...HEAD
+[1.4.1]: https://github.com/AndreaAlhena/qubeejs-core/compare/v1.4.0...v1.4.1
 [1.4.0]: https://github.com/AndreaAlhena/qubeejs-core/compare/v1.3.0...v1.4.0
 [1.3.0]: https://github.com/AndreaAlhena/qubeejs-core/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/AndreaAlhena/qubeejs-core/compare/v1.1.0...v1.2.0
