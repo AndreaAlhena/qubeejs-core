@@ -62,6 +62,9 @@ import { buildListHref, buildListRequest, readListState } from '@qubeejs/core';
 const state = readListState(articleList, location.search); // typed; never throws
 const href = buildListHref(articleList, location, { q: 'vue' }); // back to page 1
 const { uri, headers, paginate } = buildListRequest(articleList, state); // page applied last
+
+// taskList declares an input: what its request needs besides the URL
+const tasks = buildListRequest(taskList, readListState(taskList, location.search), { projectId });
 ```
 
 These are pure transformations too: the core reads and writes URLs, but never navigates, subscribes

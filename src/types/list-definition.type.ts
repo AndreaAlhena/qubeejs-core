@@ -8,21 +8,41 @@ import type { QubeeConfig } from './qubee-config.type';
  * are built with, the page-URL params its state is made of, and how that
  * state becomes builder calls. Declare one with `defineList()`.
  *
+ * A list whose request needs more than the URL — a path param, an id looked
+ * up from a slug, a tenant from the session — declares an input by annotating
+ * `apply`'s third parameter, and `buildListRequest()` then requires it.
+ *
+ * Every list, with or without an input, is assignable to
+ * `ListDefinition<ListParams>`, which is what lets generic code accept any
+ * list. Through that type the input requirement is erased:
+ * `buildListRequest(list, state)` compiles without it, and `apply` receives
+ * `undefined`. Generic code carries the input itself, typed with
+ * `ListInput<TList>`; see `ListInput` for the pattern that forwards it.
+ *
  * @typeParam TParams - The list's params
+ * @typeParam TInput - What the request needs besides URL state; `never` for a
+ * list that needs nothing else. `null` and `undefined` are not allowed
  */
-export type ListDefinition<TParams extends ListParams> = {
+export type ListDefinition<
+  TParams extends ListParams,
+  TInput extends NonNullable<unknown> = never,
+> = {
   /**
    * Turn list state into builder calls — filters, sorts, a limit.
    *
    * Runs on a fresh builder whose resource is already set. The page is
    * applied after it returns, so calls that reset the page to 1 are harmless
-   * here. Method syntax, so every definition stays assignable to
-   * `ListDefinition<ListParams>` in generic code.
+   * here, `setResource()` included. Method syntax, so every definition stays
+   * assignable to `ListDefinition<ListParams>` in generic code.
    *
    * @param builder - A fresh builder for `resource`
    * @param state - The list state to apply
+   * @param input - What the request needs besides URL state, as
+   * `buildListRequest()` received it. Annotate it to declare the list's input.
+   * Optional, so that two-argument calls keep compiling; it is `undefined` for
+   * a list that declares none, and through `ListDefinition<ListParams>`
    */
-  apply?(builder: QueryBuilder, state: ParamsState<TParams>): void;
+  apply?(builder: QueryBuilder, state: ParamsState<TParams>, input?: TInput): void;
 
   /**
    * The params, keyed by the name each has in list state. They appear in
@@ -37,7 +57,9 @@ export type ListDefinition<TParams extends ListParams> = {
   readonly qubee: QubeeConfig;
 
   /**
-   * The API resource, as `QueryBuilder.setResource()` takes it.
+   * The API resource, as `QueryBuilder.setResource()` takes it: the default,
+   * which `apply` may replace. It is not encoded, so encode any path segment
+   * that comes from data.
    */
   readonly resource: string;
 };
