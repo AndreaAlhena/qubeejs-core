@@ -3,6 +3,7 @@ import type { SearchParamsInput } from '../types/search-params-input.type';
 
 import { articleList } from '../../test/fixtures/article-list';
 import { ArticleStatusEnum } from '../../test/fixtures/article-status.enum';
+import { taskList } from '../../test/fixtures/task-list';
 import { SortEnum } from '../enums/sort.enum';
 import { buildListHref } from './build-list-href';
 import { readListState } from './read-list-state';
@@ -120,4 +121,22 @@ describe('buildListHref', () => {
       expect(readListState(articleList, href.slice(href.indexOf('?'))).q).toBe(q);
     }
   );
+
+  describe('a list with an input', () => {
+    const tasksAt = (search: SearchParamsInput): ListLocation => ({
+      pathname: '/projects/42/tasks',
+      search,
+    });
+
+    it('should write only params, never the input', () => {
+      expect(buildListHref(taskList, tasksAt('?page=3'), { status: 'open' })).toBe(
+        '/projects/42/tasks?status=open'
+      );
+    });
+
+    it('should refuse the input as a change', () => {
+      // @ts-expect-error — the input is not a param, so it cannot go into a link
+      expect(buildListHref(taskList, tasksAt(''), { projectId: '7' })).toBe('/projects/42/tasks');
+    });
+  });
 });

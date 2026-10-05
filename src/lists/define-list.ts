@@ -34,15 +34,37 @@ import { DuplicateListParamError } from '../errors/duplicate-list-param.error';
  * });
  * ```
  *
+ * A list whose request needs more than the URL declares an input by
+ * annotating `apply`'s third parameter, and `buildListRequest()` then
+ * requires it:
+ *
+ * ```ts
+ * export const taskList = defineList({
+ *   apply: (builder, { status }, { projectId }: { projectId: string }) => {
+ *     builder.addFilter('project', projectId);
+ *
+ *     if (status) {
+ *       builder.addFilter('status', status);
+ *     }
+ *   },
+ *   params: {
+ *     page: integerParam('page', { default: 1, min: 1 }),
+ *     status: enumParam('status', ['open', 'done']),
+ *   },
+ *   qubee: { driver: STRAPI_DRIVER },
+ *   resource: 'tasks',
+ * });
+ * ```
+ *
  * @param definition - The list
  * @returns A frozen shallow copy of the list, with its params map frozen too —
- * the input stays unfrozen, and so does the driver, a shared constant such as
- * `STRAPI_DRIVER`
+ * the definition passed in stays unfrozen, and so does the driver, a shared
+ * constant such as `STRAPI_DRIVER`
  * @throws {DuplicateListParamError} If two params share a key, or a key is empty
  */
-export function defineList<TParams extends ListParams>(
-  definition: ListDefinition<TParams>
-): ListDefinition<TParams> {
+export function defineList<TParams extends ListParams, TInput extends NonNullable<unknown> = never>(
+  definition: ListDefinition<TParams, TInput>
+): ListDefinition<TParams, TInput> {
   const params: Readonly<Record<string, ListParam<unknown>>> = definition.params;
   const owners = new Map<string, string[]>();
 
