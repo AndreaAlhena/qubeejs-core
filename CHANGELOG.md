@@ -7,6 +7,19 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Fixed
+
+- A list's input no longer depends on how its type is written. TypeScript read the input from the
+  type arguments only when a list's type was spelled `ListDefinition<…>`; through another alias
+  (`type LooseList = ListDefinition<ListParams>`), a list spread into a new object or an object
+  type written by hand, it inferred the input from `apply`'s shape, and an `apply` with two
+  parameters or an input of `never` fell back to `{}`, "an input is required". `ListInput<TList>`
+  reported that input, and `buildListRequest(loose, state)` failed with "Expected 3 arguments, but
+  got 2". Both now read the input from `apply`'s parameters. `buildListRequest()` now takes the
+  list's own type as its one type parameter, `<TList>` instead of `<TParams, TInput>`, with `state`
+  typed `ParamsState<TList['params']>`; calls that leave the type arguments to inference are
+  unchanged (#39)
+
 ## [1.4.0] - 2026-10-05
 
 ### Added

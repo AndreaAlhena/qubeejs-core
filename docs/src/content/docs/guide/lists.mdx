@@ -364,7 +364,9 @@ page is still applied after `apply` returns, so replacing the resource does not 
 A list with an input is still a `ListDefinition<ListParams>`, so generic code, such as an adapter's
 hook or a helper that takes any list, accepts it. Through that type, though, the requirement is
 erased: `buildListRequest(list, state)` compiles without the input, `apply` receives `undefined`,
-and a third argument is refused. Generic code carries the input itself, typed with
+and a third argument is refused. The same holds through an alias of it, such as
+`type LooseList = ListDefinition<ListParams>`: the input is read from `apply`'s parameters, so how a
+list's type is written does not change it. Generic code carries the input itself, typed with
 `ListInput<TList>`, and forwards it by holding the list twice, loose and widened:
 
 ```ts
@@ -391,6 +393,7 @@ function buildRequestFor<TList extends ListDefinition<ListParams>>(
 ```
 
 `ListInput<typeof list>` is `never` for a list that declares no input, and
-`[ListInput<TList>] extends [never]` is how generic code tells the two apart. The no-input branch
-needs the loose copy: called on the generic `TList`, `buildListRequest()` asks for a third
-argument. Callers stay checked: `buildRequestFor(taskList, search)` is a compile error.
+`[ListInput<TList>] extends [never]` is how generic code tells the two apart. Both calls go through
+a copy: on the generic `TList`, `readListState()` returns the loose state,
+`ParamsState<ListParams>`, which `buildListRequest()` takes only with a list that is not generic.
+Callers stay checked: `buildRequestFor(taskList, search)` is a compile error.

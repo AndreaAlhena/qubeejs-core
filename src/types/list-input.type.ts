@@ -28,9 +28,10 @@
  * ```
  *
  * A list with an input never receives `undefined`, and a list without one
- * always does, so the branch is exact. The no-input branch needs the loose
- * copy: called on the generic `TList`, `buildListRequest()` asks for a third
- * argument.
+ * always does, so the branch is exact. Both calls go through a copy: on the
+ * generic `TList`, `readListState()` returns the loose state,
+ * `ParamsState<ListParams>`, which `buildListRequest()` takes only with a list
+ * that is not generic.
  *
  * The input is read from `apply`'s third parameter, not from the list's type
  * arguments, so it does not depend on how the list's type is written:
