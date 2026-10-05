@@ -15,6 +15,30 @@ They are pure transformations, like the rest of the core. They read and write UR
 navigate, subscribe to a router or fetch. That is left to your framework — or to an adapter such
 as [`@qubeejs/react`](https://qubeejs-react.andreatantimonaco.me).
 
+## URL or memory?
+
+Keep a list's state in the page URL when the list **is** the page: an article index, search
+results, an admin table. Those are the pages people reload, share and come back to with the back
+button, and a server can render them from the URL it receives, with no client state to wait for.
+
+Keep it in memory when the list lives **inside** something else — a dialog, a picker, an
+autocomplete, a second table on the same screen — or when the app has no routing. Written to the
+URL, its state would add history entries nobody goes back to, and its keys could clash with the
+page's own.
+
+Both run on the same builder; a list only declares what drives it. In memory, you have two options:
+
+- **The same list, with its query kept outside the address bar.** The functions on this page read
+  the query from a value and write it back as a string; they never touch the address bar, so the
+  query can just as well live in a component's state. `@qubeejs/react`'s `MemoryAdapter` runs a
+  list this way.
+- **The builder alone**, through [`createQubee()`](/guide/factory/), when the state is not worth
+  declaring as params: call `addFilter()`, `nextPage()` and the rest yourself, and
+  [subscribe to its store](/guide/reactivity/).
+
+Pick one place per list. If the URL and a store both hold the same state, every change has to be
+synced in both directions.
+
 ## Declaring a list
 
 ```ts
