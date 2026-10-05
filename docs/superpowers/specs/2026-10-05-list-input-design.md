@@ -35,7 +35,8 @@ before.
 | --- | --- |
 | Name | `input`. `context` already means React contexts in `@qubeejs/react` (`qubeeContext`, `useQubeeContext`) and diagnostics in core (`QubeeError.context`). |
 | Declaration | Inferred from the annotation on `apply`'s third parameter. No new runtime API. |
-| Allowed types | Any type except `null` and `undefined` (`TInput extends NonNullable<unknown>`). `@qubeejs/react` uses `null` for "input not ready yet", and `undefined` reads as "no input passed". A bare `string` is allowed. Docs prefer an object, without enforcing it. |
+| Allowed types | Any type except `null` and `undefined` (`TInput extends NonNullable<unknown>`). `@qubeejs/react` uses `null` for "input not ready yet", and `undefined` reads as "no input passed". A bare `string` is allowed. Docs prefer an object, without enforcing it. A `null` annotation on `apply` is refused where the list is declared. A `string \| undefined` annotation is accepted and gives an input of `string`: the optional parameter absorbs `undefined`, so the input type still excludes it. |
+| Parameter | `apply`'s third parameter is optional (`input?: TInput`). A required one would break every existing two-argument `apply` call ("Expected 3 arguments, but got 2"), including code that re-implemented `buildListRequest` to work around 1.3, making the change breaking. Optional is also accurate: `apply` receives `undefined` through the loose type. |
 | Required | A declared input is always required, even when every field is optional (pass `{}`). |
 | Refused | Passing an input to a list that declares none is a compile error. |
 | Resource | Stays a plain string: the default resource, which `apply` may replace with `setResource()`. |
@@ -50,7 +51,7 @@ export type ListDefinition<
   TParams extends ListParams,
   TInput extends NonNullable<unknown> = never,
 > = {
-  apply?(builder: QueryBuilder, state: ParamsState<TParams>, input: TInput): void;
+  apply?(builder: QueryBuilder, state: ParamsState<TParams>, input?: TInput): void;
   readonly params: TParams;
   readonly qubee: QubeeConfig;
   readonly resource: string;
@@ -80,6 +81,9 @@ export type ListInput<TList> =
   `buildListRequest(list, state)` unchanged. With method bivariance, `ListDefinition<ListParams>`
   still accepts every list, and `ListState<TList>` still infers. A `void` or `undefined` default
   would break that assignability.
+- **The parameter is optional** (`input?: TInput`), so two-argument `apply` calls keep compiling.
+  An unannotated third parameter is typed `undefined`: using it, or passing an input to
+  `buildListRequest`, fails to compile.
 - **`NoInfer` is required.** Without it, `buildListRequest(taskList, state)` compiles, because
   TypeScript infers `TInput` as `never` from the empty rest parameter.
 - **`NonNullable<unknown>`, not `{}`**, which the linter rejects.
@@ -90,9 +94,11 @@ export type ListInput<TList> =
 
 Inside a generic adapter, the list's type is erased, and `buildListRequest` refuses a third
 argument for a list held as `ListDefinition<ListParams>` ("Expected 2 arguments, but got 3").
-Generic code forwards the input without casts by widening the list to
-`ListDefinition<ListParams, NonNullable<unknown>>`, which every list is assignable to, and
-branching on whether it received an input:
+Generic code forwards the input without casts by holding the list twice, once as
+`ListDefinition<ListParams>` and once widened to `ListDefinition<ListParams, NonNullable<unknown>>`
+(every list is assignable to both), and branching on whether it received an input. The loose copy
+is needed for the no-input branch: called on the generic `TList` itself, `buildListRequest` does
+not infer "no input" and asks for a third argument.
 
 ```ts
 // `search` is the current query, wherever the adapter reads it from.
@@ -101,6 +107,7 @@ function buildRequestFor<TList extends ListDefinition<ListParams>>(
   search: SearchParamsInput,
   ...args: [ListInput<TList>] extends [never] ? [] : [input: ListInput<TList> | null]
 ): ListRequest | null {
+  const loose: ListDefinition<ListParams> = list;
   const wide: ListDefinition<ListParams, NonNullable<unknown>> = list;
   const [input] = args;
 
@@ -108,10 +115,10 @@ function buildRequestFor<TList extends ListDefinition<ListParams>>(
     return null; // the input is not ready yet
   }
 
-  const state = readListState(list, search);
+  const state = readListState(loose, search);
 
   return input === undefined
-    ? buildListRequest(list, state)
+    ? buildListRequest(loose, state)
     : buildListRequest(wide, state, input);
 }
 ```
@@ -196,11 +203,15 @@ list with an input works unchanged, and the input never shows up in the href.
 - The input type is inferred from the annotation on `apply`.
 - A list with an input is assignable to `ListDefinition<ListParams>`.
 - `ListState<TList>` infers for a list with an input.
-- Declaring the input as `string | null` or `string | undefined` is rejected.
+- A `null` annotation on `apply` is refused where the list is declared, and
+  `ListDefinition<ListParams, string | null>` and `ListDefinition<ListParams, string | undefined>`
+  are refused as types.
+- A two-argument `apply` call compiles.
 
 **Types, in a new `src/types/list-input.type.spec.ts`**
 
-- `ListInput` gives the declared type, including a bare `string`.
+- `ListInput` gives the declared type, including a bare `string`, and `string` for a
+  `string | undefined` annotation.
 - It is `never` for a list without an input.
 - It is `never` through `ListDefinition<ListParams>` (erasure pinned).
 
@@ -227,8 +238,8 @@ request". No framework-specific examples: the Next recipe belongs in `@qubeejs/r
    form, then
    `buildListRequest(taskList, readListState(taskList, search), { projectId })`, where `projectId`
    and `search` are whatever the router gives.
-2. **Declaring it:** annotate `apply`'s third parameter. Without the annotation, both using the
-   input and passing it fail at compile time.
+2. **Declaring it:** annotate `apply`'s third parameter. Without the annotation, the input is
+   typed `undefined`, so both using it and passing it fail at compile time.
 3. **Shape:** prefer an object, so adding a value later doesn't break call sites. A bare value is
    allowed; `null` and `undefined` are not.
 4. **Lookups:** resolve the slug's id before calling, because core does no I/O. Then a short note
@@ -273,16 +284,20 @@ the URL.
 
 ## Verified before writing
 
-A TypeScript 6.0.3 spike, outside the repo, under `--strict`, confirmed:
+A TypeScript 6.0.3 spike, outside the repo, under `--strict --noUnusedParameters`, confirmed,
+with the optional parameter:
 
 - the input is inferred from the annotation, and a bare `string` works;
 - a declared input is required, including an all-optional one;
 - an input passed to a list without one, or of the wrong shape, is refused;
-- `null` and `undefined` are refused where the list is declared;
+- `null` is refused where the list is declared, and reported on the `apply` line;
+- `null` and `undefined` are refused as type arguments, and a `string | undefined` annotation
+  gives an input of `string`;
+- two-argument `apply` calls compile (with a required parameter they did not);
 - `ListDefinition<ListParams>` assignability and `ListState<TList>` inference hold;
 - `readListState` and `buildListHref` accept a list with an input, with unchanged signatures;
 - without `NoInfer`, a missing input compiles;
 - through `ListDefinition<ListParams>`, the requirement is erased and `ListInput` is `never`;
 - through `ListDefinition<ListParams>`, a third argument is refused;
-- the forwarding pattern compiles without casts, with or without a constraint on `infer` in
-  `ListInput`, and its callers are checked.
+- the forwarding pattern compiles without casts once the no-input branch uses the loose copy, and
+  its callers are checked.
