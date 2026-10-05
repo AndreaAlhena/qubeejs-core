@@ -1,6 +1,3 @@
-import type { ListDefinition } from './list-definition.type';
-import type { ListParams } from './list-params.type';
-
 /**
  * The input a list declares: what its request needs besides URL state.
  *
@@ -35,15 +32,22 @@ import type { ListParams } from './list-params.type';
  * copy: called on the generic `TList`, `buildListRequest()` asks for a third
  * argument.
  *
- * A list written by hand with no `apply` at all declares no input either: with
- * nothing to infer from, `TInput` would otherwise fall back to its
- * constraint, and generic code would ask that list for an input.
+ * The input is read from `apply`'s third parameter, not from the list's type
+ * arguments, so it does not depend on how the list's type is written:
+ * `typeof list`, an alias such as `type LooseList = ListDefinition<ListParams>`,
+ * an intersection and an object type written by hand all read the same. A
+ * list with no `apply`, or whose `apply` takes two parameters or an input of
+ * `never`, declares none.
  *
- * @typeParam TList - The list, as `defineList()` returned it
+ * @typeParam TList - The list's type, however it is written
  */
-export type ListInput<TList> =
-  TList extends ListDefinition<ListParams, infer TInput>
-    ? 'apply' extends keyof TList
-      ? TInput
+export type ListInput<TList> = TList extends { apply?: infer TApply }
+  ? NonNullable<TApply> extends (builder: never, state: never, ...rest: infer TRest) => unknown
+    ? // Through the rest tuple, a missing third parameter reads as `undefined`, where an `infer`
+      // on the parameter itself would fall back to its constraint. `NonNullable` drops the
+      // `undefined` an optional parameter adds.
+      TRest extends [unknown?, ...unknown[]]
+      ? NonNullable<TRest[0]>
       : never
-    : never;
+    : never
+  : never;
