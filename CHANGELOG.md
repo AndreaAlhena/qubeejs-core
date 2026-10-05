@@ -7,6 +7,19 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Fixed
+
+- Exactly one slash joins the base URL and the resource. A trailing slash on the base URL
+  (`https://api.dev/`) no longer gives `https://api.dev//articles`, and a resource with a leading
+  slash (`/projects/42/tasks`) no longer gives the protocol-relative `//projects/42/tasks`, which
+  `fetch` resolves against a host named `projects`. A trailing slash on the resource is kept, and
+  the state still holds both values as given (#34)
+- JSON:API and Spatie no longer guess the field type of a nested resource. `addFields()` on
+  `users/42/followers` threw `Key users/42/followers is missing in the fields object` whatever the
+  key; the type cannot be read from the path (that resource returns `users`, and `users/me` ends in
+  `me`), so the fields now go out as given. A single-segment resource is still checked, now with
+  slashes around it ignored (#34)
+
 ## [1.3.0] - 2026-09-30
 
 ### Added

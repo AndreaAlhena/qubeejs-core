@@ -48,11 +48,20 @@ export abstract class AbstractRequestStrategy implements IRequestStrategy {
   /**
    * Compute the base path (no query string)
    *
+   * Exactly one slash joins the two: trailing slashes on the base URL and
+   * leading slashes on the resource are dropped, so `/projects/42/tasks`
+   * never becomes the protocol-relative `//projects/42/tasks`. A trailing
+   * slash on the resource is kept, for backends whose routes end in one.
+   * Nothing is encoded.
+   *
    * @param state - The current query builder state
    * @returns The base URI without the query separator (e.g. `/users` or `https://api.example.com/users`)
    */
   protected baseUri(state: QueryBuilderState): string {
-    return state.baseUrl ? `${state.baseUrl}/${state.resource}` : `/${state.resource}`;
+    const baseUrl = state.baseUrl.replace(/\/+$/, '');
+    const resource = state.resource.replace(/^\/+/, '');
+
+    return `${baseUrl}/${resource}`;
   }
 
   /**

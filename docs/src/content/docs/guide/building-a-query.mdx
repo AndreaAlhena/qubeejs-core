@@ -17,6 +17,20 @@ qb.setResource('articles');       // → /articles
 qb.setBaseUrl('https://api.dev'); // → https://api.dev/articles
 ```
 
+A resource can be a path, for APIs that nest one collection under another:
+
+```ts
+qb.setResource(`projects/${encodeURIComponent(projectId)}/tasks`); // → /projects/42/tasks
+```
+
+- **One slash joins the two.** A trailing slash on the base URL and a leading slash on the resource
+  are dropped, so `https://api.dev/` with `/articles` still gives `https://api.dev/articles`, and a
+  URI never starts with `//`, which a browser would read as another host.
+- **A trailing slash on the resource is kept**, for backends whose routes end in one, as Django REST
+  Framework's do: `articles/` gives `/articles/?…`.
+- **The resource is not encoded.** Encode every path segment that comes from data, as above;
+  otherwise a `/` or `?` in it changes the URI.
+
 ## Pagination
 
 ```ts
@@ -63,6 +77,15 @@ qb.addFields('articles', ['id']);      // typed — capabilities.fields
 
 `addSelect()` names columns on the primary resource. `addFields()` names them per model, the
 JSON:API-style sparse fieldset.
+
+On JSON:API and Spatie, every model passed to `addFields()` must be the resource's own or one of
+its includes, and the resource's own must be among them. For a nested resource, the path cannot tell
+the model: `users/42/followers` returns `users`, and `users/me` ends in `me`. The fields then go out
+exactly as you name them, and the server checks them:
+
+```ts
+qb.setResource('users/42/followers').addFields('users', ['name']); // → fields[users]=name
+```
 
 ## Relations
 
