@@ -9,7 +9,12 @@ import type { ParamsState } from './params-state.type';
  * type ArticleListState = ListState<typeof articleList>;
  * ```
  *
+ * A list with an input has state like any other, including a list written by
+ * hand whose `apply` requires its input.
+ *
  * @typeParam TList - The list, as `defineList()` returned it
  */
 export type ListState<TList> =
-  TList extends ListDefinition<infer TParams extends ListParams> ? ParamsState<TParams> : never;
+  TList extends ListDefinition<infer TParams extends ListParams, NonNullable<unknown>>
+    ? ParamsState<TParams>
+    : never;
