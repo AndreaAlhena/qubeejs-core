@@ -4,6 +4,7 @@ import type { StrategyCapabilities } from '../types/strategy-capabilities.type';
 
 import { SortEnum } from '../enums/sort.enum';
 import { UnselectableModelError } from '../errors/unselectable-model.error';
+import { getResourceType } from '../utils/get-resource-type';
 import { stringify } from '../utils/stringify';
 import { AbstractRequestStrategy } from './abstract-request.strategy';
 
@@ -38,11 +39,15 @@ export class JsonApiRequestStrategy extends AbstractRequestStrategy {
   /**
    * Append per-type field selection in bracket notation
    *
+   * Validates that each field type is the resource's own or an include. A
+   * nested resource (`users/42/followers`) names no type the path can tell,
+   * so its fields go out as given and the server checks them.
+   *
    * @param state - The current query builder state
    * @param options - The query parameter key name configuration
    * @param out - The accumulator the caller joins into the URI
-   * @throws Error if the resource is missing from the fields object
-   * @throws UnselectableModelError if a field type is not the resource or in includes
+   * @throws Error if the resource's type is missing from the fields object
+   * @throws UnselectableModelError if a field type is not the resource's or in includes
    */
   private _appendFields(
     state: QueryBuilderState,
@@ -53,8 +58,10 @@ export class JsonApiRequestStrategy extends AbstractRequestStrategy {
       return;
     }
 
-    if (!(state.resource in state.fields)) {
-      throw new Error(`Key ${state.resource} is missing in the fields object`);
+    const resourceType = getResourceType(state.resource);
+
+    if (resourceType !== undefined && !(resourceType in state.fields)) {
+      throw new Error(`Key ${resourceType} is missing in the fields object`);
     }
 
     const grouped: Record<string, string> = {};
@@ -64,7 +71,7 @@ export class JsonApiRequestStrategy extends AbstractRequestStrategy {
         continue;
       }
 
-      if (type !== state.resource && !state.includes.includes(type)) {
+      if (resourceType !== undefined && type !== resourceType && !state.includes.includes(type)) {
         throw new UnselectableModelError(type);
       }
 

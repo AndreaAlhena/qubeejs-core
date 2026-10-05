@@ -4,6 +4,7 @@ import type { StrategyCapabilities } from '../types/strategy-capabilities.type';
 
 import { SortEnum } from '../enums/sort.enum';
 import { UnselectableModelError } from '../errors/unselectable-model.error';
+import { getResourceType } from '../utils/get-resource-type';
 import { stringify } from '../utils/stringify';
 import { AbstractRequestStrategy } from './abstract-request.strategy';
 
@@ -38,14 +39,15 @@ export class SpatieRequestStrategy extends AbstractRequestStrategy {
   /**
    * Append per-model field selection in bracket notation
    *
-   * Validates that each field model exists either as the main resource
-   * or in the includes list.
+   * Validates that each field model is the resource's own or an include. A
+   * nested resource (`users/42/followers`) names no model the path can tell,
+   * so its fields go out as given and the server checks them.
    *
    * @param state - The current query builder state
    * @param options - The query parameter key name configuration
    * @param out - The accumulator the caller joins into the URI
-   * @throws Error if the resource is required but not set
-   * @throws UnselectableModelError if a field model is not in resource or includes
+   * @throws Error if the resource's model is missing from the fields object
+   * @throws UnselectableModelError if a field model is not the resource's or in includes
    */
   private _appendFields(
     state: QueryBuilderState,
@@ -56,8 +58,10 @@ export class SpatieRequestStrategy extends AbstractRequestStrategy {
       return;
     }
 
-    if (!(state.resource in state.fields)) {
-      throw new Error(`Key ${state.resource} is missing in the fields object`);
+    const resourceModel = getResourceType(state.resource);
+
+    if (resourceModel !== undefined && !(resourceModel in state.fields)) {
+      throw new Error(`Key ${resourceModel} is missing in the fields object`);
     }
 
     const grouped: Record<string, string> = {};
@@ -67,7 +71,11 @@ export class SpatieRequestStrategy extends AbstractRequestStrategy {
         continue;
       }
 
-      if (model !== state.resource && !state.includes.includes(model)) {
+      if (
+        resourceModel !== undefined &&
+        model !== resourceModel &&
+        !state.includes.includes(model)
+      ) {
         throw new UnselectableModelError(model);
       }
 
