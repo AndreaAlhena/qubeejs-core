@@ -7,6 +7,31 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.4.1] - 2026-10-05
+
+### Fixed
+
+- A list's input no longer depends on how its type is written. TypeScript read the input from the
+  type arguments only when a list's type was spelled `ListDefinition<…>`; through another alias
+  (`type LooseList = ListDefinition<ListParams>`), a list spread into a new object or an object
+  type written by hand, it inferred the input from `apply`'s shape, and an `apply` with two
+  parameters or an input of `never` fell back to `{}`, "an input is required". `ListInput<TList>`
+  reported that input, and `buildListRequest(loose, state)` failed with "Expected 3 arguments, but
+  got 2". Both now read the input from `apply`'s parameters. `buildListRequest()` now takes the
+  list's own type as its one type parameter, `<TList>` instead of `<TParams, TInput>`, with `state`
+  typed `ParamsState<TList['params']>`; calls that leave the type arguments to inference are
+  unchanged (#39)
+- `defineList()` no longer declares an input for an `apply` whose input is annotated as none.
+  `input?: never`, `input: undefined` and `input?: undefined` were inferred as `undefined`, which
+  the input's constraint refuses, so the input fell back to `{}` and `buildListRequest()` asked for
+  a third argument. They now declare no input, as leaving the parameter out does; `null` is still
+  refused (#40)
+- `readListState()`, `buildListHref()` and `ListState<TList>` take a list written by hand whose
+  `apply` requires its input. They took `ListDefinition<TParams>`, whose input is `never`, which
+  such a list is not assignable to, so its state could not be read nor its links built, and
+  `ListState` was `never`; `buildListRequest()` already took it. They now take any input, as
+  `buildListRequest()` does (#41)
+
 ## [1.4.0] - 2026-10-05
 
 ### Added
@@ -246,7 +271,8 @@ Carried over from `ng-qubee`, where these are still present:
 - CI verifies both entry points resolve, that there are no runtime dependencies, and that a
   single-driver import still tree-shakes (#12)
 
-[unreleased]: https://github.com/AndreaAlhena/qubeejs-core/compare/v1.4.0...HEAD
+[unreleased]: https://github.com/AndreaAlhena/qubeejs-core/compare/v1.4.1...HEAD
+[1.4.1]: https://github.com/AndreaAlhena/qubeejs-core/compare/v1.4.0...v1.4.1
 [1.4.0]: https://github.com/AndreaAlhena/qubeejs-core/compare/v1.3.0...v1.4.0
 [1.3.0]: https://github.com/AndreaAlhena/qubeejs-core/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/AndreaAlhena/qubeejs-core/compare/v1.1.0...v1.2.0

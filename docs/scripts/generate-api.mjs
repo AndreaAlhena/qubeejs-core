@@ -58,6 +58,8 @@ function typeName(t) {
         .join(' | ');
     case 'intersection':
       return t.types.map(typeName).join(' & ');
+    case 'indexedAccess':
+      return `${typeName(t.objectType)}[${typeName(t.indexType)}]`;
     case 'literal':
       return typeof t.value === 'string' ? `'${t.value}'` : String(t.value);
     case 'reflection': {

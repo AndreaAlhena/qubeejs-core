@@ -56,15 +56,23 @@ import { DuplicateListParamError } from '../errors/duplicate-list-param.error';
  * });
  * ```
  *
+ * An annotation that means no input — `input?: never`, `input: undefined` —
+ * declares none, as leaving the parameter out does.
+ *
  * @param definition - The list
  * @returns A frozen shallow copy of the list, with its params map frozen too —
  * the definition passed in stays unfrozen, and so does the driver, a shared
  * constant such as `STRAPI_DRIVER`
  * @throws {DuplicateListParamError} If two params share a key, or a key is empty
  */
-export function defineList<TParams extends ListParams, TInput extends NonNullable<unknown> = never>(
-  definition: ListDefinition<TParams, TInput>
-): ListDefinition<TParams, TInput> {
+export function defineList<
+  TParams extends ListParams,
+  // `undefined` is allowed here, then dropped: `input?: never` is inferred as `undefined`, which
+  // the list's own constraint would turn into `{}`, an input. `null` is still refused.
+  TInput extends NonNullable<unknown> | undefined = never,
+>(
+  definition: ListDefinition<TParams, NonNullable<TInput>>
+): ListDefinition<TParams, NonNullable<TInput>> {
   const params: Readonly<Record<string, ListParam<unknown>>> = definition.params;
   const owners = new Map<string, string[]>();
 

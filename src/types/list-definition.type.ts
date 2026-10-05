@@ -12,12 +12,16 @@ import type { QubeeConfig } from './qubee-config.type';
  * up from a slug, a tenant from the session — declares an input by annotating
  * `apply`'s third parameter, and `buildListRequest()` then requires it.
  *
- * Every list, with or without an input, is assignable to
- * `ListDefinition<ListParams>`, which is what lets generic code accept any
+ * Every list `defineList()` returns, with or without an input, is assignable
+ * to `ListDefinition<ListParams>`, which is what lets generic code accept any
  * list. Through that type the input requirement is erased:
  * `buildListRequest(list, state)` compiles without it, and `apply` receives
  * `undefined`. Generic code carries the input itself, typed with
  * `ListInput<TList>`; see `ListInput` for the pattern that forwards it.
+ *
+ * A list written by hand whose `apply` requires its input is not: its input
+ * cannot be `undefined`. `readListState()`, `buildListHref()` and
+ * `buildListRequest()` take it all the same, and `ListState` reads its state.
  *
  * @typeParam TParams - The list's params
  * @typeParam TInput - What the request needs besides URL state; `never` for a

@@ -1,5 +1,6 @@
 import { articleList } from '../../test/fixtures/article-list';
 import { ArticleStatusEnum } from '../../test/fixtures/article-status.enum';
+import { plainTaskList } from '../../test/fixtures/plain-task-list';
 import { taskList } from '../../test/fixtures/task-list';
 import { STRAPI_DRIVER } from '../drivers/strapi.driver';
 import { SortEnum } from '../enums/sort.enum';
@@ -101,5 +102,9 @@ describe('readListState', () => {
 
   it('should never read the input from the query', () => {
     expect(readListState(taskList, '?projectId=99')).toEqual({ page: 1, status: undefined });
+  });
+
+  it('should read a list written by hand whose apply requires its input', () => {
+    expect(readListState(plainTaskList, '?page=2&q=api')).toEqual({ page: 2, q: 'api' });
   });
 });
