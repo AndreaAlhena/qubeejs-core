@@ -1,12 +1,12 @@
 # @qubeejs/core
 
-Framework-agnostic query builder and paginator with pluggable drivers for 18 backend querying
+Framework-agnostic query builder and paginator with pluggable drivers for 19 backend querying
 standards.
 
 > Extracted from [ng-qubee](https://github.com/AndreaAlhena/ng-qubee), which remains fully
-> supported and unaffected. Every URI is verified byte-for-byte against `ng-qubee@3.8.0` across all
-> eighteen drivers, apart from the bugs fixed here and still present there, each listed with its
-> issue — see `npm run test:parity`.
+> supported and unaffected. Every URI is verified byte-for-byte against `ng-qubee@3.8.0` across the
+> eighteen drivers the two share, apart from the bugs fixed here and still present there, each
+> listed with its issue — see `npm run test:parity`.
 
 [![CI](https://github.com/AndreaAlhena/qubeejs-core/actions/workflows/ci.yml/badge.svg)](https://github.com/AndreaAlhena/qubeejs-core/actions/workflows/ci.yml)
 [![license](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
@@ -88,12 +88,12 @@ to a router or fetches. See
 
 ## Why it is small
 
-Zero runtime dependencies, and importing one driver leaves the other seventeen out of your bundle:
+Zero runtime dependencies, and importing one driver leaves the other eighteen out of your bundle:
 
 | import                       | minified | gzipped    |
 | ---------------------------- | -------- | ---------- |
 | `STRAPI_DRIVER` (one driver) | 7.1 kB   | **2.7 kB** |
-| `DRIVERS` (all eighteen)     | 54 kB    | 10.4 kB    |
+| `DRIVERS` (all nineteen)     | 54 kB    | 10.4 kB    |
 
 Reach for `DRIVERS` only when the backend is chosen at runtime.
 
@@ -110,8 +110,8 @@ const state = useSyncExternalStore(store.subscribe, store.getSnapshot);
 ## Supported drivers
 
 API Platform · Directus · Django REST Framework · Feathers · JSON:API · json-server · Laravel ·
-NestJS · @nestjsx/crud · OData · Payload · PocketBase · PostgREST · Sieve · Spatie · Spring Data
-REST · Strapi · WordPress REST
+NestJS · @nestjsx/crud · OData · Payload · PocketBase · PostgREST · Ransack (Rails) · Sieve ·
+Spatie · Spring Data REST · Strapi · WordPress REST
 
 ## Adapters
 

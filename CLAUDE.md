@@ -45,7 +45,7 @@ src/
 ├─ models/       PaginatedCollection, QueryBuilderOptions, ResponseOptions
 ├─ params/       integerParam, stringParam, enumParam, booleanParam, listParam, sortParam
 ├─ services/     QueryBuilder, QubeeStore, Paginator
-├─ strategies/   18 request + 18 response strategies, over 3 abstract bases
+├─ strategies/   19 request + 19 response strategies, over 3 abstract bases
 ├─ types/        data shapes and derived unions
 └─ utils/        append-params, encode-values, read-header, read-path, stringify, to-search-params,
                  get-page-window, get-page-range, toggle-sort, get-aria-sort

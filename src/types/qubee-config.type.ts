@@ -19,7 +19,7 @@ export type QubeeConfig = {
    * The driver to use, as its exported definition — `STRAPI_DRIVER`, say.
    *
    * A definition rather than an id, deliberately: it keeps `createQubee` from
-   * reaching into `DRIVERS`, which would bundle all eighteen drivers into every
+   * reaching into `DRIVERS`, which would bundle every driver into every
    * consumer. To choose at runtime, import the registry yourself and pass
    * `DRIVERS[id]`, so the cost is visible at your own import site.
    */
