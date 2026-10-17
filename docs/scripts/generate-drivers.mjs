@@ -61,12 +61,34 @@ const caps = new Map(
 );
 
 /**
- * Whether a driver's response strategy reads the response headers. `paginate`
- * takes `headers` as an optional third parameter only where they carry the
- * totals (PostgREST, WordPress, Ransack), so its arity says it.
+ * Drivers whose backends name attributes in snake_case, so the sample sorts on
+ * `created_at`: Ransack drops a sort on an attribute the model does not have.
+ */
+const SNAKE_CASE = new Set(['ransack']);
+
+/**
+ * Whether a driver's response strategy reads the response headers, found by
+ * paginating an empty body against a bag that records every lookup — what
+ * the strategy does, not how its signature looks.
  */
 function readsHeaders(id) {
-  return DRIVERS[id].createResponseStrategy().paginate.length > 2;
+  const definition = DRIVERS[id];
+  let read = false;
+  const headers = {
+    get: () => {
+      read = true;
+      return null;
+    },
+  };
+
+  definition.createResponseStrategy().paginate([], definition.createResponseOptions({}), headers);
+
+  return read;
+}
+
+/** The field the sample query sorts on, in the backend's own casing. */
+function sortField(id) {
+  return SNAKE_CASE.has(id) ? 'created_at' : 'createdAt';
 }
 
 /** The hand-written notes for a driver, or an empty string. */
@@ -81,7 +103,7 @@ function sampleUri(id) {
   const qb = new QueryBuilder(store, DRIVERS[id].createRequestStrategy('query'), undefined, id);
   qb.setResource('articles').setLimit(25);
   if (caps.get(id).filters) qb.addFilter('status', 'published');
-  if (caps.get(id).sort) qb.addSort('createdAt', SortEnum.DESC);
+  if (caps.get(id).sort) qb.addSort(sortField(id), SortEnum.DESC);
   return qb.generateUri();
 }
 
@@ -186,7 +208,7 @@ const paginator = new Paginator(
 \`\`\`ts
 ${
   `qb.setResource('articles')${c.filters ? "\n  .addFilter('status', 'published')" : ''}${
-    c.sort ? "\n  .addSort('createdAt', SortEnum.DESC)" : ''
+    c.sort ? `\n  .addSort('${sortField(id)}', SortEnum.DESC)` : ''
   }\n  .setLimit(25)\n  .generateUri();`
 }
 \`\`\`

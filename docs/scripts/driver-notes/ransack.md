@@ -34,6 +34,13 @@ resource '*', headers: :any, methods: [:get],
 For api-pagination, expose `link`, `total` and `per-page` instead.
 :::
 
+## Attribute names
+
+Conditions and sorts name the model's own attributes, in snake_case: `created_at`, not
+`createdAt`. Ransack 4 and later search only what the model allowlists in
+`ransackable_attributes` (and `ransackable_associations`, for a condition such as
+`author_name_cont`); a condition or sort on any other attribute is ignored.
+
 ## Searching across columns
 
 Ransack has no global search parameter; a combinator attribute name searches several columns in one
