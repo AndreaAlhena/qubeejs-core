@@ -50,6 +50,23 @@ describe('parseLinkHeader', () => {
     });
   });
 
+  it('should find rel among the other parameters of a link', () => {
+    const value =
+      '<https://x.io/a?page=1>; type="application/json"; rel="prev", ' +
+      '<https://x.io/a?page=3>; title="Next, please"; rel="next"';
+
+    expect(parseLinkHeader(value)).toEqual({
+      next: 'https://x.io/a?page=3',
+      prev: 'https://x.io/a?page=1',
+    });
+  });
+
+  it('should read an unquoted rel', () => {
+    expect(parseLinkHeader('<https://x.io/a?page=2>; rel=next')).toEqual({
+      next: 'https://x.io/a?page=2',
+    });
+  });
+
   it('should tolerate whitespace around the separators', () => {
     expect(parseLinkHeader('<https://x.io/a?page=2>  ;  rel="next"')).toEqual({
       next: 'https://x.io/a?page=2',
