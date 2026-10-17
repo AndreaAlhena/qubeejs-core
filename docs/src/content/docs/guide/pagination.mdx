@@ -60,7 +60,7 @@ key. Rows pass through as the response held them.
 ## Header-based pagination
 
 Some backends page over headers rather than the body — PostgREST's `Content-Range`, WordPress's
-`X-WP-TotalPages`. Pass the headers as the second argument:
+`X-WP-TotalPages`, the `total-count` of Rails' Pagy. Pass the headers as the second argument:
 
 ```ts
 const response = await fetch(url);

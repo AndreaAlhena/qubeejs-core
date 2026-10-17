@@ -90,12 +90,28 @@ const DIVERGENCES = {
   },
 };
 
+/**
+ * Drivers added after the extraction. ng-qubee@3.8.0 has no counterpart to
+ * compare them against, so they are listed and skipped; their wire format is
+ * pinned by their own specs instead.
+ */
+const CORE_ONLY = {
+  ransack: '#42',
+};
+
 let pass = 0,
   diverged = 0,
-  fail = 0;
+  fail = 0,
+  coreOnly = 0;
 const failures = [];
 
 for (const id of DRIVERS) {
+  if (CORE_ONLY[id]) {
+    coreOnly += 1;
+    console.log(`  -- ${id.padEnd(14)} ${CORE_ONLY[id]}: core only, no ng-qubee counterpart`);
+    continue;
+  }
+
   const NgClass = ng[NG_STRATEGY[id]];
   if (!NgClass) {
     console.log(`  ?  ${id.padEnd(14)} not exported by ng-qubee`);
@@ -136,7 +152,9 @@ for (const id of DRIVERS) {
   }
 }
 
-console.log(`\n  ${pass} identical, ${diverged} diverged as documented, ${fail} mismatched`);
+console.log(
+  `\n  ${pass} identical, ${diverged} diverged as documented, ${fail} mismatched, ${coreOnly} core only`
+);
 for (const f of failures) {
   console.log(`\n  --- ${f.id} ---\n    ng-qubee : ${f.ng}\n    qubee    : ${f.core}`);
 }

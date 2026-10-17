@@ -45,7 +45,7 @@ src/
 ├─ models/       PaginatedCollection, QueryBuilderOptions, ResponseOptions
 ├─ params/       integerParam, stringParam, enumParam, booleanParam, listParam, sortParam
 ├─ services/     QueryBuilder, QubeeStore, Paginator
-├─ strategies/   18 request + 18 response strategies, over 3 abstract bases
+├─ strategies/   19 request + 19 response strategies, over 3 abstract bases
 ├─ types/        data shapes and derived unions
 └─ utils/        append-params, encode-values, read-header, read-path, stringify, to-search-params,
                  get-page-window, get-page-range, toggle-sort, get-aria-sort
@@ -60,7 +60,7 @@ the template.
 **Extra params:** `setParam()` values are appended by `QueryBuilder.generateUri()` after the
 request strategy returns (`utils/append-params.ts`), so strategies never emit `state.params`.
 
-**Bundle note:** `DRIVERS` reaches every driver by construction (~50 kB minified). A consumer that
+**Bundle note:** `DRIVERS` reaches every driver by construction (~54 kB minified). A consumer that
 knows its backend at build time should `import { STRAPI_DRIVER } from '@qubeejs/core'` instead
 (~7.1 kB minified / 2.7 kB gzipped).
 

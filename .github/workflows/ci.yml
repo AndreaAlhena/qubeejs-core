@@ -48,14 +48,16 @@ jobs:
       - name: Verify the published entry points resolve
         run: |
           node --input-type=module -e "
-            import { DRIVERS, QueryBuilder, QubeeStore } from './dist/index.js';
-            if (Object.keys(DRIVERS).length !== 18) throw new Error('ESM: expected 18 drivers');
+            import { DRIVERS, DriverEnum, QueryBuilder, QubeeStore } from './dist/index.js';
+            const expected = Object.values(DriverEnum).length;
+            if (Object.keys(DRIVERS).length !== expected) throw new Error('ESM: expected ' + expected + ' drivers');
             if (typeof QueryBuilder !== 'function') throw new Error('ESM: QueryBuilder missing');
             if (typeof QubeeStore !== 'function') throw new Error('ESM: QubeeStore missing');
           "
           node --input-type=commonjs -e "
-            const { DRIVERS, QueryBuilder } = require('./dist/index.cjs');
-            if (Object.keys(DRIVERS).length !== 18) throw new Error('CJS: expected 18 drivers');
+            const { DRIVERS, DriverEnum, QueryBuilder } = require('./dist/index.cjs');
+            const expected = Object.values(DriverEnum).length;
+            if (Object.keys(DRIVERS).length !== expected) throw new Error('CJS: expected ' + expected + ' drivers');
             if (typeof QueryBuilder !== 'function') throw new Error('CJS: QueryBuilder missing');
           "
 

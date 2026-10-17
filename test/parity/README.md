@@ -24,9 +24,20 @@ byte for byte, against a stated rule; any other difference still fails.
 | ---------- | ----- | --------------------------- |
 | pocketbase | #21   | `&&` → `%26%26` in `filter` |
 
+## Core-only drivers
+
+A driver added after the extraction has nothing in `ng-qubee@3.8.0` to compare against. It is
+listed in `CORE_ONLY` in `parity.mjs` with the issue that added it, reported as skipped, and pinned
+by its own specs instead.
+
+| Driver  | Issue |
+| ------- | ----- |
+| ransack | #42   |
+
 ## Results
 
 ```
 1.0 audit   18 identical, 0 mismatched
 1.1.0       17 identical, 1 diverged as documented, 0 mismatched
+1.5.0       17 identical, 1 diverged as documented, 0 mismatched, 1 core only
 ```

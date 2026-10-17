@@ -18,6 +18,7 @@ export enum DriverEnum {
   PAYLOAD = 'payload',
   POCKETBASE = 'pocketbase',
   POSTGREST = 'postgrest',
+  RANSACK = 'ransack',
   SIEVE = 'sieve',
   SPATIE = 'spatie',
   SPRING = 'spring',

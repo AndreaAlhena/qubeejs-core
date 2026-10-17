@@ -5,18 +5,9 @@ import type { PaginatedObject } from '../types/paginated-object.type';
 import type { RawResponse } from '../types/raw-response.type';
 
 import { PaginatedCollection } from '../models/paginated-collection';
+import { parseLinkHeader } from '../utils/parse-link-header';
 import { readHeader } from '../utils/read-header';
 import { readPath } from '../utils/read-path';
-
-/**
- * Internal shape holding the navigation URLs parsed out of a `Link`
- * header. Both are optional: page 1 has no `prev`, the last page has no
- * `next`, and a single-page result has neither.
- */
-type LinkRelations = {
-  next?: string;
-  prev?: string;
-};
 
 /**
  * Response strategy for the WordPress REST API driver
@@ -53,7 +44,6 @@ type LinkRelations = {
  */
 export class WordpressResponseStrategy implements IResponseStrategy {
   private static readonly _linkHeader = 'Link';
-  private static readonly _linkRegex = /<([^>]+)>\s*;\s*rel="(next|prev)"/g;
   private static readonly _pageParamRegex = /[?&]page=(\d+)/;
   private static readonly _totalHeader = 'X-WP-Total';
   private static readonly _totalPagesHeader = 'X-WP-TotalPages';
@@ -181,32 +171,6 @@ export class WordpressResponseStrategy implements IResponseStrategy {
   }
 
   /**
-   * Extract the `rel="next"` / `rel="prev"` URLs from an RFC 5988
-   * `Link` header value
-   *
-   * Tolerates any ordering, extra relations (`rel="collection"` etc.
-   * are ignored), and a missing header.
-   *
-   * @param value - Raw header value (possibly null/undefined)
-   * @returns The navigation URLs found, keyed by relation
-   */
-  private _parseLinkHeader(value: string | null | undefined): LinkRelations {
-    if (!value) {
-      return {};
-    }
-
-    const relations: LinkRelations = {};
-    const regex = new RegExp(WordpressResponseStrategy._linkRegex.source, 'g');
-    let match: RegExpExecArray | null;
-
-    while ((match = regex.exec(value)) !== null) {
-      relations[match[2] as keyof LinkRelations] = match[1];
-    }
-
-    return relations;
-  }
-
-  /**
    * Parse a WordPress REST response into a typed PaginatedCollection
    *
    * @param response - The raw response. Either the array body directly, or
@@ -231,7 +195,7 @@ export class WordpressResponseStrategy implements IResponseStrategy {
     const lastPage = this._parseCount(
       readHeader(headers, WordpressResponseStrategy._totalPagesHeader)
     );
-    const { next, prev } = this._parseLinkHeader(
+    const { next, prev } = parseLinkHeader(
       readHeader(headers, WordpressResponseStrategy._linkHeader)
     );
 
