@@ -28,8 +28,10 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Changed
 
 - The WordPress driver reads its `Link` header through the parser it now shares with Ransack.
-  Relation names match case-insensitively and a space-separated `rel` list is read, so
-  `rel="Next"` is no longer ignored; everything WordPress sends is read as before (#42)
+  `rel` is found anywhere among a link's parameters, quoted or not, relation names match
+  case-insensitively and a space-separated `rel` list is read, so `rel="Next"` and
+  `<…>; type="…"; rel="next"` are no longer ignored; everything WordPress sends is read as
+  before (#42)
 - `DRIVERS` is 54 kB minified and 10.4 kB gzipped with the nineteenth driver, up from 50 kB and
   9.7 kB. A single-driver import is unchanged at 2.7 kB; `RANSACK_DRIVER` alone is 3.0 kB (#42)
 
