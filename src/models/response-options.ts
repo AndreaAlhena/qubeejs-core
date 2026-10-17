@@ -367,6 +367,39 @@ export class PocketbaseResponseOptions extends ResponseOptions {
 }
 
 /**
+ * Pre-configured ResponseOptions for the Ransack (Rails) driver
+ *
+ * Ransack does not paginate, so the response is whatever the pagination
+ * gem sends: a bare-array body with the metadata in headers. Unlike every
+ * other subclass, `currentPage`, `lastPage`, `perPage` and `total` name
+ * **response headers**, not body paths. They default to the headers of
+ * Pagy's `headers_hash` (`current-page`, `total-pages`, `page-limit`,
+ * `total-count`); when one is absent the strategy falls back to
+ * api-pagination's (`page`, `per-page`, `total`), so Kaminari works
+ * unconfigured. Navigation URLs come from the `link` header, so the URL
+ * paths default to empty strings, as do `from`/`to`, which are derived.
+ * `data` is a body path, read only when the body is not a bare array.
+ */
+export class RansackResponseOptions extends ResponseOptions {
+  constructor(options: PaginationConfig) {
+    super({
+      currentPage: options.currentPage ?? 'current-page',
+      data: options.data ?? 'data',
+      firstPageUrl: options.firstPageUrl ?? '',
+      from: options.from ?? '',
+      lastPage: options.lastPage ?? 'total-pages',
+      lastPageUrl: options.lastPageUrl ?? '',
+      nextPageUrl: options.nextPageUrl ?? '',
+      path: options.path ?? '',
+      perPage: options.perPage ?? 'page-limit',
+      prevPageUrl: options.prevPageUrl ?? '',
+      to: options.to ?? '',
+      total: options.total ?? 'total-count',
+    });
+  }
+}
+
+/**
  * Pre-configured ResponseOptions for the Sieve (.NET) driver
  *
  * Sieve defines no response envelope (it returns an `IQueryable` the
