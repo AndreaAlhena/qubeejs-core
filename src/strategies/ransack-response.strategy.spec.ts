@@ -186,6 +186,16 @@ describe('RansackResponseStrategy', () => {
       expect(collection.perPage).toBe(20);
     });
 
+    it('should skip a header disabled with an empty name, which Headers.get() rejects', () => {
+      const disabled = new RansackResponseOptions({ currentPage: '', total: '' });
+      const headers = new Headers({ page: '3', total: '7' });
+
+      const collection = strategy.paginate(rows(1), disabled, headers);
+
+      expect(collection.total).toBe(7);
+      expect(collection.page).toBe(3);
+    });
+
     it('should ignore unparseable header values', () => {
       const headers = { 'page-limit': 'twenty', 'total-count': 'n/a', 'total-pages': '' };
 
