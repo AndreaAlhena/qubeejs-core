@@ -6,7 +6,7 @@
  *
  * Note on bundle size: `DRIVERS` reaches every driver by construction. A
  * consumer that knows its backend at build time should import that driver's
- * constant instead and let the other seventeen tree-shake.
+ * constant instead and let every other driver tree-shake.
  */
 
 // Query builder configuration
