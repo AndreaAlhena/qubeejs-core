@@ -7,6 +7,12 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed
+
+- The package's npm page links the documentation site, https://qubeejs.andreatantimonaco.me, as
+  its homepage. With no `homepage` in `package.json`, npm linked the repository's README, so the
+  repository showed up twice and the docs were not linked at all (#43)
+
 ## [1.5.0] - 2026-10-19
 
 ### Added
