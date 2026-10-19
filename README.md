@@ -1,6 +1,6 @@
 # @qubeejs/core
 
-Framework-agnostic query builder and paginator with pluggable drivers for 19 backend querying
+Framework-agnostic query builder and paginator with pluggable drivers for 20 backend querying
 standards.
 
 > Extracted from [ng-qubee](https://github.com/AndreaAlhena/ng-qubee), which remains fully
@@ -88,12 +88,12 @@ to a router or fetches. See
 
 ## Why it is small
 
-Zero runtime dependencies, and importing one driver leaves the other eighteen out of your bundle:
+Zero runtime dependencies, and importing one driver leaves the other nineteen out of your bundle:
 
 | import                       | minified | gzipped    |
 | ---------------------------- | -------- | ---------- |
 | `STRAPI_DRIVER` (one driver) | 7.1 kB   | **2.7 kB** |
-| `DRIVERS` (all nineteen)     | 54 kB    | 10.4 kB    |
+| `DRIVERS` (all twenty)       | 56 kB    | 10.7 kB    |
 
 Reach for `DRIVERS` only when the backend is chosen at runtime.
 
@@ -109,9 +109,9 @@ const state = useSyncExternalStore(store.subscribe, store.getSnapshot);
 
 ## Supported drivers
 
-API Platform · Directus · Django REST Framework · Feathers · JSON:API · json-server · Laravel ·
-NestJS · @nestjsx/crud · OData · Payload · PocketBase · PostgREST · Ransack (Rails) · Sieve ·
-Spatie · Spring Data REST · Strapi · WordPress REST
+API Platform · Directus · Django REST Framework · FastAPI · Feathers · JSON:API · json-server ·
+Laravel · NestJS · @nestjsx/crud · OData · Payload · PocketBase · PostgREST · Ransack (Rails) ·
+Sieve · Spatie · Spring Data REST · Strapi · WordPress REST
 
 ## Adapters
 

@@ -7,7 +7,8 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 
 const LABELS: Record<string, string> = {
   'api-platform': 'API Platform', directus: 'Directus', drf: 'Django REST',
-  feathers: 'FeathersJS', 'json-api': 'JSON:API', 'json-server': 'json-server',
+  fastapi: 'FastAPI', feathers: 'FeathersJS', 'json-api': 'JSON:API',
+  'json-server': 'json-server',
   laravel: 'Laravel', nestjs: 'nestjs-paginate', 'nestjsx-crud': '@nestjsx/crud',
   odata: 'OData v4', payload: 'Payload CMS', pocketbase: 'PocketBase',
   postgrest: 'PostgREST', ransack: 'Ransack', sieve: 'Sieve', spatie: 'Spatie',
@@ -20,7 +21,7 @@ const features = [
   { title: 'Agnostic by construction',
     body: 'No Angular, no React, no RxJS, no Signals. Plain TypeScript that returns a URI and parses a body.' },
   { title: '2.7 kB gzipped',
-    body: 'Import one driver and the other eighteen tree-shake out. Zero runtime dependencies, ever.' },
+    body: 'Import one driver and the other nineteen tree-shake out. Zero runtime dependencies, ever.' },
   { title: 'Fluent, chainable, typed',
     body: 'Filters, operators, sorting, field selection, includes, embeds and pagination in one chain.' },
   { title: 'Bring your own reactivity',
@@ -33,7 +34,7 @@ const features = [
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>qubee — build the query, not the plumbing</title>
-    <meta name="description" content="Framework-agnostic query builder and paginator with pluggable drivers for 19 backend querying standards." />
+    <meta name="description" content="Framework-agnostic query builder and paginator with pluggable drivers for 20 backend querying standards." />
     <link rel="icon" href={`${base}/mark.png`} />
   </head>
 
@@ -62,7 +63,7 @@ const features = [
             <h1>Build the query.<br /><span>Not the plumbing.</span></h1>
             <p class="lede">
               <strong>@qubeejs/core</strong> is a framework-agnostic query builder and paginator
-              with pluggable drivers for 19 backend querying standards. It performs no I/O — you
+              with pluggable drivers for 20 backend querying standards. It performs no I/O — you
               fetch however you like and hand the body back.
             </p>
             <div class="cta">
@@ -101,7 +102,7 @@ const features = [
             <thead><tr><th>import</th><th>min</th><th>gzip</th></tr></thead>
             <tbody>
               <tr><td><code>STRAPI_DRIVER</code></td><td>7.1 kB</td><td><strong>2.7 kB</strong></td></tr>
-              <tr><td><code>DRIVERS</code> (all 19)</td><td>54 kB</td><td>10.4 kB</td></tr>
+              <tr><td><code>DRIVERS</code> (all 20)</td><td>56 kB</td><td>10.7 kB</td></tr>
             </tbody>
           </table>
         </div>
@@ -126,7 +127,7 @@ const features = [
 
       <section class="drivers">
         <div class="drivers-head">
-          <h2>Nineteen backends, one builder</h2>
+          <h2>Twenty backends, one builder</h2>
           <span>Request + response strategies, capability-checked.</span>
         </div>
         <div class="grid">
