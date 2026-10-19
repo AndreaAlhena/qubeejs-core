@@ -38,6 +38,7 @@
     "./package.json": "./package.json"
   },
   "files": ["dist"],
+  "homepage": "https://qubeejs.andreatantimonaco.me",
   "keywords": [
     "api-platform",
     "builder",
