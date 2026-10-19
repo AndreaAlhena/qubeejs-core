@@ -7,6 +7,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.6.0] - 2026-10-19
+
 ### Added
 
 - **A FastAPI driver.** `FASTAPI_DRIVER` (`DriverEnum.FASTAPI`, `'fastapi'`) speaks fastapi-filter
@@ -321,7 +323,8 @@ Carried over from `ng-qubee`, where these are still present:
 - CI verifies both entry points resolve, that there are no runtime dependencies, and that a
   single-driver import still tree-shakes (#12)
 
-[unreleased]: https://github.com/AndreaAlhena/qubeejs-core/compare/v1.5.0...HEAD
+[unreleased]: https://github.com/AndreaAlhena/qubeejs-core/compare/v1.6.0...HEAD
+[1.6.0]: https://github.com/AndreaAlhena/qubeejs-core/compare/v1.5.0...v1.6.0
 [1.5.0]: https://github.com/AndreaAlhena/qubeejs-core/compare/v1.4.1...v1.5.0
 [1.4.1]: https://github.com/AndreaAlhena/qubeejs-core/compare/v1.4.0...v1.4.1
 [1.4.0]: https://github.com/AndreaAlhena/qubeejs-core/compare/v1.3.0...v1.4.0
