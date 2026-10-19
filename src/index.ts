@@ -54,6 +54,7 @@ export {
   ApiPlatformResponseOptions,
   DirectusResponseOptions,
   DrfResponseOptions,
+  FastapiResponseOptions,
   FeathersResponseOptions,
   JsonApiResponseOptions,
   JsonServerResponseOptions,
@@ -79,6 +80,8 @@ export { DirectusRequestStrategy } from './strategies/directus-request.strategy'
 export { DirectusResponseStrategy } from './strategies/directus-response.strategy';
 export { DrfRequestStrategy } from './strategies/drf-request.strategy';
 export { DrfResponseStrategy } from './strategies/drf-response.strategy';
+export { FastapiRequestStrategy } from './strategies/fastapi-request.strategy';
+export { FastapiResponseStrategy } from './strategies/fastapi-response.strategy';
 export { FeathersRequestStrategy } from './strategies/feathers-request.strategy';
 export { FeathersResponseStrategy } from './strategies/feathers-response.strategy';
 export { JsonApiRequestStrategy } from './strategies/json-api-request.strategy';
@@ -123,6 +126,7 @@ export { API_PLATFORM_DRIVER } from './drivers/api-platform.driver';
 export { DIRECTUS_DRIVER } from './drivers/directus.driver';
 export { DRF_DRIVER } from './drivers/drf.driver';
 export { DRIVERS } from './drivers/driver-registry';
+export { FASTAPI_DRIVER } from './drivers/fastapi.driver';
 export { FEATHERS_DRIVER } from './drivers/feathers.driver';
 export { JSON_API_DRIVER } from './drivers/json-api.driver';
 export { JSON_SERVER_DRIVER } from './drivers/json-server.driver';

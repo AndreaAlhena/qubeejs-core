@@ -4,6 +4,7 @@ import { DriverEnum } from '../enums/driver.enum';
 import { API_PLATFORM_DRIVER } from './api-platform.driver';
 import { DIRECTUS_DRIVER } from './directus.driver';
 import { DRF_DRIVER } from './drf.driver';
+import { FASTAPI_DRIVER } from './fastapi.driver';
 import { FEATHERS_DRIVER } from './feathers.driver';
 import { JSON_API_DRIVER } from './json-api.driver';
 import { JSON_SERVER_DRIVER } from './json-server.driver';
@@ -36,6 +37,7 @@ export const DRIVERS: Record<DriverEnum, DriverDefinition> = {
   [DriverEnum.API_PLATFORM]: API_PLATFORM_DRIVER,
   [DriverEnum.DIRECTUS]: DIRECTUS_DRIVER,
   [DriverEnum.DRF]: DRF_DRIVER,
+  [DriverEnum.FASTAPI]: FASTAPI_DRIVER,
   [DriverEnum.FEATHERS]: FEATHERS_DRIVER,
   [DriverEnum.JSON_API]: JSON_API_DRIVER,
   [DriverEnum.JSON_SERVER]: JSON_SERVER_DRIVER,

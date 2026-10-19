@@ -11,7 +11,7 @@ import a driver or the registry.
 | Import | Minified | Gzipped |
 | --- | --- | --- |
 | `STRAPI_DRIVER` (one driver) | 7.1 kB | **2.7 kB** |
-| `DRIVERS` (all nineteen) | 54 kB | 10.4 kB |
+| `DRIVERS` (all twenty) | 57 kB | 10.8 kB |
 
 Measured with esbuild, minified, ES2022, and asserted in CI so it cannot regress.
 
@@ -23,7 +23,7 @@ Each driver is its own module, exported by name:
 import { STRAPI_DRIVER, QubeeStore, QueryBuilder } from '@qubeejs/core';
 ```
 
-Bundlers tree-shake the other eighteen away, along with their response strategies and options.
+Bundlers tree-shake the other nineteen away, along with their response strategies and options.
 
 ## When to use the registry
 
@@ -33,7 +33,7 @@ construction, so reserve it for when the backend genuinely is not known until ru
 ```ts
 import { DRIVERS } from '@qubeejs/core';
 
-const driver = DRIVERS[config.driver]; // pulls in all nineteen
+const driver = DRIVERS[config.driver]; // pulls in all twenty
 ```
 
 ## Why there are no dependencies

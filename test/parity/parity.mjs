@@ -96,6 +96,7 @@ const DIVERGENCES = {
  * pinned by their own specs instead.
  */
 const CORE_ONLY = {
+  fastapi: '#44',
   ransack: '#42',
 };
 

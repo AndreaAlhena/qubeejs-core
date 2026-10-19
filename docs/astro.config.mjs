@@ -14,7 +14,7 @@ export default defineConfig({
       credits: false,
       customCss: ['./src/styles/qubee.css'],
       description:
-        'Framework-agnostic query builder and paginator with pluggable drivers for 19 backend querying standards.',
+        'Framework-agnostic query builder and paginator with pluggable drivers for 20 backend querying standards.',
       editLink: { baseUrl: `${REPO}/edit/develop/docs/` },
       favicon: '/mark.png',
       lastUpdated: true,

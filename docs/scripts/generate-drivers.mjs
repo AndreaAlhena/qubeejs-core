@@ -37,6 +37,7 @@ const LABELS = {
   'api-platform': 'API Platform',
   directus: 'Directus',
   drf: 'Django REST Framework',
+  fastapi: 'FastAPI',
   feathers: 'FeathersJS',
   'json-api': 'JSON:API',
   'json-server': 'json-server',
@@ -62,9 +63,10 @@ const caps = new Map(
 
 /**
  * Drivers whose backends name attributes in snake_case, so the sample sorts on
- * `created_at`: Ransack drops a sort on an attribute the model does not have.
+ * `created_at`: Ransack drops a sort on an attribute the model does not have,
+ * and fastapi-filter answers it with a 422.
  */
-const SNAKE_CASE = new Set(['ransack']);
+const SNAKE_CASE = new Set(['fastapi', 'ransack']);
 
 /**
  * Whether a driver's response strategy reads the response headers, found by

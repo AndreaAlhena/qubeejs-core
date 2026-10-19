@@ -3,7 +3,7 @@
     "name": "Andrea Tantimonaco",
     "url": "https://andreatantimonaco.me"
   },
-  "description": "Framework-agnostic query builder and paginator with pluggable drivers for 19 backend querying standards",
+  "description": "Framework-agnostic query builder and paginator with pluggable drivers for 20 backend querying standards",
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@types/node": "^26.4.1",
@@ -46,6 +46,7 @@
     "directus",
     "django",
     "drf",
+    "fastapi",
     "feathers",
     "filter",
     "framework-agnostic",
@@ -91,5 +92,5 @@
   "sideEffects": false,
   "type": "module",
   "types": "./dist/index.d.ts",
-  "version": "1.5.0"
+  "version": "1.6.0"
 }
