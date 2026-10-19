@@ -7,11 +7,27 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+
+- **A FastAPI driver.** `FASTAPI_DRIVER` (`DriverEnum.FASTAPI`, `'fastapi'`) speaks fastapi-filter
+  on the request and fastapi-pagination's `Page` on the response. Filters are flat
+  `field=value`, several values one comma-separated `field__in=a,b`; operators are
+  fastapi-filter suffixes (`GTE` → `__gte`, `NOT` → `__neq` / `__not_in`, `BTW` → `__gte` +
+  `__lte`, `NULL` → `__isnull=true|false`), with `CONTAINS`, `ILIKE` and `SW` sent as
+  `like`/`ilike` patterns carrying their own `%` wildcards. Sorts are `order_by=-created_at,title`,
+  search is `search=term`, and pagination is `page` + `size`. No select, fields or includes. The
+  `{ items, total, page, size, pages }` body is read without configuration, as are the `links` of
+  `fastapi_pagination.links.Page`; the `null` total of `UseIncludeTotal(False)` reads as unknown.
+  `LimitOffsetPage` and the cursor page are not supported. Code that maps every `Driver`, such as
+  a `Record<Driver, …>` or an exhaustive `switch`, needs a `fastapi` entry (#44)
+
 ### Changed
 
 - The package's npm page links the documentation site, https://qubeejs.andreatantimonaco.me, as
   its homepage. With no `homepage` in `package.json`, npm linked the repository's README, so the
   repository showed up twice and the docs were not linked at all (#43)
+- `DRIVERS` is 56 kB minified and 10.7 kB gzipped with the twentieth driver, up from 54 kB and
+  10.4 kB. A single-driver import is unchanged at 2.7 kB; `FASTAPI_DRIVER` alone is 2.6 kB (#44)
 
 ## [1.5.0] - 2026-10-19
 
