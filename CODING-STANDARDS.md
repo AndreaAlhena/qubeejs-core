@@ -81,11 +81,11 @@ matters for React and plain-JS callers and for config that arrives as a string f
 **The widening applies to public method parameters only. Internal state keeps the enum type.**
 Widening state breaks two things that were verified to matter here:
 
-- the 13 per-driver `switch` statements over `FilterOperatorEnum` enumerate every member with **no
-  `default:`** — that is what makes them provably exhaustive, and a string union defeats the
-  narrowing;
-- 17 sites compare `sort.order === SortEnum.DESC`, which `no-unsafe-enum-comparison` rejects across
-  a union.
+- the per-driver `switch` statements over `FilterOperatorEnum`, one in every driver with operators,
+  enumerate every member with **no `default:`** — that is what makes them provably exhaustive, and
+  a string union defeats the narrowing;
+- every request strategy that sorts, and the sort utilities, compare `sort.order === SortEnum.DESC`,
+  which `no-unsafe-enum-comparison` rejects across a union.
 
 So: widen at the door, normalize inward.
 
