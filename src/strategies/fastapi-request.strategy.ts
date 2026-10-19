@@ -110,7 +110,9 @@ export class FastapiRequestStrategy extends AbstractRequestStrategy {
    * Append `order_by=-field1,field2`
    *
    * Ascending fields carry no prefix: fastapi-filter also accepts `+`, but
-   * a raw `+` in a query string decodes to a space.
+   * a raw `+` in a query string decodes to a space. fastapi-filter answers
+   * a field named twice with a 422, so a repeated field is sent once, with
+   * its first sort; in SQL the later key could never change the order.
    *
    * @param state - The current query builder state
    * @param out - The accumulator the caller joins into the URI
@@ -120,9 +122,9 @@ export class FastapiRequestStrategy extends AbstractRequestStrategy {
       return;
     }
 
-    const fields = state.sorts.map(
-      (sort) => `${sort.order === SortEnum.DESC ? '-' : ''}${sort.field}`
-    );
+    const fields = state.sorts
+      .filter((sort, index) => state.sorts.findIndex((s) => s.field === sort.field) === index)
+      .map((sort) => `${sort.order === SortEnum.DESC ? '-' : ''}${sort.field}`);
 
     out.push(`${FastapiRequestStrategy._orderByKey}=${fields.join(',')}`);
   }

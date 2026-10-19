@@ -261,6 +261,21 @@ describe('FastapiRequestStrategy', () => {
         '/articles?order_by=-created_at,title&page=1&size=10'
       );
     });
+
+    it('should send a repeated field once, keeping its first sort', () => {
+      const state = {
+        ...baseState,
+        sorts: [
+          { field: 'title', order: SortEnum.ASC },
+          { field: 'created_at', order: SortEnum.DESC },
+          { field: 'title', order: SortEnum.DESC },
+        ],
+      };
+
+      expect(strategy.buildUri(state, options)).toBe(
+        '/articles?order_by=title,-created_at&page=1&size=10'
+      );
+    });
   });
 
   describe('search', () => {
