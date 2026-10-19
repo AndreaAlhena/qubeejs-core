@@ -53,12 +53,12 @@ export class MyResponseStrategy implements IResponseStrategy {
 }
 ```
 
-Used by DRF (cursor URLs), OData (`@odata.nextLink`), PostgREST and WordPress (headers).
+Used by DRF (cursor URLs), OData (`@odata.nextLink`), PostgREST, WordPress and Ransack (headers).
 
 ## Bare-array bodies
 
-PostgREST and the WordPress REST API return rows directly, with metadata in headers. `RawResponse`
-models both shapes:
+PostgREST, the WordPress REST API and Rails behind Ransack return rows directly, with metadata in
+headers. `RawResponse` models both shapes:
 
 ```ts
 type RawResponse = Record<string, unknown> | readonly unknown[];

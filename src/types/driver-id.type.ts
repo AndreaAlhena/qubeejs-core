@@ -5,7 +5,7 @@ import type { Driver } from './driver.type';
  * a driver defined outside this package.
  *
  * `string & {}` accepts any string without letting the union collapse to
- * plain `string`, so editors still suggest the eighteen built-in ids. A
+ * plain `string`, so editors still suggest the built-in ids. A
  * custom driver can therefore name itself, and capability errors name it
  * rather than a built-in id it had to borrow:
  *

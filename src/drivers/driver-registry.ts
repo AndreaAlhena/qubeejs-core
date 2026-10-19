@@ -14,6 +14,7 @@ import { ODATA_DRIVER } from './odata.driver';
 import { PAYLOAD_DRIVER } from './payload.driver';
 import { POCKETBASE_DRIVER } from './pocketbase.driver';
 import { POSTGREST_DRIVER } from './postgrest.driver';
+import { RANSACK_DRIVER } from './ransack.driver';
 import { SIEVE_DRIVER } from './sieve.driver';
 import { SPATIE_DRIVER } from './spatie.driver';
 import { SPRING_DRIVER } from './spring.driver';
@@ -45,6 +46,7 @@ export const DRIVERS: Record<DriverEnum, DriverDefinition> = {
   [DriverEnum.PAYLOAD]: PAYLOAD_DRIVER,
   [DriverEnum.POCKETBASE]: POCKETBASE_DRIVER,
   [DriverEnum.POSTGREST]: POSTGREST_DRIVER,
+  [DriverEnum.RANSACK]: RANSACK_DRIVER,
   [DriverEnum.SIEVE]: SIEVE_DRIVER,
   [DriverEnum.SPATIE]: SPATIE_DRIVER,
   [DriverEnum.SPRING]: SPRING_DRIVER,

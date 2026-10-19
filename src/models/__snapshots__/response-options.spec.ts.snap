@@ -187,6 +187,23 @@ exports[`ResponseOptions > resolved defaults per driver > Pocketbase 1`] = `
 }
 `;
 
+exports[`ResponseOptions > resolved defaults per driver > Ransack 1`] = `
+{
+  "currentPage": "current-page",
+  "data": "data",
+  "firstPageUrl": "",
+  "from": "",
+  "lastPage": "total-pages",
+  "lastPageUrl": "",
+  "nextPageUrl": "",
+  "path": "",
+  "perPage": "page-limit",
+  "prevPageUrl": "",
+  "to": "",
+  "total": "total-count",
+}
+`;
+
 exports[`ResponseOptions > resolved defaults per driver > Sieve 1`] = `
 {
   "currentPage": "page",

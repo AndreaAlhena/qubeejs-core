@@ -7,6 +7,34 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.5.0] - 2026-10-19
+
+### Added
+
+- **A Ransack (Rails) driver.** `RANSACK_DRIVER` (`DriverEnum.RANSACK`, `'ransack'`) nests
+  conditions under the `q` search key: `q[status_eq]=published`, several values as repeated
+  `q[status_in][]=…` keys, operators as Ransack predicates (`GTE` → `_gteq`, `ILIKE` → `_i_cont`,
+  `SW` → `_start`, `BTW` → `_gteq` + `_lteq`, `NULL` → `_null=1` / `_not_null=1`), and sorts as
+  `q[s][]=created_at+desc`. Pagination is `page` + `limit`, Pagy's defaults; Kaminari's
+  `per_page` is `request: { limit: 'per_page' }`. Filters, operators and sort only: Ransack has no
+  select, includes or search, and a search across columns is a combinator field name
+  (`title_or_body` + `ILIKE` → `q[title_or_body_i_cont]=…`). The body is a bare array and the
+  totals arrive in headers, read from Pagy (`total-count`, `total-pages`, `current-page`,
+  `page-limit`) or Kaminari + api-pagination (`total`, `per-page`) without configuration;
+  navigation comes from the `link` header, and what no header names is derived. Code that maps
+  every `Driver`, such as a `Record<Driver, …>` or an exhaustive `switch`, needs a `ransack`
+  entry (#42)
+
+### Changed
+
+- The WordPress driver reads its `Link` header through the parser it now shares with Ransack.
+  `rel` is found anywhere among a link's parameters, quoted or not, relation names match
+  case-insensitively and a space-separated `rel` list is read, so `rel="Next"` and
+  `<…>; type="…"; rel="next"` are no longer ignored; everything WordPress sends is read as
+  before (#42)
+- `DRIVERS` is 54 kB minified and 10.4 kB gzipped with the nineteenth driver, up from 50 kB and
+  9.7 kB. A single-driver import is unchanged at 2.7 kB; `RANSACK_DRIVER` alone is 3.0 kB (#42)
+
 ## [1.4.1] - 2026-10-05
 
 ### Fixed
@@ -271,7 +299,8 @@ Carried over from `ng-qubee`, where these are still present:
 - CI verifies both entry points resolve, that there are no runtime dependencies, and that a
   single-driver import still tree-shakes (#12)
 
-[unreleased]: https://github.com/AndreaAlhena/qubeejs-core/compare/v1.4.1...HEAD
+[unreleased]: https://github.com/AndreaAlhena/qubeejs-core/compare/v1.5.0...HEAD
+[1.5.0]: https://github.com/AndreaAlhena/qubeejs-core/compare/v1.4.1...v1.5.0
 [1.4.1]: https://github.com/AndreaAlhena/qubeejs-core/compare/v1.4.0...v1.4.1
 [1.4.0]: https://github.com/AndreaAlhena/qubeejs-core/compare/v1.3.0...v1.4.0
 [1.3.0]: https://github.com/AndreaAlhena/qubeejs-core/compare/v1.2.0...v1.3.0
