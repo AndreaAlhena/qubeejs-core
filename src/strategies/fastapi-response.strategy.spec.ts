@@ -40,14 +40,27 @@ describe('FastapiResponseStrategy', () => {
     expect(collection.to).toBe(95);
   });
 
-  it('should read an empty result', () => {
+  it('should read an empty result as one page with no rows', () => {
     const response = { items: [], page: 1, pages: 0, size: 50, total: 0 };
 
     const collection = strategy.paginate(response, options);
 
     expect(collection.data).toEqual([]);
     expect(collection.total).toBe(0);
-    expect(collection.lastPage).toBe(0);
+    expect(collection.lastPage).toBe(1);
+    expect(collection.from).toBeUndefined();
+    expect(collection.to).toBeUndefined();
+  });
+
+  it('should leave from and to unset on a page past the end', () => {
+    const response = { items: [], page: 5, pages: 3, size: 10, total: 30 };
+
+    const collection = strategy.paginate(response, options);
+
+    expect(collection.page).toBe(5);
+    expect(collection.lastPage).toBe(3);
+    expect(collection.from).toBeUndefined();
+    expect(collection.to).toBeUndefined();
   });
 
   it('should read the links of a fastapi_pagination.links Page', () => {
@@ -105,7 +118,39 @@ describe('FastapiResponseStrategy', () => {
     expect(collection.lastPage).toBeUndefined();
     expect(collection.page).toBe(2);
     expect(collection.from).toBe(11);
-    expect(collection.to).toBeUndefined();
+    expect(collection.to).toBe(20);
+  });
+
+  it('should drop the last link fastapi-pagination points at page 1 when it has no total', () => {
+    const response = {
+      items: rows(10, 41),
+      links: {
+        first: '/articles?page=1&size=10',
+        last: '/articles?page=1&size=10',
+        next: null,
+        prev: '/articles?page=4&size=10',
+        self: '/articles?page=5&size=10',
+      },
+      page: 5,
+      pages: null,
+      size: 10,
+      total: null,
+    };
+
+    const collection = strategy.paginate(response, options);
+
+    expect(collection.lastPageUrl).toBeUndefined();
+    expect(collection.firstPageUrl).toBe('/articles?page=1&size=10');
+    expect(collection.prevPageUrl).toBe('/articles?page=4&size=10');
+  });
+
+  it('should count to from the rows when the total is short of a full page', () => {
+    const response = { items: rows(3, 21), page: 3, pages: null, size: 10, total: null };
+
+    const collection = strategy.paginate(response, options);
+
+    expect(collection.from).toBe(21);
+    expect(collection.to).toBe(23);
   });
 
   it('should follow keys renamed through PaginationConfig', () => {

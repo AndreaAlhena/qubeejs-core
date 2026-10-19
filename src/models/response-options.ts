@@ -143,8 +143,9 @@ export class DrfResponseOptions extends ResponseOptions {
  * size, pages }`. `fastapi_pagination.links.Page` adds a `links` block,
  * `{ first, last, self, next, prev }`, so the URL paths point into it and
  * resolve to `undefined` on a plain `Page`. The envelope carries no
- * `from`/`to` indices, which the strategy derives from `page` × `size`.
- * Keys renamed on the server through `UseFieldsAliases` are mapped through
+ * `from`/`to` indices: the strategy derives them from `page` × `size` and
+ * the rows returned, and ignores `options.from` and `options.to`. Keys
+ * renamed on the server through `UseFieldsAliases` are mapped through
  * `PaginationConfig` (dot notation supported).
  */
 export class FastapiResponseOptions extends ResponseOptions {
