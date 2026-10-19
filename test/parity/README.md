@@ -32,6 +32,7 @@ by its own specs instead.
 
 | Driver  | Issue |
 | ------- | ----- |
+| fastapi | #44   |
 | ransack | #42   |
 
 ## Results
@@ -40,4 +41,5 @@ by its own specs instead.
 1.0 audit   18 identical, 0 mismatched
 1.1.0       17 identical, 1 diverged as documented, 0 mismatched
 1.5.0       17 identical, 1 diverged as documented, 0 mismatched, 1 core only
+1.6.0       17 identical, 1 diverged as documented, 0 mismatched, 2 core only
 ```

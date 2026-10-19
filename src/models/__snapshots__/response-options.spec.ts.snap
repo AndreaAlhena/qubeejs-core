@@ -51,6 +51,23 @@ exports[`ResponseOptions > resolved defaults per driver > Drf 1`] = `
 }
 `;
 
+exports[`ResponseOptions > resolved defaults per driver > Fastapi 1`] = `
+{
+  "currentPage": "page",
+  "data": "items",
+  "firstPageUrl": "links.first",
+  "from": "",
+  "lastPage": "pages",
+  "lastPageUrl": "links.last",
+  "nextPageUrl": "links.next",
+  "path": "",
+  "perPage": "size",
+  "prevPageUrl": "links.prev",
+  "to": "",
+  "total": "total",
+}
+`;
+
 exports[`ResponseOptions > resolved defaults per driver > Feathers 1`] = `
 {
   "currentPage": "",

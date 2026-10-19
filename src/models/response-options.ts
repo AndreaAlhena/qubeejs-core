@@ -137,6 +137,37 @@ export class DrfResponseOptions extends ResponseOptions {
 }
 
 /**
+ * Pre-configured ResponseOptions for the FastAPI driver
+ *
+ * fastapi-pagination's `Page` envelope is flat: `{ items, total, page,
+ * size, pages }`. `fastapi_pagination.links.Page` adds a `links` block,
+ * `{ first, last, self, next, prev }`, so the URL paths point into it and
+ * resolve to `undefined` on a plain `Page`. The envelope carries no
+ * `from`/`to` indices: the strategy derives them from `page` × `size` and
+ * the rows returned, and ignores `options.from` and `options.to`. Keys
+ * renamed on the server through `UseFieldsAliases` are mapped through
+ * `PaginationConfig` (dot notation supported).
+ */
+export class FastapiResponseOptions extends ResponseOptions {
+  constructor(options: PaginationConfig) {
+    super({
+      currentPage: options.currentPage ?? 'page',
+      data: options.data ?? 'items',
+      firstPageUrl: options.firstPageUrl ?? 'links.first',
+      from: options.from ?? '',
+      lastPage: options.lastPage ?? 'pages',
+      lastPageUrl: options.lastPageUrl ?? 'links.last',
+      nextPageUrl: options.nextPageUrl ?? 'links.next',
+      path: options.path ?? '',
+      perPage: options.perPage ?? 'size',
+      prevPageUrl: options.prevPageUrl ?? 'links.prev',
+      to: options.to ?? '',
+      total: options.total ?? 'total',
+    });
+  }
+}
+
+/**
  * Pre-configured ResponseOptions for the FeathersJS driver
  *
  * The Feathers adapter envelope is `{ total, limit, skip, data }` —

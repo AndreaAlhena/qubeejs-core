@@ -8,6 +8,7 @@ export enum DriverEnum {
   API_PLATFORM = 'api-platform',
   DIRECTUS = 'directus',
   DRF = 'drf',
+  FASTAPI = 'fastapi',
   FEATHERS = 'feathers',
   JSON_API = 'json-api',
   JSON_SERVER = 'json-server',
