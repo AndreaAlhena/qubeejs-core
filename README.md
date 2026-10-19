@@ -93,7 +93,7 @@ Zero runtime dependencies, and importing one driver leaves the other nineteen ou
 | import                       | minified | gzipped    |
 | ---------------------------- | -------- | ---------- |
 | `STRAPI_DRIVER` (one driver) | 7.1 kB   | **2.7 kB** |
-| `DRIVERS` (all twenty)       | 56 kB    | 10.7 kB    |
+| `DRIVERS` (all twenty)       | 57 kB    | 10.8 kB    |
 
 Reach for `DRIVERS` only when the backend is chosen at runtime.
 
