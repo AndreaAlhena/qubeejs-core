@@ -34,6 +34,12 @@ type ContentRangeParts = {
  * and the response headers via the optional `headers` bag. See
  * `Paginator.paginate()` for the call-site shape.
  *
+ * The header places the rows but does not state the page size, and the
+ * span of a short last page (`30-33/34` at limit 10) is not it. The page
+ * size is therefore the requested `limit`, which `Paginator` passes; the
+ * span stands in only when no limit is given, and is right on every page
+ * but a short last one.
+ *
  * @see https://postgrest.org/en/stable/references/api/pagination_count.html
  */
 export class PostgrestResponseStrategy implements IResponseStrategy {
@@ -78,12 +84,15 @@ export class PostgrestResponseStrategy implements IResponseStrategy {
    * header drives page/total derivation; omission is tolerated and yields
    * a collection with `undefined` bounds (auto-sync will leave
    * `isLastPageKnown` at `false`).
+   * @param limit - The page size the request asked for. Without it, the
+   * span of the range stands in, which misplaces a short last page.
    * @returns A typed PaginatedCollection instance
    */
   public paginate<T extends PaginatedObject>(
     response: RawResponse,
     options: ResponseOptions,
-    headers?: HeaderBag
+    headers?: HeaderBag,
+    limit?: number
   ): PaginatedCollection<T> {
     // Body may be a bare array or an envelope with the array at options.data
     const data = (Array.isArray(response) ? response : readPath(response, options.data)) as T[];
@@ -92,8 +101,9 @@ export class PostgrestResponseStrategy implements IResponseStrategy {
     const contentRange = readHeader(headers, PostgrestResponseStrategy._contentRangeHeader);
     const { from, to, total } = this._parseContentRange(contentRange);
 
-    // Per-page can only be derived from the from/to range; fall back to undefined
-    const perPage = from !== undefined && to !== undefined ? to - from + 1 : undefined;
+    // The requested limit is the page size; the span is, too, on every page but a short last one
+    const span = from !== undefined && to !== undefined ? to - from + 1 : undefined;
+    const perPage = limit !== undefined && limit > 0 ? limit : span;
 
     // Page is 1-based in the store; PostgREST reports 0-based indices
     const page = perPage && from !== undefined ? Math.floor(from / perPage) + 1 : 1;

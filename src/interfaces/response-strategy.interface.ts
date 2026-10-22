@@ -21,11 +21,16 @@ export interface IResponseStrategy {
    * pagination metadata in headers (PostgREST's `Content-Range`) read from
    * this bag; body-only drivers ignore it. Accepts anything with a `.get()`
    * accessor (`HttpHeaders`, `Headers`) or a plain `Record<string, string>`.
+   * @param limit - Optional page size the request asked for; `Paginator.paginate()`
+   * passes the store's `limit`. Drivers whose response places the rows but does not
+   * state the page size (PostgREST's `Content-Range`) need it to place a short last
+   * page; the rest ignore it.
    * @returns A typed PaginatedCollection instance
    */
   paginate<T extends PaginatedObject>(
     response: RawResponse,
     options: ResponseOptions,
-    headers?: HeaderBag
+    headers?: HeaderBag,
+    limit?: number
   ): PaginatedCollection<T>;
 }
