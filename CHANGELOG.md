@@ -7,6 +7,21 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Fixed
+
+- The PostgREST driver places a short last page on the page that was asked for. It sized a page by
+  the span of `Content-Range`, which is the page size only on a full page, so `30-33/34` at a limit
+  of 10 parsed as page 8 of 9 instead of page 4 of 4, and `40-44/45` at a limit of 20 as page 9 of
+  9 instead of page 3 of 3. `Paginator.paginate()` synced that page into the store, so the next
+  `Range` header (`160-179`) or `offset` asked for rows past the end. `IResponseStrategy.paginate()`
+  takes the requested page size as an optional fourth argument, `limit`, which `Paginator` passes
+  from the store; called without one, the PostgREST strategy still sizes a page by its span. Both
+  pagination modes were affected, and ng-qubee 3.8.0 parsed the same way, so this is not a
+  regression (#45)
+- The PostgREST driver reads an empty collection, `Content-Range: */0`, as a total of 0 and one
+  page. The header did not parse, so the total and last page were unknown and a last page synced
+  from an earlier, wider query survived (#45)
+
 ## [1.6.0] - 2026-10-19
 
 ### Added
