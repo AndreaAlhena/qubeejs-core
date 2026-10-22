@@ -1,7 +1,8 @@
 # qubee
 
 Framework-agnostic query builder and paginator. Extracted from `ng-qubee`; consumed by the
-`ng-qubee` (Angular) and `@qubeejs/react` adapters.
+`@qubeejs/angular` (ng-qubee's successor, `AndreaAlhena/qubeejs-angular`) and `@qubeejs/react`
+adapters.
 
 ## Coding standards
 
