@@ -70,6 +70,10 @@ const page = paginator.paginate(await response.json(), response.headers);
 Anything with a `.get()` accessor works — the DOM `Headers`, Angular's `HttpHeaders` — as does a
 plain object. The core imports none of them.
 
+PostgREST's `Content-Range` places the rows but does not state the page size, so the paginator
+takes it from the store's limit: a short last page, `30-33/34` at a limit of 10, is page 4 of 4.
+Parse each response with the paginator whose builder made the request.
+
 Drivers that need to *send* pagination headers expose them through `paginationHeaders()`, which
 returns `null` when the active driver has nothing to add, so it is safe to spread unconditionally:
 

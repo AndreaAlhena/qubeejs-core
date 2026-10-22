@@ -47,6 +47,7 @@ export class MyResponseStrategy implements IResponseStrategy {
     response: RawResponse,
     options: ResponseOptions,
     headers?: HeaderBag,
+    limit?: number,
   ): PaginatedCollection<T> {
     // …
   }
@@ -54,6 +55,12 @@ export class MyResponseStrategy implements IResponseStrategy {
 ```
 
 Used by DRF (cursor URLs), OData (`@odata.nextLink`), PostgREST, WordPress and Ransack (headers).
+
+`limit` is the page size the request asked for; `Paginator.paginate()` passes the store's. Read it
+when the response places the rows without stating the page size. PostgREST's
+`Content-Range: 30-33/34` spans four rows, but at a limit of 10 it is page 4 of 4, not page 8 of 9.
+The other built-in strategies ignore it, and so can yours when the response states its page size or
+a `next` link proves the page full.
 
 ## Bare-array bodies
 
