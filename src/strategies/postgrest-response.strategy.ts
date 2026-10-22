@@ -41,6 +41,11 @@ type ContentRangeParts = {
  * but a short last one. An empty collection, whose header gives `*` for
  * the range and `0` for the total, reads as one page holding no rows.
  *
+ * A server that caps rows below the limit (`db-max-rows`; Supabase's Max
+ * Rows, 1000 by default) returns fewer rows than were asked for on every
+ * page, and the next page's offset skips the rest. Keep the limit at or
+ * below the cap.
+ *
  * @see https://postgrest.org/en/stable/references/api/pagination_count.html
  */
 export class PostgrestResponseStrategy implements IResponseStrategy {
