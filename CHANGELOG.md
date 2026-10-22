@@ -7,6 +7,13 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed
+
+- The README, the introduction and the docs landing page name `@qubeejs/angular` as the Angular
+  adapter, where they named `ng-qubee`: ng-qubee 4.0 is `@qubeejs/angular`, built on this package,
+  and its 3.x versions are deprecated. The parity harness still compares against `ng-qubee@3.8.0`
+  (#48)
+
 ## [1.6.1] - 2026-10-22
 
 ### Fixed
