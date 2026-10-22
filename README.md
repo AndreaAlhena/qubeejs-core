@@ -3,8 +3,9 @@
 Framework-agnostic query builder and paginator with pluggable drivers for 20 backend querying
 standards.
 
-> Extracted from [ng-qubee](https://github.com/AndreaAlhena/ng-qubee), which remains fully
-> supported and unaffected. Every URI is verified byte-for-byte against `ng-qubee@3.8.0` across the
+> Extracted from [ng-qubee](https://github.com/AndreaAlhena/ng-qubee), which 4.0 renamed to
+> [`@qubeejs/angular`](https://github.com/AndreaAlhena/qubeejs-angular), the Angular adapter built on
+> this package. Every URI is verified byte-for-byte against `ng-qubee@3.8.0` across the
 > eighteen drivers the two share, apart from the bugs fixed here and still present there, each
 > listed with its issue — see `npm run test:parity`.
 
@@ -115,11 +116,11 @@ Sieve · Spatie · Spring Data REST · Strapi · WordPress REST
 
 ## Adapters
 
-| Package                                                           | Framework            |
-| ----------------------------------------------------------------- | -------------------- |
-| `@qubeejs/core`                                                   | none — vanilla TS/JS |
-| [`ng-qubee`](https://github.com/AndreaAlhena/ng-qubee)            | Angular              |
-| [`@qubeejs/react`](https://github.com/AndreaAlhena/qubeejs-react) | React                |
+| Package                                                               | Framework            |
+| --------------------------------------------------------------------- | -------------------- |
+| `@qubeejs/core`                                                       | none — vanilla TS/JS |
+| [`@qubeejs/angular`](https://github.com/AndreaAlhena/qubeejs-angular) | Angular              |
+| [`@qubeejs/react`](https://github.com/AndreaAlhena/qubeejs-react)     | React                |
 
 ## Contributing
 
