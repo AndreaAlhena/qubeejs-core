@@ -5,41 +5,18 @@ endpoints use: [fastapi-filter](https://github.com/arthurio/fastapi-filter) read
 its SQLAlchemy backend, and [fastapi-pagination](https://github.com/uriyyo/fastapi-pagination)'s
 `Page` shapes the response.
 
-```py
-from fastapi import Depends
-from fastapi_filter import FilterDepends
-from fastapi_filter.contrib.sqlalchemy import Filter
-from fastapi_pagination import Page, add_pagination
-from fastapi_pagination.ext.sqlalchemy import paginate
-from sqlalchemy import select
-from sqlalchemy.orm import Session
+FastAPI ignores a query parameter nothing declares, so a condition the server does not expect is
+dropped without an error. For this driver's queries to take effect, the endpoint needs:
 
-class ArticleFilter(Filter):
-    status: str | None = None
-    status__in: list[str] | None = None
-    views__gte: int | None = None
-    title__ilike: str | None = None
-    order_by: list[str] | None = None
-    search: str | None = None
-
-    class Constants(Filter.Constants):
-        model = Article
-        search_model_fields = ["title", "body"]
-
-@app.get("/articles", response_model=Page[ArticleOut])
-def list_articles(articles: ArticleFilter = FilterDepends(ArticleFilter), db: Session = Depends(get_db)):
-    return paginate(db, articles.sort(articles.filter(select(Article))))
-
-add_pagination(app)
-```
-
-Every condition the client sends must be a field of the `Filter`. FastAPI ignores a query parameter
-nothing declares, so an undeclared condition is dropped without an error. `status` and
-`status__in` are two fields: one value is sent as `status=…`, several as `status__in=…`.
-
-Sorting and search need their own fields too. `order_by` takes effect through the endpoint's
-`.sort()` call. A `search` field needs `search_model_fields`, the columns it matches with `ilike`;
-without them a search is a server error.
+- **One `Filter` field per condition the client sends.** One value is sent as `status=…` and
+  several as `status__in=…`, so these are two fields. An operator adds its suffix: `views__gte`,
+  `title__ilike`.
+- **An `order_by` field** for sorting. It takes effect when the endpoint passes its query through
+  the filter's `.sort()`, as conditions do through `.filter()`.
+- **A `search` field** for search, with `search_model_fields` naming the columns it matches with
+  `ilike`. Without them, a search is a server error.
+- **`Page` as the response model**, or `fastapi_pagination.links.Page` for the navigation URLs,
+  with `add_pagination(app)` on the application.
 
 ## Names and values
 
