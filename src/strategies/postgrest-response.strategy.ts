@@ -38,19 +38,22 @@ type ContentRangeParts = {
  * span of a short last page (`30-33/34` at limit 10) is not it. The page
  * size is therefore the requested `limit`, which `Paginator` passes; the
  * span stands in only when no limit is given, and is right on every page
- * but a short last one.
+ * but a short last one. An empty collection, whose header gives `*` for
+ * the range and `0` for the total, reads as one page holding no rows.
  *
  * @see https://postgrest.org/en/stable/references/api/pagination_count.html
  */
 export class PostgrestResponseStrategy implements IResponseStrategy {
   private static readonly _contentRangeHeader = 'Content-Range';
-  private static readonly _contentRangeRegex = /^(\d+)-(\d+)\/(\*|\d+)$/;
+  private static readonly _contentRangeRegex = /^(?:(\d+)-(\d+)|\*)\/(\*|\d+)$/;
 
   /**
    * Extract `{from, to, total}` from a PostgREST `Content-Range` value
    *
-   * Expected format: `<from>-<to>/<total|*>`. Any shape mismatch returns
-   * an empty object; `*` as the total yields `total: undefined`.
+   * Expected format: `<from>-<to>/<total|*>`, with `*` in place of the
+   * range when the page holds no rows, as on an empty collection. Any other
+   * shape returns an empty object; `*` as the total yields
+   * `total: undefined`.
    *
    * @param value - Raw header value (possibly null/undefined)
    * @returns Parsed integers; missing fields indicate an unparseable header
@@ -66,11 +69,14 @@ export class PostgrestResponseStrategy implements IResponseStrategy {
       return {};
     }
 
-    const from = parseInt(match[1], 10);
-    const to = parseInt(match[2], 10);
     const total = match[3] === '*' ? undefined : parseInt(match[3], 10);
 
-    return { from, to, total };
+    // `*` in place of the range: an empty page places no rows
+    if (match[1] === undefined) {
+      return { total };
+    }
+
+    return { from: parseInt(match[1], 10), to: parseInt(match[2], 10), total };
   }
 
   /**
@@ -105,9 +111,10 @@ export class PostgrestResponseStrategy implements IResponseStrategy {
     const span = from !== undefined && to !== undefined ? to - from + 1 : undefined;
     const perPage = limit !== undefined && limit > 0 ? limit : span;
 
-    // Page is 1-based in the store; PostgREST reports 0-based indices
+    // Page is 1-based in the store; PostgREST reports 0-based indices. An empty collection is one page
     const page = perPage && from !== undefined ? Math.floor(from / perPage) + 1 : 1;
-    const lastPage = total !== undefined && perPage ? Math.ceil(total / perPage) : undefined;
+    const lastPage =
+      total !== undefined && perPage ? Math.max(Math.ceil(total / perPage), 1) : undefined;
 
     // Library convention: from/to are 1-indexed and inclusive; PostgREST emits 0-indexed
     const fromOneIndexed = from !== undefined ? from + 1 : undefined;

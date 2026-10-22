@@ -386,4 +386,15 @@ describe('Paginator auto-sync (PostgREST)', () => {
     expect(state.lastPage).toBe(4);
     expect(state.isLastPageKnown).toBe(true);
   });
+
+  it('should replace a stale last page when the collection comes back empty', () => {
+    store.limit = 10;
+    store.syncLastPage(5);
+
+    paginator.paginate([], { 'Content-Range': '*/0' });
+
+    const state = store.getSnapshot();
+    expect(state.page).toBe(1);
+    expect(state.lastPage).toBe(1);
+  });
 });

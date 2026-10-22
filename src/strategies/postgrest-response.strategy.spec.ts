@@ -203,6 +203,16 @@ describe('PostgrestResponseStrategy', () => {
       expect(collection.lastPage).toBeUndefined();
     });
 
+    it('should read an empty collection (*/0) as one page holding no rows', () => {
+      const collection = strategy.paginate([], options, { 'Content-Range': '*/0' }, 10);
+
+      expect(collection.page).toBe(1);
+      expect(collection.total).toBe(0);
+      expect(collection.lastPage).toBe(1);
+      expect(collection.from).toBeUndefined();
+      expect(collection.to).toBeUndefined();
+    });
+
     it('should fall back to the span when no limit is given', () => {
       const collection = strategy.paginate([{ id: 21 }], options, { 'Content-Range': '20-29/50' });
 
