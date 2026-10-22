@@ -7,6 +7,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.6.1] - 2026-10-22
+
 ### Fixed
 
 - The PostgREST driver places a short last page on the page that was asked for. It sized a page by
@@ -21,6 +23,11 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - The PostgREST driver reads an empty collection, `Content-Range: */0`, as a total of 0 and one
   page. The header did not parse, so the total and last page were unknown and a last page synced
   from an earlier, wider query survived (#45)
+
+### Changed
+
+- `DRIVERS` is 10.9 kB gzipped, up from 10.8 kB, and `createQubee` 32 bytes larger minified. A
+  single-driver import is unchanged at 2.7 kB (#45)
 
 ## [1.6.0] - 2026-10-19
 
@@ -341,7 +348,8 @@ Carried over from `ng-qubee`, where these are still present:
 - CI verifies both entry points resolve, that there are no runtime dependencies, and that a
   single-driver import still tree-shakes (#12)
 
-[unreleased]: https://github.com/AndreaAlhena/qubeejs-core/compare/v1.6.0...HEAD
+[unreleased]: https://github.com/AndreaAlhena/qubeejs-core/compare/v1.6.1...HEAD
+[1.6.1]: https://github.com/AndreaAlhena/qubeejs-core/compare/v1.6.0...v1.6.1
 [1.6.0]: https://github.com/AndreaAlhena/qubeejs-core/compare/v1.5.0...v1.6.0
 [1.5.0]: https://github.com/AndreaAlhena/qubeejs-core/compare/v1.4.1...v1.5.0
 [1.4.1]: https://github.com/AndreaAlhena/qubeejs-core/compare/v1.4.0...v1.4.1
