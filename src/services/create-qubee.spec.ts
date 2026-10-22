@@ -110,6 +110,20 @@ describe('createQubee', () => {
     expect(range.builder.paginationHeaders()).not.toBeNull();
   });
 
+  it('keeps the requested page after a partial last page in range mode', () => {
+    const { builder, paginator, store } = createQubee({
+      driver: POSTGREST_DRIVER,
+      pagination: PaginationModeEnum.RANGE,
+    });
+
+    builder.setResource('items').setLimit(20).setPage(3);
+    paginator.paginate(new Array(5).fill({}), { 'Content-Range': '40-44/45' });
+
+    // Sized by its span (5), the page would read as page 9 of 9 and ask for rows 160-179 next.
+    expect(store.getSnapshot().lastPage).toBe(3);
+    expect(builder.paginationHeaders()).toEqual({ Range: '40-59', 'Range-Unit': 'items' });
+  });
+
   it('defaults to query-mode pagination', () => {
     const { builder } = createQubee({ driver: POSTGREST_DRIVER });
 

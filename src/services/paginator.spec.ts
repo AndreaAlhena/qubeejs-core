@@ -2,6 +2,7 @@ import { JsonApiResponseOptions, NestjsResponseOptions } from '../models/respons
 import { JsonApiResponseStrategy } from '../strategies/json-api-response.strategy';
 import { LaravelResponseStrategy } from '../strategies/laravel-response.strategy';
 import { NestjsResponseStrategy } from '../strategies/nestjs-response.strategy';
+import { PostgrestResponseStrategy } from '../strategies/postgrest-response.strategy';
 import { SpatieResponseStrategy } from '../strategies/spatie-response.strategy';
 import { Paginator } from './paginator';
 import { QubeeStore } from './qubee-store';
@@ -362,5 +363,38 @@ describe('Paginator auto-sync (JSON:API)', () => {
     expect(state.page).toBe(3);
     expect(state.lastPage).toBe(9);
     expect(state.isLastPageKnown).toBe(true);
+  });
+});
+
+describe('Paginator auto-sync (PostgREST)', () => {
+  let paginator: Paginator;
+  let store: QubeeStore;
+
+  beforeEach(() => {
+    store = new QubeeStore();
+    paginator = new Paginator(store, new PostgrestResponseStrategy());
+  });
+
+  it('should sync a partial last page at the store limit, not at its span', () => {
+    store.limit = 10;
+    store.page = 4;
+
+    paginator.paginate([{}, {}, {}, {}], { 'Content-Range': '30-33/34' });
+
+    const state = store.getSnapshot();
+    expect(state.page).toBe(4);
+    expect(state.lastPage).toBe(4);
+    expect(state.isLastPageKnown).toBe(true);
+  });
+
+  it('should replace a stale last page when the collection comes back empty', () => {
+    store.limit = 10;
+    store.syncLastPage(5);
+
+    paginator.paginate([], { 'Content-Range': '*/0' });
+
+    const state = store.getSnapshot();
+    expect(state.page).toBe(1);
+    expect(state.lastPage).toBe(1);
   });
 });

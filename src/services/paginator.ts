@@ -57,6 +57,10 @@ export class Paginator {
    * value — a driver that cannot know the total (a bare cursor API, say)
    * leaves the store's `isLastPageKnown` flag false rather than guessing.
    *
+   * The store's `limit` goes to the strategy as the requested page size, so
+   * a driver that reports only row positions (PostgREST) places a short last
+   * page on the page that was asked for rather than one sized by its rows.
+   *
    * @param response - The raw response body, as returned by the backend
    * @param headers - Response headers, for drivers that paginate over them
    * @returns The parsed rows and page metadata
@@ -65,7 +69,12 @@ export class Paginator {
     response: RawResponse,
     headers?: HeaderBag
   ): PaginatedCollection<T> {
-    const collection = this._responseStrategy.paginate<T>(response, this._options, headers);
+    const collection = this._responseStrategy.paginate<T>(
+      response,
+      this._options,
+      headers,
+      this._store.getSnapshot().limit
+    );
 
     this._store.page = collection.page;
 
